@@ -1,0 +1,37 @@
+<!-- @dsCard height=288 -->
+<div class="cover">
+  <!--
+    blocks: brand slab 104×160 (cut-l), text block 104×104 (cut-l), highlight 48×104 (cut-m), success 104×104 (cut-l), brand-tint tiles 48 and 104×48 (cut-m)
+    arrangement: a modular grid right of x=496, pitch 56 = 48 tile + sp-2 gap, blocks merged across cells like the app's cards
+    pattern: geometric, modular, chamfered UI → tiles cut by the cut tokens, some merged two-wide; the system says “corners are cut, never rounded”
+    steps and radii: sp-2 (8) gaps, sp-6 (24) left inset, cut-m (10) on tiles, cut-l (16) on blocks
+  -->
+  <svg class="art" viewBox="0 0 960 288" aria-hidden="true"></svg>
+  <div class="name"><p class="word">Sweet<br>Study</p><p class="tag">Study like you’re baking.</p></div>
+</div>
+<style>
+  .cover { position: relative; width: 960px; height: 288px; background: var(--bg); overflow: hidden; font-family: var(--font-sans); }
+  .cover .art { position: absolute; inset: 0; width: 960px; height: 288px; }
+  .cover .brand { fill: var(--brand); } .cover .ink { fill: var(--text); } .cover .hi { fill: var(--highlight); }
+  .cover .ok { fill: var(--success); } .cover .tint { fill: var(--brand-tint); }
+  .cover .name { position: absolute; left: 24px; bottom: 24px; max-width: 440px; }
+  .cover .word { margin: 0; font-size: 104px; line-height: .95; font-weight: 700; letter-spacing: -.03em; color: var(--text); }
+  .cover .tag { margin: 12px 0 0; font-size: 14px; color: var(--text-2); }
+</style>
+<script>
+  (() => {
+    const cut = (x, y, w, h, c) => `${x + c},${y} ${x + w - c},${y} ${x + w},${y + c} ${x + w},${y + h - c} ${x + w - c},${y + h} ${x + c},${y + h} ${x},${y + h - c} ${x},${y + c}`;
+    const X = (c) => 496 + c * 56, Y = (r) => 40 + r * 56, S = (n) => n * 56 - 8;
+    // [col, row, cols wide, rows tall, colour class]
+    const pieces = [
+      [0, 0, 2, 3, 'brand'], [2, 1, 2, 2, 'ink'], [4, 0, 1, 2, 'hi'], [5, 2, 2, 2, 'ok'],
+      [2, 0, 1, 1, 'tint'], [3, 0, 1, 1, 'tint'], [5, 0, 1, 1, 'tint'], [6, 0, 1, 1, 'tint'], [7, 0, 1, 1, 'tint'],
+      [5, 1, 2, 1, 'tint'], [7, 1, 1, 1, 'tint'], [4, 2, 1, 1, 'tint'], [7, 2, 1, 1, 'tint'],
+      [0, 3, 2, 1, 'tint'], [2, 3, 1, 1, 'tint'], [3, 3, 1, 1, 'tint'], [4, 3, 1, 1, 'tint'], [7, 3, 1, 1, 'tint'],
+    ];
+    document.querySelector('.cover .art').innerHTML = pieces.map(([c, r, w, h, k]) => {
+      const big = w > 1 && h > 1;
+      return `<polygon class="${k}" points="${cut(X(c), Y(r), S(w), S(h), big ? 16 : 10)}"/>`;
+    }).join('');
+  })();
+</script>

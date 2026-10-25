@@ -1,0 +1,11 @@
+<!-- @dsCard group="Controls" height=110 subtitle="Switch on and off, checkbox and radio" -->
+<div class="ss" style="background:var(--bg);padding:20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+  <button class="switch cut" type="button" role="switch" aria-checked="true" aria-label="On"></button>
+  <button class="switch cut" type="button" role="switch" aria-checked="false" aria-label="Off"></button>
+  <span class="check cut" role="checkbox" aria-checked="true" aria-label="Checked"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="#ffffff" stroke-width="2.4"/></svg></span>
+  <span class="check cut" role="checkbox" aria-checked="false" aria-label="Unchecked"></span>
+  <span class="check radio cut" role="radio" aria-checked="true" aria-label="Selected"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="#ffffff" stroke-width="2.4"/></svg></span>
+</div>
+<script>
+document.querySelectorAll('.switch').forEach((s) => s.addEventListener('click', () => s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))));
+</script>
