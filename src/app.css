@@ -1190,18 +1190,18 @@ button.pill { position: relative; }
 #s-rooms .large { padding-bottom: 8px; }
 #s-rooms .rm-pad { padding-top: 12px; }
 #s-rooms .sched { border: 0; border-radius: 24px; box-shadow: none; }
-#s-rooms .rm-rail { padding-top: 18px; padding-bottom: 18px; gap: 20px; }
+#s-rooms .rm-rail { padding: 14px 32px 12px; gap: 14px; }
 #s-rooms .rm-slot { --room-color: #f3ddfc; }
 #s-rooms .rm-slot:nth-child(2) { --room-color: #e3e9fd; }
 #s-rooms .rm-slot:nth-child(3) { --room-color: #f5edc8; }
-#s-rooms .rm-card { border-radius: 88px 88px 28px 28px; padding: 30px 18px 18px; background: var(--room-color); border: 0; box-shadow: none; filter: none; }
-#s-rooms .rm-slot:nth-child(2) .rm-card { border-radius: 28px 88px 28px 28px; }
-#s-rooms .rm-slot:nth-child(3) .rm-card { border-radius: 88px 28px 28px 28px; }
-#s-rooms .rm-head { display: block; text-align: center; }
-#s-rooms .rm-head h3 { font-size: 23px; }
-#s-rooms .rm-card .cnt { margin-top: 10px; background: transparent; border: 0; color: var(--text); }
-#s-rooms .rm-round { margin-top: 18px; border: 0; }
-#s-rooms .rm-join { border-radius: 24px; font-size: 13px; min-height: 48px; }
+#s-rooms .rm-card { border-radius: 32px 64px 24px 24px; padding: 22px 18px 16px; background: linear-gradient(var(--room-color) 0 240px, #fff 240px); border: 0; box-shadow: none; filter: none; }
+#s-rooms .rm-slot:nth-child(2) .rm-card { border-radius: 32px 64px 24px 24px; }
+#s-rooms .rm-slot:nth-child(3) .rm-card { border-radius: 32px 64px 24px 24px; }
+#s-rooms .rm-head { display: block; text-align: left; position: relative; padding-right: 8px; }
+#s-rooms .rm-head h3 { font-size: 22px; font-weight: 600; letter-spacing: -.04em; }
+#s-rooms .rm-card .cnt { margin-top: 6px; height: 22px; padding: 0; font-size: 11px; font-weight: 500; background: transparent; border: 0; color: var(--text-2); }
+#s-rooms .rm-round { margin-top: 12px; border: 0; }
+#s-rooms .rm-join { border-radius: 14px; font-size: 14px; min-height: 44px; height: 44px; margin-top: 14px; }
 #s-rooms .room-section-label { padding: 24px 20px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 #s-rooms .room-section-label h2 { font-size: 20px; letter-spacing: -.03em; }
 #s-rooms .room-section-label span { font-size: 12px; color: var(--text-2); }
@@ -1226,3 +1226,11 @@ button.pill { position: relative; }
 .dessert-minutes { font-size: 9px; line-height: 14px; letter-spacing: .04em; color: #746859; min-width: 32px; text-align: center; }
 .empty-plate { width: 72px; height: 7px; margin: auto auto 23px; flex-shrink: 0; border-radius: 50%; background: #e6ddcf; align-self: center; }
 .dessert-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+#s-rooms .rm-card .scene { height: 146px; margin-top: 0; }
+#s-rooms .rm-card .scene .tbl .leg { height: 12px; }
+#s-rooms .rm-card .rm-round .tclock { font-size: 28px; font-weight: 500; letter-spacing: -.04em; }
+#s-rooms .rm-card .rbar { height: 3px; margin-top: 10px; background: #f1eef4; }
+#s-rooms .rm-card .rbar i { background: #b9a2cd; }
+#s-rooms .rm-dots { height: 14px; }
+#s-rooms .rm-card .scene .tbl .leg { display: none; }

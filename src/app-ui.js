@@ -286,7 +286,7 @@ function roomCard(r, i) {
     <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm"><b>${r.f.length}</b> ${r.f.length > 1 ? 'friends' : 'friend'} · +${r.k - r.f.length} bakers<br>${r.len}-min rounds</p></div>
     <span class="rbar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>
     <div class="rm-more"><div>${roomMore(r, i)}</div></div>
-    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0]}">${who ? `Pull up a stool · ${who.left} min with ${who.n}` : 'Pull up a stool'}</button></div></div>`;
+    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0]}">${who ? `Join ${who.n} · ${who.left} min` : 'Join table'}</button></div></div>`;
 }
 // what a card shows when it's opened: who's at the table and on what, the room's rules, and the way into the room
 const OTHER_SUBJ = { Noa: 'Organic chemistry', Kai: 'Portfolio review', Lin: 'Piano theory', Ivy: 'Essay outline', Ben: 'SQL practice' };
@@ -334,12 +334,16 @@ $('rooms').addEventListener('click', (e) => {
   const c = e.target.closest('.rm-card'); if (!c) return;
   const open = !c.classList.contains('open'); c.classList.toggle('open', open); c.setAttribute('aria-expanded', String(open)); buzz(6);
 });
-const RM_PITCH = 312;
 function layoutRooms() {
-  const c = $('rooms'), x = c.scrollLeft;
-  c.querySelectorAll('.rm-card').forEach((el, i) => { const a = Math.min(1, Math.abs(i * RM_PITCH - x) / RM_PITCH); el.style.transform = `translateY(${a * 14}px) scale(${1 - a * .07})`; el.style.filter = a > .5 ? 'saturate(.6)' : ''; });
-  const k = Math.round(x / RM_PITCH);
-  $('room-dots').querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === k));
+  const rail = $('rooms'), slots = [...rail.querySelectorAll('.rm-slot')];
+  if (!slots.length) return;
+  const center = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+  let closest = 0, distance = Infinity;
+  slots.forEach((slot, i) => {
+    const rect = slot.getBoundingClientRect(), delta = Math.abs(rect.left + rect.width / 2 - center);
+    if (delta < distance) { distance = delta; closest = i; }
+  });
+  $('room-dots').querySelectorAll('i').forEach((dot, i) => dot.classList.toggle('on', i === closest));
 }
 $('rooms').addEventListener('scroll', layoutRooms, { passive: true });
 // the focus board: a podium for the top three (first in the middle, tallest), then where you stand if you're not on it;
