@@ -1234,3 +1234,35 @@ button.pill { position: relative; }
 #s-rooms .rm-card .rbar i { background: #b9a2cd; }
 #s-rooms .rm-dots { height: 14px; }
 #s-rooms .rm-card .scene .tbl .leg { display: none; }
+
+/* schedule, refined: a slim day strip, pills that fill as they go, a card in the picked bake's colour */
+#s-rooms .sch-days { gap: 5px; }
+#s-rooms .sch-days button { position: relative; flex: 1; height: 34px; border-radius: 17px; flex-direction: row; gap: 4px; font-size: 12px; font-weight: 500; }
+#s-rooms .sch-days button b { font-size: 13px; line-height: 1; }
+#s-rooms .sch-days button i { position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--brand); }
+#s-rooms .sch-days button.on i { background: #fff; }
+#s-rooms .sch-lanes { height: 160px; }
+#s-rooms .sch-hours span { font-size: 11px; line-height: 14px; }
+#s-rooms .sch-now { top: 18px; }
+#s-rooms .sch-now::after { top: -18px; bottom: auto; left: -14px; padding: 1px 6px; background: var(--brand); color: #fff; }
+#s-rooms .sch-ev { height: 36px; border-radius: 18px; gap: 6px; padding: 0 12px 0 3px; font-size: 13px; color: var(--text); text-decoration: none; }
+#s-rooms .sch-ev .avatar { width: 30px; height: 30px; }
+#s-rooms .sch-ev .lb { overflow: hidden; text-overflow: ellipsis; }
+#s-rooms .sch-ev small { font-size: 11px; color: var(--text-2); flex-shrink: 0; }
+#s-rooms .sch-ev.live { padding-right: 12px; }
+#s-rooms .sch-ev.live::after { display: none; }
+#s-rooms .sch-ev.sel { background: var(--text) !important; color: #fff; transform: none; text-decoration: none; }
+#s-rooms .sch-ev.sel small { color: rgba(255, 255, 255, .6); }
+#s-rooms .sch-ev.plan { background: rgba(195, 73, 238, .1); color: var(--brand-strong); }
+#s-rooms .sch-ev.plan.sel { background: var(--brand) !important; color: #fff; }
+#s-rooms .sch-card { margin-top: 8px; padding: 12px; border-radius: 20px; transition: background .3s; }
+#s-rooms .sch-sum { gap: 10px; }
+#s-rooms .sch-sum .lead { width: 40px; height: 40px; }
+#s-rooms .sch-sum .kk { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#s-rooms .sch-faces .avatar { width: 26px; height: 26px; margin-left: -6px; }
+#s-rooms .sch-acts { margin-top: 10px; }
+#s-rooms .sch-acts .btn.soft { background: rgba(255, 255, 255, .7); }
+/* schedule flow */
+#s-rooms .sch-note { font-size: 12px; color: var(--text-2); margin: 8px 0 0 50px; }
+#s-rooms .sch-acts .btn { flex: 1; }
+#s-rooms .sch-acts .btn.soft { flex: 0 0 auto; }

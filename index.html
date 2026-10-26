@@ -1243,6 +1243,38 @@ button.pill { position: relative; }
 #s-rooms .rm-card .rbar i { background: #b9a2cd; }
 #s-rooms .rm-dots { height: 14px; }
 #s-rooms .rm-card .scene .tbl .leg { display: none; }
+
+/* schedule, refined: a slim day strip, pills that fill as they go, a card in the picked bake's colour */
+#s-rooms .sch-days { gap: 5px; }
+#s-rooms .sch-days button { position: relative; flex: 1; height: 34px; border-radius: 17px; flex-direction: row; gap: 4px; font-size: 12px; font-weight: 500; }
+#s-rooms .sch-days button b { font-size: 13px; line-height: 1; }
+#s-rooms .sch-days button i { position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--brand); }
+#s-rooms .sch-days button.on i { background: #fff; }
+#s-rooms .sch-lanes { height: 160px; }
+#s-rooms .sch-hours span { font-size: 11px; line-height: 14px; }
+#s-rooms .sch-now { top: 18px; }
+#s-rooms .sch-now::after { top: -18px; bottom: auto; left: -14px; padding: 1px 6px; background: var(--brand); color: #fff; }
+#s-rooms .sch-ev { height: 36px; border-radius: 18px; gap: 6px; padding: 0 12px 0 3px; font-size: 13px; color: var(--text); text-decoration: none; }
+#s-rooms .sch-ev .avatar { width: 30px; height: 30px; }
+#s-rooms .sch-ev .lb { overflow: hidden; text-overflow: ellipsis; }
+#s-rooms .sch-ev small { font-size: 11px; color: var(--text-2); flex-shrink: 0; }
+#s-rooms .sch-ev.live { padding-right: 12px; }
+#s-rooms .sch-ev.live::after { display: none; }
+#s-rooms .sch-ev.sel { background: var(--text) !important; color: #fff; transform: none; text-decoration: none; }
+#s-rooms .sch-ev.sel small { color: rgba(255, 255, 255, .6); }
+#s-rooms .sch-ev.plan { background: rgba(195, 73, 238, .1); color: var(--brand-strong); }
+#s-rooms .sch-ev.plan.sel { background: var(--brand) !important; color: #fff; }
+#s-rooms .sch-card { margin-top: 8px; padding: 12px; border-radius: 20px; transition: background .3s; }
+#s-rooms .sch-sum { gap: 10px; }
+#s-rooms .sch-sum .lead { width: 40px; height: 40px; }
+#s-rooms .sch-sum .kk { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#s-rooms .sch-faces .avatar { width: 26px; height: 26px; margin-left: -6px; }
+#s-rooms .sch-acts { margin-top: 10px; }
+#s-rooms .sch-acts .btn.soft { background: rgba(255, 255, 255, .7); }
+/* schedule flow */
+#s-rooms .sch-note { font-size: 12px; color: var(--text-2); margin: 8px 0 0 50px; }
+#s-rooms .sch-acts .btn { flex: 1; }
+#s-rooms .sch-acts .btn.soft { flex: 0 0 auto; }
 </style>
 </head>
 <body>
@@ -2572,7 +2604,8 @@ let liveTimer = null, roomClock = null;
 /* ---------- today's baking schedule: planned and live bakes on a timeline, join one or plan your own ---------- */
 // hours are counted from midnight; the lanes start an hour before now and run nine hours, 80 pt an hour
 const HOUR_W = 80, nowH = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
-const SCH_BG = { 0: '#F3DDFC', 1: '#E3E9FD', 2: '#EBF6C9', 3: '#FBE4F7' };
+// each lane's colour, and a deeper one for the part of a live bake that has already gone by
+const SCH_BG = { 0: '#F3DDFC', 1: '#E3E9FD', 2: '#EBF6C9', 3: '#FBE4F7' }, SCH_DONE = { 0: '#E7BDF7', 1: '#C9D5FA', 2: '#DCEBA6', 3: '#F4C9EE' };
 const t0 = Math.floor(nowH());
 // each bake: who leads it, what, when (hours), how long (min), lane, who's going, and the room if it's a room's round
 const SCHED = [
@@ -2591,16 +2624,27 @@ const hhmm = (h) => `${Math.floor(h) % 24}:${String(Math.round((h % 1) * 60) % 6
 const isLive = (e) => SCH.day === 0 && e.at <= nowH() && nowH() < e.at + e.len / 60;
 function schedDays() {
   const d = new Date();
-  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}"><b>${x.getDate()}</b>${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'}</button>`; }).join('');
+  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}">${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'} <b>${x.getDate()}</b>${SCHED[i].length ? '<i></i>' : ''}</button>`; }).join('');
 }
 function schedLanes() {
   const s0 = dayStart(), now = nowH(), all = schedEvents();
   return `<div class="sch-hours">${Array.from({ length: 9 }, (_, i) => `<span>${(s0 + i) % 24}:00</span>`).join('')}</div>`
     + (SCH.day ? '' : `<span class="sch-now" style="left:${(now - s0) * HOUR_W}px"></span>`)
-    + all.map((e, i) => `<button type="button" class="sch-ev ${e.plan ? 'plan' : ''} ${i === SCH.sel ? 'sel' : ''} ${isLive(e) ? 'live' : ''} ${e.with?.includes('Leqi') ? 'going' : ''}" data-ev="${i}" style="left:${(e.at - s0) * HOUR_W}px;top:${24 + e.lane * 48}px;width:${Math.max(140, e.len / 60 * HOUR_W)}px;${e.plan ? '' : `background:${SCH_BG[e.lane % 4]}`}">${e.plan ? '<span class="pl">＋ Plan a bake</span>' : `${face(e.who)}<span>${esc(e.label)} <small>${e.len}m</small></span>`}</button>`).join('');
+    + all.map((e, i) => {
+      const live = isLive(e), done = live ? Math.round((now - e.at) / (e.len / 60) * 100) : 0, bg = SCH_BG[e.lane % 4];
+      const fill = e.plan ? '' : `background:${live ? `linear-gradient(90deg, ${SCH_DONE[e.lane % 4]} ${done}%, ${bg} ${done}%)` : bg}`;
+      return `<button type="button" class="sch-ev ${e.plan ? 'plan' : ''} ${i === SCH.sel ? 'sel' : ''} ${live ? 'running' : ''} ${e.with?.includes('Leqi') ? 'going' : ''}" data-ev="${i}" style="left:${(e.at - s0) * HOUR_W}px;top:${28 + e.lane * 44}px;width:${Math.max(176, e.len / 60 * HOUR_W)}px;${fill}">${e.plan ? '<span class="pl">＋ Plan a bake</span>' : `${face(e.who)}<span class="lb">${esc(e.label)}</span><small>${e.len}m</small>`}</button>`;
+    }).join('');
 }
 // the day's bakes plus one free slot to plan in (on the third lane, a couple of hours out), wherever it fits
-function schedEvents() { const list = SCHED[SCH.day], s0 = SCH.day ? 18 : Math.ceil(nowH() + 2.6); return list.some((e) => e.lane === 2 && Math.abs(e.at - s0) < 1) ? list : [...list, { plan: true, at: SCH.plan ? SCH.plan.at : s0, len: SCH.plan ? SCH.plan.len : 50, lane: 2 }]; }
+function schedEvents() {
+  const list = SCHED[SCH.day];
+  if (SCH.plan) return [...list, { plan: true, at: SCH.plan.at, len: SCH.plan.len, lane: 2 }];
+  // the first hour on the third lane, a couple of hours out, that no pill there already covers
+  const busy = (h) => list.some((e) => e.lane === 2 && h < e.at + Math.max(2.1, e.len / 60) && h + 2.1 > e.at);
+  let at = SCH.day ? 18 : Math.ceil(nowH() + 2.6); while (busy(at) && at < 23) at++;
+  return [...list, { plan: true, at, len: 50, lane: 2 }];
+}
 function schedCard() {
   const e = schedEvents()[SCH.sel];
   if (!e) return `<p class="sch-empty">Nothing planned ${SCH.day ? 'that day' : 'yet'}. Tap “Plan a bake” to start one.</p>`;
@@ -2612,23 +2656,35 @@ function schedCard() {
       <div class="sch-who">${FRIENDS.map((f) => `<button type="button" data-inv="${f.n}" aria-pressed="${pick.who.includes(f.n)}">${face(f.n)}<span>${f.n}</span></button>`).join('')}</div>
       <div class="sch-acts"><button class="btn soft rounded m" type="button" data-sch="cancel">Not now</button><button class="btn rounded m" type="button" data-sch="send">${pick.who.length ? `Invite ${pick.who.length}` : 'Plan it'}</button></div></div>`;
   }
-  const live = isLive(e), going = e.with.includes('Leqi');
-  return `<div class="row sch-sum"><span class="faces sch-faces">${e.with.map((n) => face(n)).join('')}</span><div class="grow"><b class="k">${esc(e.label)}</b><p class="kk">${live ? '<b class="lv">Live</b> · started ' : 'Starts '}${hhmm(e.at)} · ${e.len} min · ${e.with.length} going</p></div></div>
-    <div class="sch-acts">${live ? `<button class="btn soft rounded m" type="button" data-sch="remind">Remind me</button><button class="btn rounded m" type="button" data-sch="join">Join now · ${Math.max(1, Math.round(e.len - (nowH() - e.at) * 60))} min left</button>`
-      : `<button class="btn soft rounded m" type="button" data-sch="remind">Remind me</button><button class="btn rounded m ${going ? 'in' : ''}" type="button" data-sch="in">${going ? 'You’re in ✓' : 'I’m in'}</button>`}</div>`;
+  const live = isLive(e), going = e.with.includes('Leqi'), mine = e.who === 'Leqi';
+  const left = Math.max(1, Math.round(e.len - (nowH() - e.at) * 60)), until = Math.round((e.at - nowH()) * 60) + (SCH.day * 1440);
+  const inT = until >= 60 ? `${Math.floor(until / 60)}h ${until % 60}m` : `${Math.max(1, until)}m`;
+  const waiting = (e.invited || []).filter((n) => !e.with.includes(n));
+  const meta = live ? `<b class="lv">Live</b> · ${left} min left · ${e.with.length} going`
+    : mine ? `Starts in ${inT} · ${e.len} min · ${e.with.length} going`
+    : going ? `<b class="lv">You’re in</b> · starts in ${inT} · ${e.len} min`
+    : `${hhmm(e.at)} · ${e.len} min · ${e.with.length === 1 ? 'be the second one in' : `${e.with.length} going`}`;
+  const note = mine && waiting.length ? `<p class="sch-note">Waiting for ${waiting.join(', ')}</p>` : going && !mine ? `<p class="sch-note">We’ll remind you 10 min before.</p>` : '';
+  const acts = live ? `<button class="btn rounded m" type="button" data-sch="join">Join now · ${left} min left</button>`
+    : mine ? `<button class="btn soft rounded m" type="button" data-sch="share">Share link</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
+    : going ? `<button class="btn soft rounded m" type="button" data-sch="in">Leave</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
+    : `<button class="btn rounded m" type="button" data-sch="in">I’m in · remind me</button>`;
+  return `<div class="row sch-sum">${face(e.who, 'lead')}<div class="grow"><b class="k">${esc(e.label)}</b><p class="kk">${meta}</p></div><span class="faces sch-faces">${e.with.filter((n) => n !== e.who).slice(0, 3).map((n) => face(n)).join('')}</span></div>${note}
+    <div class="sch-acts">${acts}</div>`;
 }
 function drawSched(scrollToNow) {
   const keepX = $('sch-wrap')?.scrollLeft || 0, list = SCHED[SCH.day], live = list.filter(isLive).length;
   setHTML($('live-hero'), `<div class="ach"><p class="k">Today’s bakes</p><span class="kk">${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
-    <div class="sch-days">${schedDays()}</div><div class="sch-wrap" id="sch-wrap"><div class="sch-lanes">${schedLanes()}</div></div><div class="sch-card" id="sch-card">${schedCard()}</div>`);
+    <div class="sch-days">${schedDays()}</div><div class="sch-wrap" id="sch-wrap"><div class="sch-lanes">${schedLanes()}</div></div><div class="sch-card" id="sch-card" style="background:${cardTint()}">${schedCard()}</div>`);
   // keep the timeline where it was, unless we're arriving or switching day
   if (scrollToNow) $('sch-wrap').scrollLeft = SCH.day ? 0 : Math.max(0, (nowH() - dayStart()) * HOUR_W - 60); else $('sch-wrap').scrollLeft = keepX;
 }
-function schedCardSwap() { const c = $('sch-card'); c.innerHTML = schedCard(); if (!reduced) c.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' }); }
+const cardTint = () => { const e = schedEvents()[SCH.sel]; return e && !e.plan ? SCH_BG[e.lane % 4] : 'var(--brand-tint)'; };
+function schedCardSwap() { const c = $('sch-card'); c.style.background = cardTint(); c.innerHTML = schedCard(); if (!reduced) c.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' }); }
 $('live-hero').addEventListener('click', (e) => {
   const d = e.target.closest('[data-day]'), ev = e.target.closest('[data-ev]'), a = e.target.closest('[data-sch]');
   if (d) { SCH.day = +d.dataset.day; SCH.sel = 0; SCH.plan = null; buzz(6); drawSched(true); return; }
-  if (ev) { const x = $('sch-wrap').scrollLeft; SCH.sel = +ev.dataset.ev; buzz(6); $('live-hero').querySelector('.sch-lanes').innerHTML = schedLanes(); $('sch-wrap').scrollLeft = x; schedCardSwap(); return; }
+  if (ev) { const w = $('sch-wrap'), x = w.scrollLeft, mid = ev.offsetLeft + ev.offsetWidth / 2 - w.clientWidth / 2; SCH.sel = +ev.dataset.ev; buzz(6); $('live-hero').querySelector('.sch-lanes').innerHTML = schedLanes(); w.scrollLeft = x; w.scrollTo({ left: Math.max(0, mid), behavior: reduced ? 'auto' : 'smooth' }); schedCardSwap(); return; }
   const at = e.target.closest('[data-pat]'), ln = e.target.closest('[data-plen]'), inv = e.target.closest('[data-inv]');
   if (at) { SCH.plan.at = +at.dataset.pat; buzz(6); schedCardSwap(); return; }
   if (ln) { SCH.plan.len = +ln.dataset.plen; buzz(6); schedCardSwap(); return; }
@@ -2637,11 +2693,15 @@ $('live-hero').addEventListener('click', (e) => {
   const act = a.dataset.sch, list = SCHED[SCH.day], cur = schedEvents()[SCH.sel];
   if (act === 'join') { const f = FRIENDS.find((x) => x.n === cur.who); if (f) joinFriend(f.n); else { together = cur.who; startBake(Math.max(5, Math.round(cur.len - (nowH() - cur.at) * 60)), CARRY); } }
   else if (act === 'remind') { buzz(8); toast(`<b>Reminder set</b><span>10 min before ${esc(cur.label)}${isLive(cur) ? '’s next round' : ` at ${hhmm(cur.at)}`}</span>`); }
-  else if (act === 'in') { const i = cur.with.indexOf('Leqi'); if (i < 0) { cur.with.push('Leqi'); toast(`<b>You’re in</b><span>${esc(cur.label)} at ${hhmm(cur.at)} · we’ll remind you</span>`); } else cur.with.splice(i, 1); buzz([8, 20, 8]); drawSched(); }
+  else if (act === 'in') { const i = cur.with.indexOf('Leqi'); if (i < 0) { cur.with.push('Leqi'); toast(`<b>You’re in</b><span>${esc(cur.label)} at ${hhmm(cur.at)} · reminder set</span>`); } else { cur.with.splice(i, 1); toast('<span>You left. The reminder is off.</span>'); } buzz([8, 20, 8]); drawSched(); }
+  // getting ready: the recipe whose length matches, so the bake is set up before it starts
+  else if (act === 'ready') { const r = RECIPES.find((x) => x.rounds * x.len === cur.len) || RECIPES.find((x) => x.rounds * x.len >= cur.len) || recipe; pickRecipe(r.id); present('recipe'); }
+  else if (act === 'share') toast('<b>Link copied</b><span>Anyone with it can pull up a stool</span>');
   else if (act === 'cancel') { SCH.plan = null; SCH.sel = 0; drawSched(); }
   else if (act === 'send') {
     // the plan becomes a real bake on the timeline, with you and whoever you invited
-    const pl = SCH.plan; list.push({ who: 'Leqi', label: 'Your bake', at: pl.at, len: pl.len, lane: 2, with: ['Leqi', ...pl.who] });
+    const pl = SCH.plan, ev = { who: 'Leqi', label: 'Your bake', at: pl.at, len: pl.len, lane: 2, with: ['Leqi'], invited: [...pl.who] }; list.push(ev);
+    ev.invited.forEach((n, k) => setTimeout(() => { if (k > 1) return; ev.with.push(n); buzz([8, 20, 8]); toast(`<b>${esc(n)}’s in</b><span>${esc(ev.label)} at ${hhmm(ev.at)}</span>`); if (tab === 'rooms' && !stack.length) drawSched(); }, 2600 + k * 2200));
     SCH.plan = null; SCH.sel = list.length - 1; buzz([10, 30, 10]); drawSched();
     toast(`<b>${pl.who.length ? `Invited ${pl.who.join(', ')}` : 'Bake planned'}</b><span>${hhmm(pl.at)} · ${pl.len} min</span>`);
   }
