@@ -441,7 +441,16 @@ button.pill { position: relative; }
 .badge svg.art { position: absolute; left: 8px; top: 9px; width: 28px; height: 24px; }
 /* the dock: a round button, a segmented pill, a round black button */
 /* content scrolls under the dock; a fade keeps the dock readable over it */
-.tabbar.dock::before { content: ""; position: absolute; left: -12px; right: -12px; bottom: -26px; height: 118px; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, rgba(235, 246, 201, 0), var(--bg) 62%); }
+/* content fades as it slides under the bar: an eased curve that is almost clear at the top,
+   thickens gradually and is solid only behind the bar, so there is no visible edge */
+.tabbar.dock::before {
+  content: ""; position: absolute; left: -12px; right: -12px; bottom: -26px; height: 132px; z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--bg) 0%, transparent) 0%, color-mix(in srgb, var(--bg) 3%, transparent) 15%,
+    color-mix(in srgb, var(--bg) 10%, transparent) 30%, color-mix(in srgb, var(--bg) 25%, transparent) 45%,
+    color-mix(in srgb, var(--bg) 50%, transparent) 58%, color-mix(in srgb, var(--bg) 78%, transparent) 70%,
+    color-mix(in srgb, var(--bg) 94%, transparent) 82%, var(--bg) 92%);
+}
 .tabbar.dock { left: 12px; right: 12px; bottom: 26px; height: auto; padding: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 8px; justify-content: center; border-radius: 0; }
 .dock .round { width: 46px; height: 46px; border-radius: 50%; background: var(--text); color: var(--on-dark); display: grid; place-items: center; flex: 0 0 46px; transition: transform var(--t-press) var(--spring); }
 .dock .round:active { transform: scale(.92); }
@@ -976,6 +985,16 @@ button.pill { position: relative; }
 .rm-round .tclock { font-size: 26px; font-weight: 600; line-height: 30px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .rm-round .sm { font-size: 12px; line-height: 17px; color: var(--text-2); text-align: right; }
 .rm-round .sm b { color: var(--text); font-weight: 600; }
+/* friends at the table: overlapping faces and their names; strangers are only counted */
+.rm-round > div:first-child { flex-shrink: 0; }
+.rm-round .lbl { white-space: nowrap; }
+.rm-fr { display: inline-flex; align-items: center; gap: 0; }
+.rm-fr .avatar { width: 18px; height: 18px; margin-left: -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px #fff; }
+.rm-fr .avatar:first-child { margin-left: 0; }
+.rm-fr b { margin-left: 5px; }
+.mrow.others .faces { display: flex; flex-shrink: 0; }
+.mrow.others .faces .avatar { width: 24px; height: 24px; margin-left: -8px; opacity: .55; filter: grayscale(.6); }
+.mrow.others .faces .avatar:first-child { margin-left: 0; }
 .rbar { display: block; height: 4px; border-radius: 2px; background: rgba(17, 17, 19, .08); margin-top: 10px; overflow: hidden; }
 .rbar i { display: block; height: 100%; border-radius: 2px; background: var(--text); transition: width 1s linear; }
 .rm-card .rm-join { margin-top: 14px; height: 46px; width: 100%; font-size: 15px; }
@@ -1032,11 +1051,7 @@ button.pill { position: relative; }
 .lf .avatar { width: 26px; height: 26px; }
 .lf b { font-weight: 600; }
 .lf small { font-size: 12px; opacity: .85; }
-/* room cards: details slide open under the clock */
-.rm-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease); }
-.rm-more > div { overflow: hidden; }
-.rm-card.open .rm-more { grid-template-rows: 1fr; }
-.rm-more .mh { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; margin-top: 16px; }
+.mh { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; margin-top: 16px; }
 .mrow { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
 .mrow .avatar { width: 30px; height: 30px; }
 .mrow b { display: block; font-size: 14px; font-weight: 600; line-height: 18px; }
@@ -1046,48 +1061,34 @@ button.pill { position: relative; }
 .mopen { display: flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--brand-strong); min-height: 32px; }
 .mopen .chev { color: var(--brand-strong); width: 8px; }
 /* friends: bubbles of different sizes at different heights */
-.bubbles { display: flex; justify-content: space-around; align-items: flex-start; padding: 12px 0 4px; min-height: 150px; }
-.fb { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: var(--dy); transition: transform .35s var(--spring); }
-.fb .fring { --p: 0; position: relative; width: var(--sz); height: var(--sz); border-radius: 50%; padding: 9px; display: block; }
-/* the progress is a thin ring round the shape, not a disc behind it */
+/* friends in a tidy row: same size, one baseline. A thin ring shows how far into the bake they are,
+   the time sits on the ring, then name and what they're on */
+.bubbles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 14px 0 2px; }
+.fb { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; transition: transform .35s var(--spring); }
+.fb .fring { --p: 0; position: relative; width: 64px; height: 64px; border-radius: 50%; padding: 7px; display: block; background: none; }
 .fb .fring .ring { position: absolute; inset: 0; width: 100%; height: 100%; }
-.fb .fring .avatar { position: relative; }
-.fb .fring .avatar { width: 100%; height: 100%; box-shadow: 0 0 0 3px var(--surface); }
-.fb .fbm { position: absolute; top: calc(var(--sz) - 14px); left: 50%; transform: translateX(-50%); height: 22px; padding: 0 8px; border-radius: 11px; background: var(--text); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fb .fring .avatar { position: relative; width: 100%; height: 100%; padding: 4px; box-shadow: none; }
+.fb .fbm { position: relative; z-index: 1; margin-top: -11px; height: 20px; padding: 0 7px; border-radius: 10px; background: var(--text); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; font-variant-numeric: tabular-nums; white-space: nowrap; box-shadow: 0 0 0 2px var(--surface); }
 .fb .fbm b { font-weight: 600; }
-.fb .fbn { font-size: 13px; font-weight: 500; margin-top: 10px; }
-.fb.sel { transform: translateY(-4px) scale(1.06); }
-.fb.sel .fbn { color: var(--brand-strong); font-weight: 600; }
-.fpanel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease); position: relative; }
-.fpanel > div { overflow: hidden; }
-.fpanel.open { grid-template-rows: 1fr; }
-.fpanel .fp-hint { display: none; }
-.fpanel .fp, .fpanel .fp-bar, .fpanel .fp-s, .fpanel .fp-acts { margin-left: 0; }
-.fpanel > div { background: var(--bg); border-radius: 18px; margin-top: 11px; padding: 0 14px; }
-.fpanel.open > div { padding: 14px; }
-.fp { display: flex; align-items: center; gap: 10px; }
-.fp .avatar { width: 36px; height: 36px; }
-.fp b { display: block; font-size: 15px; font-weight: 600; }
-.fp .grow span { display: block; font-size: 13px; color: var(--text-2); }
+.fb .fbn { font-size: 14px; font-weight: 600; line-height: 18px; margin-top: 6px; }
+.fb .fbs { max-width: 100%; font-size: 11px; line-height: 14px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fp-min { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .fp-min b { display: inline; font-size: 17px; color: var(--text); font-variant-numeric: tabular-nums; }
 .fp-bar { display: block; height: 4px; border-radius: 2px; background: rgba(17, 17, 19, .08); margin-top: 10px; overflow: hidden; }
 .fp-bar i { display: block; height: 100%; background: var(--blue); border-radius: 2px; }
-.fp-s { font-size: 12px; color: var(--text-2); margin-top: 6px; }
-.fp-acts { display: flex; gap: 8px; margin-top: 12px; }
-.fp-acts .btn { flex: 1; }
-.fp-acts .btn.soft { flex: 0 0 auto; gap: 6px; }
 /* focus board: a podium, first in the middle */
-.podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; padding-top: 16px; }
-.pcol { flex: 1; max-width: 104px; display: flex; flex-direction: column; align-items: center; }
-.pcol .who { display: block; width: 44px; height: 44px; }
-.pcol.first .who { width: 54px; height: 54px; }
-.pcol .who .avatar { width: 100%; height: 100%; box-shadow: 0 0 0 3px var(--surface); }
+/* podium: the face sits on its block, name and hours on the block, a big soft rank number at its foot */
+.podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; padding-top: 4px; }
+.pcol { flex: 1; max-width: 104px; display: flex; flex-direction: column; align-items: center; position: relative; }
+.pcol .crown { width: 24px; height: 16px; margin-bottom: 2px; }
+.pcol .who { display: block; width: 44px; height: 44px; position: relative; z-index: 1; margin-bottom: -20px; }
+.pcol.first .who { width: 52px; height: 52px; }
+.pcol .who .avatar { width: 100%; height: 100%; box-shadow: none; }
 .pcol .who.swap { animation: sit .5s var(--spring) both; }
-.pcol .nm { font-size: 13px; font-weight: 600; margin-top: 6px; }
-.pcol > b { font-size: 13px; font-weight: 500; color: var(--text-2); font-variant-numeric: tabular-nums; margin-bottom: 6px; }
-.blockp { width: 100%; border-radius: 16px 16px 6px 6px; display: grid; place-items: start center; padding-top: 8px; transition: height .7s var(--spring); overflow: hidden; }
-.blockp i { font-style: normal; font-size: 22px; font-weight: 600; }
+.blockp { width: 100%; border-radius: 18px 18px 8px 8px; display: flex; flex-direction: column; align-items: center; padding-top: 26px; transition: height .7s var(--spring); overflow: hidden; }
+.blockp .nm { font-size: 14px; font-weight: 600; line-height: 18px; color: var(--text); }
+.blockp > b { font-size: 12px; font-weight: 500; line-height: 16px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.blockp i { margin-top: auto; padding-bottom: 6px; font-style: normal; font-size: 28px; line-height: 30px; font-weight: 700; opacity: .9; }
 .pcol.first .blockp { background: var(--brand-tint); color: var(--brand-strong); }
 .pcol.second .blockp { background: var(--blue-tint); color: #2F4FC0; }
 .pcol.third .blockp { background: #EBF6C9; color: #55661A; }
@@ -1098,6 +1099,11 @@ button.pill { position: relative; }
 .mine b { display: block; font-size: 14px; font-weight: 600; }
 .mine .grow span { display: block; font-size: 12px; color: var(--text-2); }
 .mine .hrs { font-size: 15px; font-variant-numeric: tabular-nums; }
+.mine .gap { display: block; height: 4px; margin-top: 6px; border-radius: 2px; background: rgba(17, 17, 19, .08); overflow: hidden; }
+.mine .gap i { display: block; height: 100%; border-radius: 2px; background: var(--brand); }
+/* Today / Week sits on a grey track, level with the title */
+#lead-mode { margin: 0; background: var(--sunken, #f2f2f4); }
+#lead-mode button { height: 28px; padding: 0 12px; font-size: 12px; }
 
 /* your shape, in Me and in its picker */
 .me-shape { position: relative; flex-shrink: 0; }
@@ -1200,25 +1206,73 @@ button.pill { position: relative; }
 #s-rooms .rm-pad { padding-top: 12px; }
 #s-rooms .sched { border: 0; border-radius: 24px; box-shadow: none; }
 #s-rooms .rm-rail { padding: 14px 32px 12px; gap: 14px; }
-#s-rooms .rm-slot { --room-color: #f3ddfc; }
-#s-rooms .rm-slot:nth-child(2) { --room-color: #e3e9fd; }
-#s-rooms .rm-slot:nth-child(3) { --room-color: #f5edc8; }
-#s-rooms .rm-card { border-radius: 32px 64px 24px 24px; padding: 22px 18px 16px; background: linear-gradient(var(--room-color) 0 240px, #fff 240px); border: 0; box-shadow: none; filter: none; }
-#s-rooms .rm-slot:nth-child(2) .rm-card { border-radius: 32px 64px 24px 24px; }
-#s-rooms .rm-slot:nth-child(3) .rm-card { border-radius: 32px 64px 24px 24px; }
+/* Each room is a little bakery front: a striped, scalloped awning in a deeper shade of the room's
+   colour (set per room as --room-color / --deep), the shop window (name and scene) under it, the white counter below. */
+#s-rooms .rm-slot { --tear: 252px; }
+#s-rooms .rm-card { border-radius: 28px; padding: 52px 18px 16px; border: 0; box-shadow: none; filter: none; background: linear-gradient(var(--room-color) 0 var(--tear), #fff var(--tear)); }
+#s-rooms .rm-card::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 38px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--deep) 0 30px, #fff 30px 60px);
+  -webkit-mask: linear-gradient(#000 0 24px, transparent 24px), radial-gradient(circle at 15px 24px, #000 14px, transparent 14.5px) 0 0 / 30px 38px repeat-x;
+          mask: linear-gradient(#000 0 24px, transparent 24px), radial-gradient(circle at 15px 24px, #000 14px, transparent 14.5px) 0 0 / 30px 38px repeat-x;
+}
 #s-rooms .rm-head { display: block; text-align: left; position: relative; padding-right: 8px; }
 #s-rooms .rm-head h3 { font-size: 22px; font-weight: 600; letter-spacing: -.04em; }
 #s-rooms .rm-card .cnt { margin-top: 6px; height: 22px; padding: 0; font-size: 11px; font-weight: 500; background: transparent; border: 0; color: var(--text-2); }
 #s-rooms .rm-round { margin-top: 12px; border: 0; }
 #s-rooms .rm-join { border-radius: 14px; font-size: 14px; min-height: 44px; height: 44px; margin-top: 14px; }
-#s-rooms .room-section-label { padding: 24px 20px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+#s-rooms .room-section-label { padding: 24px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
+/* Friends / Explore: one segmented control under the title */
+.rm-tabs { display: flex; gap: 2px; margin: 12px 20px 0; padding: 3px; border-radius: 999px; background: #fff; }
+.rm-tabs button { flex: 1; display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--text-2); transition: background .2s, color .2s; }
+.rm-tabs button[aria-selected="true"] { background: var(--text); color: #fff; }
+#s-rooms .rm-pane > .pad.rm-pad { padding-top: 12px; }
+#s-rooms #pane-explore .room-section-label { padding-top: 18px; }
+#s-rooms .explore-sub { margin: 2px 0 0; font-size: 13px; color: var(--text-2); }
+/* the local board in Explore: a ranked list (the podium stays for friends), you pinned at the end */
+#s-rooms .blk.local { margin-top: 8px; }
+.lb-row { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 4px; }
+.lb-row + .lb-row { border-top: 1px solid rgba(17, 17, 19, .06); }
+.lb-rk { width: 34px; flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.lb-row .avatar { width: 32px; height: 32px; flex-shrink: 0; }
+.lb-row .grow > b { font-size: 14px; font-weight: 600; }
+.lb-row .tag { margin-left: 6px; vertical-align: 1px; }
+.lb-bar { display: block; height: 4px; margin-top: 5px; border-radius: 2px; background: rgba(17, 17, 19, .06); overflow: hidden; }
+.lb-bar i { display: block; height: 100%; border-radius: 2px; background: var(--blue); }
+.lb-h { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lb-gap { text-align: center; font-size: 13px; letter-spacing: 3px; color: var(--text-3); line-height: 18px; }
+.lb-row.me { margin-top: 2px; padding: 8px 10px; border: 0; border-radius: 14px; background: var(--brand-tint); }
+.lb-row.me .lb-rk { color: var(--brand-strong); }
+.lb-row.me .lb-bar i { background: var(--brand); }
+.lb-note { margin-top: 10px; font-size: 12px; color: var(--text-2); }
+/* where to look: one button in the header that opens a short menu; type of work is one row of chips under it */
+.scope-btn { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px 0 9px; border-radius: 16px; background: #fff; font-size: 13px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+.scope-btn svg:last-child { color: var(--text-2); }
+.scope-menu { position: absolute; right: 20px; top: calc(100% + 6px); z-index: 8; width: 220px; padding: 6px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(17, 17, 19, .06), 0 16px 32px -12px rgba(17, 17, 19, .25); }
+.scope-menu button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 12px; font-size: 15px; text-align: left; }
+.scope-menu button[aria-checked="true"] { background: var(--brand-tint); font-weight: 600; }
+#s-rooms .scope-btn span, #s-rooms .scope-menu .grow { font-size: inherit; color: var(--text); }
+#s-rooms .scope-menu .n { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.scope-menu .ok { color: var(--brand-strong); visibility: hidden; }
+.scope-menu button[aria-checked="true"] .ok { visibility: visible; }
+.type-row { display: flex; gap: 6px; overflow-x: auto; padding: 12px 20px 0; scrollbar-width: none; }
+.type-row::-webkit-scrollbar { display: none; }
+.type-row button { flex-shrink: 0; height: 32px; padding: 0 13px; border-radius: 16px; background: rgba(255, 255, 255, .6); font-size: 13px; font-weight: 500; color: var(--text-2); transition: background .2s, color .2s; }
+.type-row button[aria-selected="true"] { background: var(--text); color: #fff; }
+.rm-empty { width: 300px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 24px; border-radius: 28px; background: #fff; }
+.rm-empty b { font-size: 17px; line-height: 22px; letter-spacing: -.02em; }
+.rm-empty span { font-size: 13px; color: var(--text-2); }
+.rm-empty .acts { display: flex; gap: 8px; margin-top: 10px; }
 #s-rooms .room-section-label h2 { font-size: 20px; letter-spacing: -.03em; }
 #s-rooms .room-section-label span { font-size: 12px; color: var(--text-2); }
 #s-rooms .blk, #s-rooms .scene *, #s-rooms .sch-ev { box-shadow: none; filter: none; }
 #s-rooms .sch-hours span { border-left: 0; }
 #s-rooms .sch-ev.plan { border: 0; background: var(--brand-tint); }
 #s-rooms .sch-ev.sel { text-decoration: underline; text-underline-offset: 4px; }
-#s-rooms .sch-ev.going::before { content: '✓'; margin-right: 4px; }
+/* a bake you're going to: a small tick badge on the host's face */
+#s-rooms .sch-ev.going .avatar { position: relative; overflow: visible; }
+#s-rooms .sch-ev.going .avatar::after { content: ""; position: absolute; right: -3px; bottom: -2px; width: 14px; height: 14px; border-radius: 50%; background: var(--brand-strong) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1.5 5l3 3 6-6.5' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center / 8px no-repeat; box-shadow: 0 0 0 2px #fff; }
+#s-rooms .sch-acts .btn:disabled { background: rgba(17, 17, 19, .08); color: var(--text-2); cursor: default; }
 #s-rooms .scene .tbl::before { display: none; }
 
 /* A shallow patisserie window, with a continuous display ledge. */
@@ -1236,7 +1290,9 @@ button.pill { position: relative; }
 .empty-plate { width: 72px; height: 7px; margin: auto auto 23px; flex-shrink: 0; border-radius: 50%; background: #e6ddcf; align-self: center; }
 .dessert-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-#s-rooms .rm-card .scene { height: 146px; margin-top: 0; }
+/* a shorter window: the empty strip above the dessert is trimmed, everything in it moves up */
+#s-rooms .rm-card .scene { height: 128px; margin-top: 0; }
+#s-rooms .rm-card .scene > * { translate: 0 -18px; }
 #s-rooms .rm-card .scene .tbl .leg { height: 12px; }
 #s-rooms .rm-card .rm-round .tclock { font-size: 28px; font-weight: 500; letter-spacing: -.04em; }
 #s-rooms .rm-card .rbar { height: 3px; margin-top: 10px; background: #f1eef4; }
@@ -1246,13 +1302,13 @@ button.pill { position: relative; }
 
 /* schedule, refined: a slim day strip, pills that fill as they go, a card in the picked bake's colour */
 #s-rooms .sch-days { gap: 5px; }
-#s-rooms .sch-days button { position: relative; flex: 1; height: 34px; border-radius: 17px; flex-direction: row; gap: 4px; font-size: 12px; font-weight: 500; }
+#s-rooms .sch-days button { position: relative; flex: 1 1 auto; min-width: 0; padding: 0 8px; white-space: nowrap; height: 34px; border-radius: 17px; flex-direction: row; gap: 4px; font-size: 12px; font-weight: 500; }
 #s-rooms .sch-days button b { font-size: 13px; line-height: 1; }
-#s-rooms .sch-days button i { position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--brand); }
-#s-rooms .sch-days button.on i { background: #fff; }
 #s-rooms .sch-lanes { height: 160px; }
 #s-rooms .sch-hours span { font-size: 11px; line-height: 14px; }
-#s-rooms .sch-now { top: 18px; }
+#s-rooms .sch-hours span.hid { visibility: hidden; }
+/* the Now line runs behind the bakes, so it never crosses a name; its tag sits alone on the hour row */
+#s-rooms .sch-now { top: 18px; z-index: 0; }
 #s-rooms .sch-now::after { top: -18px; bottom: auto; left: -14px; padding: 1px 6px; background: var(--brand); color: #fff; }
 #s-rooms .sch-ev { height: 36px; border-radius: 18px; gap: 6px; padding: 0 12px 0 3px; font-size: 13px; color: var(--text); text-decoration: none; }
 #s-rooms .sch-ev .avatar { width: 30px; height: 30px; }
@@ -1262,7 +1318,7 @@ button.pill { position: relative; }
 #s-rooms .sch-ev.live::after { display: none; }
 #s-rooms .sch-ev.sel { background: var(--text) !important; color: #fff; transform: none; text-decoration: none; }
 #s-rooms .sch-ev.sel small { color: rgba(255, 255, 255, .6); }
-#s-rooms .sch-ev.plan { background: rgba(195, 73, 238, .1); color: var(--brand-strong); }
+#s-rooms .sch-ev.plan { background: #f9edfd; color: var(--brand-strong); }
 #s-rooms .sch-ev.plan.sel { background: var(--brand) !important; color: #fff; }
 #s-rooms .sch-card { margin-top: 8px; padding: 12px; border-radius: 20px; transition: background .3s; }
 #s-rooms .sch-sum { gap: 10px; }
@@ -1275,6 +1331,100 @@ button.pill { position: relative; }
 #s-rooms .sch-note { font-size: 12px; color: var(--text-2); margin: 8px 0 0 50px; }
 #s-rooms .sch-acts .btn { flex: 1; }
 #s-rooms .sch-acts .btn.soft { flex: 0 0 auto; }
+
+/* friends: a request badge on the Me row, the invite card, request and people rows, and who you sat with after a bake */
+.badge-n { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px; background: var(--brand); color: #fff; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.badge-n[hidden] { display: none; }
+#s-friends .scroll { padding-top: var(--sp-2); }
+.invite { --c: 24px; background: var(--brand-tint); padding: 20px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+.invite .t { font-size: 19px; font-weight: 600; letter-spacing: -.02em; }
+.invite .s { font-size: var(--fs-footnote); line-height: 19px; color: var(--text-2); margin-top: -4px; }
+.invite .link-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border-radius: 999px; padding: 6px 6px 6px 16px; margin-top: 4px; }
+.invite .url { flex: 1; min-width: 0; font-size: var(--fs-subhead); font-weight: 500; color: var(--brand-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.invite > .btn { width: 100%; }
+.fr-list .row { gap: 10px; }
+.fr-list .row .avatar { width: 40px; height: 40px; flex-shrink: 0; }
+.fr-list .row .grow { min-width: 0; }
+.fr-list .btn.small { flex-shrink: 0; }
+.fr-list .sent { font-size: var(--fs-footnote); color: var(--text-2); flex-shrink: 0; padding: 0 4px; }
+.fr-remove { font-size: var(--fs-footnote); color: var(--text-2); min-height: 44px; padding: 0 4px; flex-shrink: 0; }
+.fr-none { font-size: var(--fs-footnote); color: var(--text-2); padding: 4px 2px 0; }
+#friends-body .field { margin-bottom: 10px; }
+.met { --c: 22px; background: var(--surface); padding: 16px 14px 6px; margin-top: var(--sp-4); }
+.met .k { font-size: 17px; font-weight: 600; letter-spacing: -.02em; padding: 0 4px; }
+.met > .s { font-size: var(--fs-footnote); line-height: 18px; color: var(--text-2); padding: 2px 4px 6px; }
+.met .fr-list .row { padding-left: 4px; padding-right: 4px; }
+.fr-x { width: 36px; height: 36px; border-radius: 50%; background: var(--sunken); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* sheets from Rooms: a table, a person, a whole board. Everything opens from the bottom, the scrim or the grabber closes it */
+#sheet-shop { max-height: 88%; }
+#shop-body { overflow-y: auto; margin: 0 calc(-1 * var(--sp-5)); padding: 0 var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); }
+.rs { display: flex; flex-direction: column; }
+.rs .mh { margin-top: 18px; margin-bottom: 2px; }
+button.mrow { width: 100%; text-align: left; }
+button.lb-row { width: 100%; text-align: left; }
+.lb-all { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; min-height: 44px; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--brand-strong); }
+.lb-all .chev { color: var(--brand-strong); width: 8px; }
+.ls-head p { font-size: var(--fs-footnote); color: var(--text-2); margin-top: 2px; }
+.ls-list { padding-bottom: 4px; }
+.pcol .who[data-n]:not([data-n=""]) { cursor: pointer; }
+
+/* a person's sheet: a hero in their colour with a scalloped hem, their face in a chef's hat inside the bake ring,
+   then three paper stickers, each a little askew with a hard paper shadow (no blur) */
+.ph { --tint: #E9E9EF; position: relative; margin: 4px -6px 6px; padding: 22px 16px 30px; border-radius: 26px 26px 0 0; text-align: center;
+  background: color-mix(in srgb, var(--tint) 55%, #fff);
+  -webkit-mask: radial-gradient(10px at 50% 100%, #0000 98%, #000) 50% 0 / 20px 100% repeat-x, linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat;
+  mask: radial-gradient(10px at 50% 100%, #0000 98%, #000) 50% 0 / 20px 100% repeat-x, linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat; }
+.ph::before { content: ""; position: absolute; inset: 0 0 10px; border-radius: inherit; pointer-events: none;
+  background: repeating-linear-gradient(-45deg, transparent 0 14px, rgba(255, 255, 255, .28) 14px 22px); }
+.ph-ring { position: relative; display: block; width: 116px; height: 116px; margin: 8px auto 0; padding: 14px; }
+.ph-arc { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ph-ring .bob { position: relative; display: block; width: 100%; height: 100%; animation: bob 3.2s ease-in-out infinite, sit .55s var(--spring) both; }
+.ph-ring .avatar { width: 100%; height: 100%; box-shadow: none; }
+.ph-ring .toque { width: 42px; height: 34px; top: -22px; margin-left: -21px; transform: rotate(-8deg); }
+.ph-pill { position: absolute; left: 50%; bottom: -6px; translate: -50% 0; z-index: 2; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--text); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; white-space: nowrap; box-shadow: 0 0 0 3px color-mix(in srgb, var(--tint) 55%, #fff); }
+.ph-pill b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.ph h3 { position: relative; margin-top: 16px; font-size: 26px; line-height: 30px; }
+.ph p { position: relative; font-size: var(--fs-subhead); color: var(--text-2); margin-top: 2px; }
+.stks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 2px; }
+.stk { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 12px 12px 11px; border-radius: 18px; background: var(--bgc); rotate: var(--r);
+  box-shadow: 0 3px 0 rgba(17, 17, 19, .08), inset 0 0 0 2px #fff; animation: popin .45s var(--spring) both; }
+.stk:nth-child(2) { animation-delay: .06s; } .stk:nth-child(3) { animation-delay: .12s; }
+.stk .ic { width: 30px; height: 30px; display: flex; margin-bottom: 6px; }
+.stk .ic svg { width: 100%; height: 100%; }
+.stk b { max-width: 100%; font-size: 15px; font-weight: 600; line-height: 18px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.stk small { margin-top: auto; padding-top: 2px; }
+.stk small { max-width: 100%; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps-note { font-size: var(--fs-footnote); line-height: 19px; color: var(--text-2); text-align: center; padding: 0 12px; }
+.ps-acts { align-items: stretch; }
+.cheer { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; height: var(--h-l, 56px); padding: 0 20px; border-radius: 999px; background: #FCE4F4; color: #D6339B; font-size: var(--fs-headline, 17px); font-weight: 600; transition: transform .3s var(--spring); }
+.cheer span { font-variant-numeric: tabular-nums; min-width: 2.4em; text-align: left; color: var(--text); }
+.cheer:active { transform: scale(.94); }
+.cheer.pop svg { animation: thump .45s var(--spring); }
+@keyframes thump { 40% { transform: scale(1.45) rotate(-8deg); } }
+.stk .ic { color: #E36BC0; }
+
+/* the table's sheet: the card's awning and table, bigger, in the room's colour */
+.rs-hero { padding-top: 40px; padding-bottom: 22px; }
+.rs-hero::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26px; border-radius: 26px 26px 0 0;
+  background: repeating-linear-gradient(90deg, var(--deep) 0 24px, rgba(255, 255, 255, .85) 24px 48px);
+  -webkit-mask: radial-gradient(12px at 50% 14px, #000 98%, #0000) 0 0 / 24px 100% repeat-x, linear-gradient(#000 0 0) top / 100% 14px no-repeat;
+  mask: radial-gradient(12px at 50% 14px, #000 98%, #0000) 0 0 / 24px 100% repeat-x, linear-gradient(#000 0 0) top / 100% 14px no-repeat; }
+.rs-top { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.rs-at { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px 0 6px; border-radius: 13px; background: rgba(255, 255, 255, .8); font-size: 12px; font-weight: 600; }
+.rs-at svg { width: 16px; height: 16px; }
+.rs-live { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border-radius: 13px; background: var(--text); color: #fff; font-size: 12px; font-weight: 500; }
+.rs-live b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.rs-live i { width: 7px; height: 7px; border-radius: 50%; background: #7BE08A; animation: blink 1.6s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+.rs-hero h3 { margin-top: 12px; }
+.rs-hero .scene { width: 268px; height: 132px; margin: 6px auto 0; }
+.rs-hero .scene > * { translate: 0 -20px; }
+.rs-hero .scene .tbl .leg { height: 14px; }
+.rs-hero .scene .seat .avatar { box-shadow: none; }
+.stk .tclock { font-variant-numeric: tabular-nums; }
+.stk .rbar { display: block; width: 100%; height: 4px; margin-top: 6px; border-radius: 2px; background: rgba(17, 17, 19, .08); overflow: hidden; }
+.stk .rbar i { display: block; height: 100%; border-radius: 2px; background: var(--text); }
 </style>
 </head>
 <body>
@@ -1333,14 +1483,29 @@ button.pill { position: relative; }
       <section class="screen" id="s-rooms" aria-label="Study rooms">
         <div class="scroll">
           <div class="large"><div><p class="sub">Bake alongside other people</p><h1>Study rooms</h1></div></div>
+          <!-- two circles: Friends (people you added, wherever they are) and Explore (open tables, by place) -->
+          <div class="rm-tabs" id="rm-tabs" role="tablist" aria-label="Who to study with"><button type="button" role="tab" data-rtab="friends" aria-selected="true">Friends</button><button type="button" role="tab" data-rtab="explore" aria-selected="false">Explore</button></div>
+          <div class="rm-pane" id="pane-friends" role="tabpanel">
           <div class="pad rm-pad"><div class="blk sched" id="live-hero"></div></div>
-          <div class="room-section-label"><h2>Find your table</h2><span>Swipe to explore →</span></div>
-          <div class="rm-rail" id="rooms"></div>
-          <div class="rm-dots" id="room-dots" aria-hidden="true"></div>
           <div class="pad"><div class="stack">
             <div class="blk"><div class="ach"><p class="k"><i class="live-dot" aria-hidden="true"></i>Friends baking now</p><span class="kk" id="friends-count"></span></div><div id="friends-all"></div></div>
             <div class="blk"><div class="ach"><p class="k">Focus board</p><div class="case-mode lead-mode" id="lead-mode" role="group" aria-label="Period"><button type="button" data-p="today" aria-pressed="false">Today</button><button type="button" data-p="week" aria-pressed="true">Week</button></div></div><div class="lead" id="leaderboard"></div></div>
           </div></div>
+          </div>
+          <div class="rm-pane" id="pane-explore" role="tabpanel" hidden>
+          <div class="room-section-label"><div><h2>Open tables</h2><p class="explore-sub">Study next to people you don’t know yet</p></div>
+            <button class="scope-btn" id="scope-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Where to look"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="scope-name">NYU</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <div class="scope-menu" id="scope-menu" role="menu" hidden></div>
+          </div>
+          <div class="type-row" id="type-row" role="tablist" aria-label="Type of work"></div>
+          <div class="rm-rail" id="rooms"></div>
+          <div class="rm-dots" id="room-dots" aria-hidden="true"></div>
+          <div class="pad"><div class="blk local">
+            <div class="ach"><p class="k" id="local-title">Top at NYU</p><span class="kk" id="local-sub"></span></div>
+            <div id="local-board"></div>
+            <p class="lb-note">People you haven’t added show only a first initial.</p>
+          </div></div>
+          </div>
           <div class="tab-pad"></div>
         </div>
       </section>
@@ -1383,7 +1548,7 @@ button.pill { position: relative; }
               <button class="row" type="button" data-go="report"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="grow"><span class="t">October report</span><span class="s">Your month as a receipt</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
               <button class="row" type="button" data-go="settings"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow"><span class="t">Default focus lock</span><span class="s" id="me-lock">Standard · 180°</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
               <button class="row" type="button" data-go="settings"><span class="tile info rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></span><span class="grow"><span class="t">Settings</span><span class="s">Notifications, haptics, sounds</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-tab="rooms"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span><span class="s">5 friends</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="friends"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span><span class="s" id="me-friends">4 friends</span></span><span class="badge-n" id="me-req" hidden></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
             </div>
           </div>
           <div class="tab-pad"></div>
@@ -1508,6 +1673,7 @@ button.pill { position: relative; }
           <div class="verdict"><p class="k" id="v-k">DING!</p><h1 id="v-h">Golden perfect</h1><p id="v-p">The door stayed shut.</p></div>
           <div class="plate"><span class="rays" aria-hidden="true"></span><svg viewBox="0 0 200 172" data-art="cupcake" id="result-food"></svg></div>
           <div class="pad"><div id="r-slip"></div></div>
+          <div class="pad"><div id="r-met"></div></div>
           <div class="spacer"></div>
         </div>
         <div class="bottom"><button class="btn rounded" type="button" id="to-deco">Decorate · 5-min break</button></div>
@@ -1557,6 +1723,13 @@ button.pill { position: relative; }
           <div class="spacer"></div><div class="spacer"></div>
         </div>
         <div class="bottom"><button class="btn line rounded" type="button" id="rc-save">Save image</button><button class="btn wide rounded" type="button" id="rc-share">Share with friends</button></div>
+      </section>
+      <section class="screen flow" id="s-friends" aria-label="Friends">
+        <header class="nav">
+          <button class="icon" type="button" data-go="back" aria-label="Back"><svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="#10131A" stroke-width="2.6"/></svg></button>
+          <p class="title">Friends</p><span class="step"></span>
+        </header>
+        <div class="scroll" id="friends-body"></div>
       </section>
       <section class="screen flow" id="s-settings" aria-label="Settings">
         <header class="nav">
@@ -2234,11 +2407,59 @@ const FRIENDS = [
   { n: 'Ava', c: '#BCCBF9', d: 'Strawberry cupcake', left: 31, subj: 'Japanese N3 vocab' },
   { n: 'Sam', c: '#FFF07A', d: 'Latte', left: 6, subj: 'Reading notes' },
 ];
+// Rooms sit at a scope (your campus, your city, or open to everyone) and have a type of work.
+// A wider scope includes the narrower ones; Friends shows any room a friend is in.
 const ROOMS = [
-  { n: 'Quiet library', s: 'No chat · cameras off', k: 12, f: ['Mia', 'Jun', 'Ava'], len: 25, left: 760 },
-  { n: 'Exam sprint', s: '50-minute rounds', k: 34, f: ['Sam', 'Ava'], len: 50, left: 1860 },
-  { n: 'Night owls', s: 'Open until 2 am', k: 8, f: ['Jun'], len: 25, left: 410 },
+  { n: 'Quiet library', s: 'No chat · cameras off', k: 12, f: ['Mia', 'Jun', 'Ava'], len: 25, left: 760, at: 'campus', type: 'Coursework' },
+  { n: 'Exam sprint', s: '50-minute rounds', k: 34, f: ['Sam', 'Ava'], len: 50, left: 1860, at: 'city', type: 'Exams' },
+  { n: 'Night owls', s: 'Open until 2 am', k: 8, f: ['Jun'], len: 25, left: 410, at: 'world', type: 'Writing' },
+  { n: 'GRE morning club', s: 'Starts 7 am · cameras on', k: 9, f: [], host: 'Noa', len: 50, left: 1320, at: 'campus', type: 'Exams' },
+  { n: 'Thesis corner', s: 'Bobst Library, 4th floor', k: 6, f: [], host: 'Ivy', len: 50, left: 2410, at: 'campus', type: 'Writing' },
+  { n: 'Language exchange', s: 'Chat in the breaks', k: 21, f: [], host: 'Lin', len: 25, left: 980, at: 'city', type: 'Language' },
+  { n: 'Makers’ desk', s: 'Code, design, slides', k: 48, f: [], host: 'Kai', len: 50, left: 600, at: 'city', type: 'Deep work' },
+  { n: 'Job hunt hour', s: 'Applications and prep', k: 17, f: [], host: 'Ben', len: 50, left: 1700, at: 'city', type: 'Job hunt' },
+  { n: 'Inbox zero', s: 'Emails, forms, chores', k: 130, f: [], host: 'Kai', len: 25, left: 300, at: 'world', type: 'Admin' },
+  { n: 'Silent reading', s: 'Books and papers', k: 210, f: [], host: 'Lin', len: 50, left: 2050, at: 'world', type: 'Reading' },
 ];
+// Explore is about place; friends have their own tab
+const SCOPES = [['campus', 'NYU'], ['city', 'New York'], ['world', 'Everywhere']];
+// the local board: top focus hours this week at each place; people you haven't added show as a first initial
+const LOCAL = {
+  campus: { me: 12, of: 340, top: [['Noa', 9.4], ['Kai', 8.8], ['Jun', 6.2], ['Lin', 5.9], ['Mia', 4.1]] },
+  city: { me: 148, of: 5200, top: [['Ivy', 14.2], ['Ben', 12.7], ['Noa', 9.4], ['Ash', 9.1], ['Kai', 8.8]] },
+  world: { me: 2304, of: 88000, top: [['Rae', 31.5], ['Oli', 28.0], ['Zed', 26.4], ['Ivy', 14.2], ['Ben', 12.7]] },
+};
+function renderLocal() {
+  const L = LOCAL[RF.scope], best = L.top[0][1], label = SCOPES.find(([k]) => k === RF.scope)[1];
+  setText($('local-title'), RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`);
+  setText($('local-sub'), `This week · ${L.of.toLocaleString('en-US')} bakers`);
+  setHTML($('local-board'), L.top.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('') + `<div class="lb-gap" aria-hidden="true">···</div>` + lbRow(L.me, 'Leqi', myHours.week || 0, best)
+    + `<button class="lb-all" type="button" data-lb-all aria-haspopup="dialog">See the top 20${ICON.chev}</button>`);
+}
+// one row of a local board; anyone but you opens their sheet
+function lbRow(rank, n, h, best) {
+  const me = n === 'Leqi', friend = FRIENDS.some((f) => f.n === n), tag = me ? 'div' : 'button';
+  return `<${tag} class="lb-row${me ? ' me' : ''}"${me ? '' : ` type="button" aria-haspopup="dialog" data-lb='${JSON.stringify([n, rank, h])}'`}><span class="lb-rk">${rank.toLocaleString('en-US')}</span>${face(n)}<span class="grow"><b>${me ? 'You' : friend ? n : `${n[0]}.`}</b>${friend ? '<span class="tag brand">Friend</span>' : ''}<span class="lb-bar"><i style="width:${Math.round(h / best * 100)}%"></i></span></span><b class="lb-h">${h.toFixed(1)}h</b></${tag}>`;
+}
+// the whole top 20 for this place, in a sheet that scrolls
+const LB_MORE = ['Ash', 'Rae', 'Oli', 'Zed', 'Pia', 'Teo', 'Uma', 'Kit', 'Bo', 'Eli', 'Fay', 'Gus', 'Hal', 'Ida', 'Jo'];
+function localSheet() {
+  const L = LOCAL[RF.scope], best = L.top[0][1], label = SCOPES.find(([k]) => k === RF.scope)[1];
+  const pool = LB_MORE.filter((n) => !L.top.some(([x]) => x === n)), last = L.top[L.top.length - 1][1], mine = myHours.week || 0, inTop = L.me <= 20;
+  // ranks 6–20 step down from fifth place; if you're among them you sit at your rank and everyone else steps around you
+  const top = inTop ? Math.max(mine, .1) : last;
+  const all = [...L.top];
+  for (let k = 6, p = 0; k <= 20; k++) {
+    if (inTop && k === L.me) { all.push(['Leqi', mine]); continue; }
+    const h = inTop && k < L.me ? last - (last - top) * (k - 5) / (L.me - 5) : (inTop ? top : last) * Math.pow(.96, k - (inTop ? L.me : 5));
+    all.push([pool[p++], +h.toFixed(1)]);
+  }
+  showSheet(`<div class="ls-head"><h3>${RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`}</h3><p>This week · ${L.of.toLocaleString('en-US')} bakers · tap anyone to see more</p></div>
+    <div class="ls-list" id="local-all">${all.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('')}${inTop ? '' : `<div class="lb-gap" aria-hidden="true">···</div>${lbRow(L.me, 'Leqi', mine, best)}`}</div>`, localSheet);
+}
+const ROOM_TYPES = ['All', 'Exams', 'Coursework', 'Language', 'Writing', 'Deep work', 'Admin', 'Job hunt', 'Reading'];
+const AT_LABEL = { campus: 'NYU', city: 'New York', world: 'Online' };
+const WHERE = { friends: 'with friends', campus: 'at NYU', city: 'in New York', world: 'everywhere' };
 const SHOPS = [
   { n: 'Corner Patisserie', d: '350 m', walk: '4 min walk', off: '10% off', c: '#FFC4F8', x: 28, y: 36, menu: [['cupcake', 'Strawberry cupcake', 4.8], ['macaron', 'Strawberry macaron', 2.6], ['shortcake', 'Shortcake slice', 5.9]] },
   { n: 'Bloom Café', d: '600 m', walk: '8 min walk', off: '10% off', c: '#C9D5FA', x: 72, y: 26, menu: [['latte', 'Latte', 4.2], ['macaron', 'Macaron', 2.4]] },
@@ -2481,43 +2702,144 @@ function joinFriend(who) {
   startBake(f.left, CARRY);
   toast(`<b>Joined ${esc(f.n)}</b><span>You’ll both finish in ${f.left} min</span>`);
 }
-const inviteRow = (s) => `<div class="row"><span class="tile success rounded">${ICON.plus}</span><span class="grow"><span class="t">Bake with a friend</span><span class="s">${s}</span></span><button class="btn soft small rounded" type="button" data-go="invite">Invite</button></div>`;
-// friends as bubbles: each face in a ring that fills as their bake goes, minutes left on a tag, sizes and heights varied
-let fbSel = '';
-const FB_SIZE = [78, 62, 70, 58], FB_DY = [0, 22, 6, 28];
-const friendBubble = (f, i) => { const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100); return `<button class="fb${f.n === fbSel ? ' sel' : ''}" type="button" data-f="${f.n}" style="--p:${p};--sz:${FB_SIZE[i % 4]}px;--dy:${FB_DY[i % 4]}px" aria-label="${f.n}, ${f.left} minutes left"><span class="fring"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(17,17,19,.08)" stroke-width="4"/><circle cx="50" cy="50" r="47" fill="none" stroke="#8CA7F4" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>${face(f.n)}</span><span class="fbm"><b data-to="${f.left}">${f.left}</b>m</span><span class="fbn">${f.n}</span></button>`; };
-
-// the panel under the bubbles: what they're studying, how far along, and join or cheer
-function friendPanel() {
-  const f = FRIENDS.find((x) => x.n === fbSel);
-  if (!f) return `<p class="fp-hint">Tap a friend to see what they’re working on</p>`;
-  const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100), room = ROOMS.find((r) => r.f.includes(f.n));
-  return `<div class="fp">${face(f.n)}<div class="grow"><b>${f.n}</b><span>${f.subj || f.d}</span></div><span class="fp-min"><b>${f.left}</b> min left</span></div>
-    <span class="fp-bar"><i style="width:${p}%"></i></span><p class="fp-s">${f.d}${room ? ` · ${room.n}` : ''}</p>
-    <div class="fp-acts"><button class="btn soft small rounded" type="button" data-cheer="${f.n}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>Cheer</button><button class="btn small rounded" type="button" data-go="join" data-who="${f.n}">Join · ${f.left} min</button></div>`;
+// a table of people you don't know: bake for what's left of its round, no names in the toast
+function joinTable(i) {
+  const r = ROOMS[i], min = Math.max(1, Math.ceil(r.left / 60));
+  together = r.host; P.together = true;
+  recipe = recipeById(['macaron', 'shortcake', 'latte', 'cupcake'][i % 4]) || recipe; renderRecipes();
+  startBake(min, CARRY);
+  toast(`<b>You took a seat at ${esc(r.n)}</b><span>The round ends in ${min} min</span>`);
 }
+const inviteRow = (s) => `<div class="row"><span class="tile success rounded">${ICON.plus}</span><span class="grow"><span class="t">Bake with a friend</span><span class="s">${s}</span></span><button class="btn soft small rounded" type="button" data-go="invite">Invite</button></div>`;
+// friends as bubbles: each face in a ring that fills as their bake goes, minutes left on a tag; tap one for their sheet
+const friendBubble = (f) => { const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100); return `<button class="fb" type="button" aria-haspopup="dialog" data-f="${f.n}" style="--p:${p}" aria-label="${f.n}, ${f.subj || f.d}, ${f.left} minutes left"><span class="fring"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(140,167,244,.2)" stroke-width="4"/><circle cx="50" cy="50" r="47" fill="none" stroke="#8CA7F4" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>${face(f.n)}</span><span class="fbm"><b data-to="${f.left}">${f.left}</b>m</span><span class="fbn">${f.n}</span><span class="fbs">${esc(f.subj || f.d)}</span></button>`; };
+
 // a room: name, rules, who's in it in their shapes, the live count in a scallop, and join
 const ROOM_SH = [['scallop', '#F3DDFC'], ['flower8', '#E3E9FD'], ['star', '#DDEB9E']];
 // a room card: the table scene, then this round's clock and who's in, then one button
-function roomCard(r, i) {
+const ROOM_BG = ['#f3ddfc', '#e3e9fd', '#f5edc8'], ROOM_DEEP = ['#e3a6f7', '#bccaf9', '#ecd77f'];
+// c picks the colour: cards cycle pink, blue, yellow in the order they're shown, so neighbours never match
+function roomCard(r, i, c = i) {
   const who = FRIENDS.find((f) => r.f.includes(f.n)), p = 1 - r.left / (r.len * 60);
-  return `<div class="rm-slot"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-expanded="false" aria-label="${r.n}, ${r.k} baking">
-    <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here</span></div>
-    ${roomTable(r, i)}
-    <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm"><b>${r.f.length}</b> ${r.f.length > 1 ? 'friends' : 'friend'} · +${r.k - r.f.length} bakers<br>${r.len}-min rounds</p></div>
+  // friends by face and name; everyone else only as a count
+  const fr = r.f.filter((n) => FRIENDS.some((f) => f.n === n));
+  const names = fr.length === 1 ? fr[0] : fr.length === 2 ? `${fr[0]} & ${fr[1]}` : `${fr[0]}, ${fr[1]} +${fr.length - 2}`;
+  const crowd = fr.length ? `<span class="rm-fr">${fr.slice(0, 3).map((n) => face(n)).join('')}<b>${names}</b></span><br>+${r.k - fr.length} others · ${r.len}-min rounds`
+    : `<b>${r.k}</b> bakers · no friends yet<br>${r.len}-min rounds`;
+  return `<div class="rm-slot" style="--room-color:${ROOM_BG[c % 3]};--deep:${ROOM_DEEP[c % 3]}"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${r.n}, ${r.k} baking">
+    <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here · ${AT_LABEL[r.at]} · ${r.type}</span></div>
+    ${roomTable(r, i, c)}
+    <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm">${crowd}</p></div>
     <span class="rbar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>
-    <div class="rm-more"><div>${roomMore(r, i)}</div></div>
-    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0]}">${who ? `Join ${who.n} · ${who.left} min` : 'Join table'}</button></div></div>`;
+    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0] || r.host}">${who ? `Join ${who.n} · ${who.left} min` : `Take a seat · ${Math.ceil(r.left / 60)} min`}</button></div></div>`;
 }
-// what a card shows when it's opened: who's at the table and on what, the room's rules, and the way into the room
-const OTHER_SUBJ = { Noa: 'Organic chemistry', Kai: 'Portfolio review', Lin: 'Piano theory', Ivy: 'Essay outline', Ben: 'SQL practice' };
-function roomMore(r, i) {
-  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3);
-  const subj = (n) => (FRIENDS.find((f) => f.n === n) || {}).subj || OTHER_SUBJ[n] || 'Studying';
-  return `<p class="mh">At the table</p>${people.map((n) => `<div class="mrow">${face(n)}<span class="grow"><b>${n}</b><span>${subj(n)}</span></span>${r.f.includes(n) ? '<span class="tag brand">Friend</span>' : ''}</div>`).join('')}
-    <div class="chips mchips">${r.s.split(' · ').map((x) => `<span class="chip rounded">${x}</span>`).join('')}<span class="chip rounded">${LOCKS[P.lock].name} lock</span></div>
-    <button class="mopen" type="button" data-go="room" data-i="${i}">Open the room${ICON.chev}</button>`;
+// which rooms show: the scope (friends, campus, city, everywhere) and one type, remembered between visits
+const RF_KEY = 'sweet-study-room-filter-v1', RANK = { campus: 1, city: 2, world: 3 };
+let RF = { scope: 'campus', type: 'All' };
+try { const s = JSON.parse(localStorage.getItem(RF_KEY) || 'null'); if (s && SCOPES.some(([k]) => k === s.scope) && ROOM_TYPES.includes(s.type)) RF = s; } catch (_) {}
+const inScope = (r, scope) => scope === 'friends' ? r.f.length > 0 : RANK[r.at] <= RANK[scope];
+const shownRooms = () => ROOMS.filter((r) => inScope(r, RF.scope) && (RF.type === 'All' || r.type === RF.type));
+function renderRooms() {
+  setText($('scope-name'), SCOPES.find(([k]) => k === RF.scope)[1]);
+  setHTML($('type-row'), ROOM_TYPES.map((t) => `<button type="button" role="tab" data-rtype="${t}" aria-selected="${t === RF.type}">${t}</button>`).join(''));
+  const list = shownRooms(), wider = SCOPES[SCOPES.findIndex(([k]) => k === RF.scope) + 1];
+  setHTML($('rooms'), list.length ? list.map((r, pos) => roomCard(r, ROOMS.indexOf(r), pos)).join('')
+    : `<div class="rm-slot"><div class="rm-empty"><b>No ${RF.type === 'All' ? '' : RF.type.toLowerCase() + ' '}tables ${WHERE[RF.scope]} right now</b><span>Start one, or look a little further out.</span>
+      <div class="acts">${wider ? `<button class="btn soft small rounded" type="button" data-scope="${wider[0]}">Look ${WHERE[wider[0]]}</button>` : ''}<button class="btn small rounded" type="button" data-go="pick">Start a table</button></div></div></div>`);
+  setHTML($('room-dots'), list.length > 1 ? list.map(() => '<i></i>').join('') : '');
+  $('rooms').scrollLeft = 0; layoutRooms(); renderLocal();
 }
+function setRoomFilter(next) {
+  RF = { ...RF, ...next }; try { localStorage.setItem(RF_KEY, JSON.stringify(RF)); } catch (_) {}
+  buzz(6); renderRooms(); stagger($('rooms'));
+}
+function scopeMenu(open) {
+  const m = $('scope-menu'); m.hidden = !open; $('scope-btn').setAttribute('aria-expanded', String(open));
+  if (open) setHTML(m, SCOPES.map(([k, label]) => { const n = ROOMS.filter((r) => inScope(r, k)).length; return `<button type="button" role="menuitemradio" aria-checked="${k === RF.scope}" data-scope="${k}"><span class="grow">${label}</span><span class="n">${n} ${n === 1 ? 'table' : 'tables'}</span><svg class="ok" width="14" height="12" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>`; }).join(''));
+}
+$('scope-btn').addEventListener('click', (e) => { e.stopPropagation(); scopeMenu($('scope-menu').hidden); });
+// Rooms has two circles: Friends (plans, who's baking, the board — no place filter) and Explore (open tables by place)
+const RTAB_KEY = 'sweet-study-rooms-tab-v1';
+let rtab = 'friends';
+try { if (localStorage.getItem(RTAB_KEY) === 'explore') rtab = 'explore'; } catch (_) {}
+function showRoomsTab(t, animate) {
+  rtab = t; try { localStorage.setItem(RTAB_KEY, t); } catch (_) {}
+  $('rm-tabs').querySelectorAll('[data-rtab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rtab === t)));
+  $('pane-friends').hidden = t !== 'friends'; $('pane-explore').hidden = t !== 'explore';
+  scopeMenu(false);
+  if (t === 'explore') { layoutRooms(); if (animate) stagger($('rooms')); }
+  else if (animate) { stagger($('friends-all').querySelector('.bubbles')); stagger($('leaderboard')); }
+}
+$('rm-tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-rtab]'); if (!b || b.dataset.rtab === rtab) return; buzz(6); showRoomsTab(b.dataset.rtab, true); });
+showRoomsTab(rtab);
+$('s-rooms').addEventListener('click', (e) => {
+  const s = e.target.closest('[data-scope]'), t = e.target.closest('[data-rtype]');
+  if (s) { scopeMenu(false); setRoomFilter({ scope: s.dataset.scope }); return; }
+  if (t) { setRoomFilter({ type: t.dataset.rtype }); t.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' }); return; }
+  if (!$('scope-menu').hidden && !e.target.closest('#scope-menu')) scopeMenu(false);
+});
+/* ---------- sheets: tapping a table, a friend or someone on a board slides up their details; swipe the scrim to close ---------- */
+let sheetRedraw = null; // redraws the open sheet when friendships change underneath it
+function showSheet(html, redraw) { setHTML($('shop-body'), html); sheetRedraw = redraw || null; openSheet('sheet-shop'); }
+// a table: its clock, who's at it (friends by name, everyone else as a count), its rules, then open the room or sit down
+let sheetRoom = -1;
+function roomSheet(i) {
+  const r = ROOMS[i], c = [...$('rooms').querySelectorAll('.rm-card')].findIndex((x) => +x.dataset.card === i);
+  const fr = r.f.filter((n) => FRIENDS.some((f) => f.n === n)), others = ['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n)).slice(0, 3);
+  const subj = (n) => (FRIENDS.find((f) => f.n === n) || {}).subj || 'Studying', who = FRIENDS.find((f) => r.f.includes(f.n));
+  sheetRoom = i; const k = Math.max(c, 0) % 3;
+  // the hero is the card's own awning and table, bigger: the dessert on its stand, who's sitting, and your empty seat
+  showSheet(`<div class="rs">
+    <div class="ph rs-hero" style="--tint:${ROOM_BG[k]};--deep:${ROOM_DEEP[k]}"><div class="rs-top"><span class="rs-at">${PIN}${AT_LABEL[r.at]} · ${r.type}</span><span class="rs-live"><i></i><b>${r.k}</b> here</span></div>
+      <h3>${r.n}</h3><p>${r.s} · ${LOCKS[P.lock].name} lock</p>${roomTable(r, i, k)}</div>
+    <div class="stks">${sticker(CLOCK, `<span class="tclock">${mmss(r.left)}</span>`, `left this round<span class="rbar"><i style="width:${((1 - r.left / (r.len * 60)) * 100).toFixed(1)}%"></i></span>`, 0)}${sticker(PEOPLE, fr.length ? `${fr.length} ${fr.length === 1 ? 'friend' : 'friends'}` : 'No friends yet', fr.length ? `${r.k - fr.length} others` : `${r.k} bakers`, 1)}${sticker(TOQUE_IC, `${r.len} min`, 'per round', 2)}</div>
+    <p class="mh">At the table</p>${fr.map((n) => `<button class="mrow" type="button" data-person="${n}">${face(n)}<span class="grow"><b>${n}</b><span>${subj(n)}</span></span><span class="tag brand">Friend</span></button>`).join('')}
+    <div class="mrow others"><span class="faces">${others.map((n) => face(n)).join('')}</span><span class="grow"><b>${r.k - fr.length} ${fr.length ? 'others' : 'bakers'}</b><span>Names show once you add each other</span></span></div></div>
+    <div class="acts"><button class="btn soft rounded" type="button" data-go="room" data-i="${i}">Open the room</button><button class="btn rounded" type="button" data-sheet-seat="${i}">${who ? `Join ${who.n} · ${who.left} min` : `Take a seat · ${Math.ceil(r.left / 60)} min`}</button></div>`, () => roomSheet(i));
+}
+// a person's sheet opens on a hero in their colour with a scalloped hem: their face in a chef's hat, bobbing,
+// inside a ring that fills as their bake goes; the details below are paper stickers, each a little askew
+const HEART = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.4 7-12a7 7 0 0 0-14 0c0 5.6 7 12 7 12z" fill="#BCCBF9"/><circle cx="12" cy="10" r="2.6" fill="#fff"/></svg>';
+const CLOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#DDEB9E"/><path d="M12 7v5l3.4 2" fill="none" stroke="#111113" stroke-width="2" stroke-linecap="round"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z" fill="#F5C542"/></svg>';
+const PEOPLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4" fill="#E3A6F7"/><path d="M2 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5z" fill="#E3A6F7"/><circle cx="17" cy="9" r="3" fill="#BCCBF9"/><path d="M14.5 14.2c.8-.3 1.6-.4 2.5-.4 3 0 5 2 5 5.2h-5" fill="#BCCBF9"/></svg>';
+const TOQUE_IC = '<svg viewBox="0 0 30 26" aria-hidden="true"><path d="M8 23v-6a5 5 0 0 1-1.6-9.7A6 6 0 0 1 15 5a6 6 0 0 1 8.6 2.3A5 5 0 0 1 22 17v6z" fill="#fff" stroke="#C9CBD6" stroke-width="1.4"/><path d="M8 19h14v4H8z" fill="#ECD77F"/></svg>';
+const CHEERS = {};
+function personHero(n, tint, p, pill, title, sub) {
+  const ring = p == null ? '' : `<svg class="ph-arc" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5"/><circle cx="50" cy="50" r="46" fill="none" stroke="#111113" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>`;
+  return `<div class="ph" style="--tint:${tint}"><span class="ph-ring">${ring}<span class="bob">${toque()}${face(n)}</span>${pill ? `<span class="ph-pill">${pill}</span>` : ''}</span><h3>${title}</h3><p>${sub}</p></div>`;
+}
+const sticker = (icon, big, small, k) => `<span class="stk" style="--r:${[-3, 2.5, -1.5][k]}deg;--bgc:${['#FCEBFE', '#ECF0FE', '#F4F9DE'][k]}"><span class="ic">${icon}</span><b>${big}</b><small>${small}</small></span>`;
+// a friend: what they're on, how far along, where, then cheer or join
+function friendSheet(n) {
+  const f = FRIENDS.find((x) => x.n === n); if (!f) return;
+  const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100), room = ROOMS.find((r) => r.f.includes(f.n)), wk = (LEAD.week.find(([x]) => x === n) || [])[1] || 0;
+  const dish = (RECIPES.find((r) => r.name === f.d) || recipeById('macaron')).id, ch = CHEERS[n] || 0;
+  showSheet(`${personHero(n, f.c, p, `<b>${f.left}</b>m left`, n, esc(f.subj || f.d))}
+    <div class="stks">${sticker(art(dish), f.d.replace('Strawberry ', ''), 'in the oven', 0)}${sticker(PIN, room ? room.n : 'Solo', room ? `${room.k} at the table` : 'baking alone', 1)}${sticker(CLOCK, `${wk.toFixed(1)}h`, 'this week', 2)}</div>
+    <div class="acts ps-acts"><button class="cheer" type="button" data-cheer="${n}" aria-label="Cheer ${n}">${HEART}<span>${ch ? `× ${ch}` : 'Cheer'}</span></button><button class="btn rounded" type="button" data-go="join" data-who="${n}">Join · ${f.left} min</button></div>`);
+}
+// someone you haven't added: an initial, where they rank, and a way to ask
+function strangerSheet(n, rank, h, where) {
+  showSheet(`${personHero(n, '#E9E9EF', null, '', `${n[0]}.`, `Bakes ${where}`)}
+    <div class="stks">${sticker(STAR, `#${rank}`, where.replace(/^(at|in) /, ''), 0)}${sticker(CLOCK, `${h.toFixed(1)}h`, 'this week', 1)}${sticker(HEART, 'Not yet', 'friends', 2)}</div>
+    <p class="ps-note">Their name, plans and what they’re working on show once you both agree to be friends.</p>
+    <div class="acts">${SENT.has(n) ? '<button class="btn soft rounded" type="button" disabled>Requested · waiting for them</button>' : `<button class="btn rounded" type="button" data-fr="add" data-n="${n}">Ask to be friends</button>`}</div>`, () => strangerSheet(n, rank, h, where));
+}
+const personSheet = (n, rank, h, where) => n === 'Leqi' ? null : FRIENDS.some((f) => f.n === n) ? friendSheet(n) : strangerSheet(n, rank, h, where);
+$('shop-body').addEventListener('click', (e) => {
+  const s = e.target.closest('[data-sheet-seat]'), p = e.target.closest('[data-person]'), c = e.target.closest('[data-cheer]'), g = e.target.closest('[data-go="join"], [data-go="room"]');
+  if (s) { closeSheet('sheet-shop'); const b = $('rooms').querySelector(`[data-seat="${s.dataset.sheetSeat}"]`); b.scrollIntoView({ block: 'nearest', inline: 'center' }); setTimeout(() => b.click(), 380); }
+  else if (p) personSheet(p.dataset.person);
+  else if (e.target.closest('[data-lb]')) { const [n, rank, h] = JSON.parse(e.target.closest('[data-lb]').dataset.lb); personSheet(n, rank, h, WHERE[RF.scope]); }
+  else if (c) {
+    const n = c.dataset.cheer; CHEERS[n] = (CHEERS[n] || 0) + 1; buzz([8, 20, 8]);
+    setText(c.querySelector('span'), `× ${CHEERS[n]}`); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+    hearts($('shop-body').querySelector('.ph-ring')); if (CHEERS[n] === 1) toast(`<b>Cheer sent</b><span>${esc(n)} sees it when their round ends</span>`);
+  }
+  else if (g) closeSheet('sheet-shop');
+});
 // a chef's toque: three puffs over a band; `ghost` is the dashed one waiting on your seat
 const toque = (ghost) => ghost
   ? '<svg class="toque ghost" viewBox="0 0 30 24" aria-hidden="true"><path d="M8 21v-6a5 5 0 0 1-1.6-9.7A6 6 0 0 1 15 3a6 6 0 0 1 8.6 2.3A5 5 0 0 1 22 15v6z" fill="#F3DDFC" stroke="#C349EE" stroke-width="1.4" stroke-dasharray="2.4 2"/></svg>'
@@ -2526,15 +2848,21 @@ const toque = (ghost) => ghost
 // the room's dessert stands on a cake stand in the middle, the cloth hangs down with a scalloped hem, two legs, a soft floor shadow
 const TABLE_TC = ['#F3DDFC', '#E3E9FD', '#EBF6C9'], TABLE_EDGE = ['#E3A6F7', '#BCCBF9', '#DDEB9E'];
 const SEATS = [26, 72, 196, 242];
-function roomTable(r, i) {
-  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3), dessert = ['macaron', 'shortcake', 'latte'][i % 3];
+function roomTable(r, i, c = i) {
+  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3), dessert = ['macaron', 'shortcake', 'latte', 'cupcake'][i % 4];
   const seat = (x, k) => k < 3
     ? `<span class="seat" style="left:${x}px;--tilt:${[-7, 5, -4][k]}deg"><span class="bob" style="--dl:${-k * .8}s">${toque()}${face(people[k])}</span></span>`
     : `<span class="seat empty" style="left:${x}px">${toque(true)}<span class="you">You</span></span>`;
   const hem = Array.from({ length: 12 }, (_, k) => `<circle cx="${11 + k * 22}" cy="0" r="11"/>`).join('');
-  return `<div class="scene" style="--tc:${TABLE_TC[i % 3]};--te:${TABLE_EDGE[i % 3]}">${SEATS.map(seat).join('')}
+  return `<div class="scene" style="--tc:${TABLE_TC[c % 3]};--te:${TABLE_EDGE[c % 3]}">${SEATS.map(seat).join('')}
     <span class="stand" aria-hidden="true">${art(dessert, 'class="dish"')}<i class="plate-t"></i><i class="stem"></i></span>
     <span class="tbl" aria-hidden="true"><i class="top"></i><i class="cloth"><svg viewBox="0 0 264 11" preserveAspectRatio="none" class="hem"><g style="fill:var(--tc)">${hem}</g></svg></i><i class="leg l"></i><i class="leg r"></i></span></div>`;
+}
+// the strangers at the table you sat down at, offered as friends on the result screen
+let metNext = null;
+function tableMates(i) {
+  const r = ROOMS[i], people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3);
+  metNext = { room: r.n, people: people.filter((n) => !FRIENDS.some((f) => f.n === n) && !REQS.some((q) => q.n === n)) };
 }
 // taking a seat: your face flies from the button to the free seat, sits down, and the bake starts with the room
 $('rooms').addEventListener('click', (e) => {
@@ -2544,17 +2872,18 @@ $('rooms').addEventListener('click', (e) => {
   const fly = document.createElement('span'); fly.className = 'flyer'; fly.innerHTML = avatarSvg('Leqi'); $('app').appendChild(fly);
   const x0 = (from.left + from.width / 2 - app.left) * k - 19, y0 = (from.top - app.top) * k - 10, x1 = (to.left - app.left) * k, y1 = (to.top - app.top) * k;
   fly.style.left = '0px'; fly.style.top = '0px';
-  const land = () => { fly.remove(); empty.classList.remove('empty'); empty.classList.add('taken'); empty.innerHTML = `<span class="bob">${toque()}${face('Leqi')}</span>`; buzz([10, 30, 16]); setText(b, 'Tying your apron…'); setTimeout(() => joinFriend(b.dataset.who), 650); };
+  const land = () => { fly.remove(); empty.classList.remove('empty'); empty.classList.add('taken'); empty.innerHTML = `<span class="bob">${toque()}${face('Leqi')}</span>`; buzz([10, 30, 16]); setText(b, 'Tying your apron…'); tableMates(+b.dataset.seat); setTimeout(() => FRIENDS.some((f) => f.n === b.dataset.who) ? joinFriend(b.dataset.who) : joinTable(+b.dataset.seat), 650); };
   if (reduced) { land(); return; }
   fly.animate([{ transform: `translate(${x0}px, ${y0}px) scale(.8)` }, { transform: `translate(${(x0 + x1) / 2}px, ${Math.min(y0, y1) - 60}px) scale(1.15)`, offset: .5 }, { transform: `translate(${x1}px, ${y1}px) scale(1)` }],
     { duration: 650, easing: 'cubic-bezier(.3,.1,.3,1)', fill: 'forwards' }).onfinish = land;
 }, true);
-// tapping a card (not its button) opens or closes its details where it is
+// tapping a card (not its button) slides its details up in a sheet
 $('rooms').addEventListener('click', (e) => {
   if (e.target.closest('[data-go], [data-seat]')) return;
   const c = e.target.closest('.rm-card'); if (!c) return;
-  const open = !c.classList.contains('open'); c.classList.toggle('open', open); c.setAttribute('aria-expanded', String(open)); buzz(6);
+  buzz(6); roomSheet(+c.dataset.card);
 });
+$('rooms').addEventListener('keydown', (e) => { const c = e.target.closest('.rm-card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); roomSheet(+c.dataset.card); } });
 function layoutRooms() {
   const rail = $('rooms'), slots = [...rail.querySelectorAll('.rm-slot')];
   if (!slots.length) return;
@@ -2573,10 +2902,12 @@ let leadP = 'week', myHours = { today: 0, week: 0 };
 const LEAD = { week: [['Jun', 6.2], ['Mia', 4.1], ['Ava', 3.2], ['Sam', 1.5]], today: [['Jun', 1.5], ['Mia', .8], ['Ava', 1.2], ['Sam', .3]] };
 const POD = [[1, 'second'], [0, 'first'], [2, 'third']];
 function renderBoardWeek(myHrs, todayHrs) {
-  if (myHrs !== undefined) myHours = { week: myHrs, today: todayHrs };
+  if (myHrs !== undefined) { myHours = { week: myHrs, today: todayHrs }; renderLocal(); }
   const rows = [...LEAD[leadP].filter(([n]) => FRIENDS.some((f) => f.n === n)), ['Leqi', myHours[leadP]]].sort((a, b) => b[1] - a[1]);
   const top = Math.max(rows[0][1], .1), el = $('leaderboard');
-  if (!el.querySelector('.podium')) el.innerHTML = `<div class="podium">${POD.map(([, c]) => `<div class="pcol ${c}"><span class="who"></span><span class="nm"></span><b data-to="0">0.0h</b><div class="blockp"><i></i></div></div>`).join('')}</div><div class="mine" id="mine"></div>`;
+  // each column: the face sits on its block (first place wears a crown); name, hours and rank are on the block itself
+  const crown = '<svg class="crown" viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14 3 4l5 4 4-7 4 7 5-4 1 10z" fill="#F5C542"/><path d="M2 14h20v2H2z" fill="#E2AE2C"/></svg>';
+  if (!el.querySelector('.podium')) el.innerHTML = `<div class="podium">${POD.map(([, c]) => `<div class="pcol ${c}">${c === 'first' ? crown : ''}<span class="who"></span><div class="blockp"><span class="nm"></span><b data-to="0">0.0h</b><i></i></div></div>`).join('')}</div><div class="mine" id="mine"></div>`;
   POD.forEach(([rank, c]) => {
     const col = el.querySelector(`.pcol.${c}`), [n, h] = rows[rank] || ['', 0];
     const who = col.querySelector('.who');
@@ -2584,11 +2915,11 @@ function renderBoardWeek(myHrs, todayHrs) {
     col.classList.toggle('me', n === 'Leqi');
     col.querySelector('.nm').textContent = n === 'Leqi' ? 'You' : n;
     const num = col.querySelector('[data-to]'); num.dataset.to = h; roll(num, h, (v) => `${v.toFixed(1)}h`, 700);
-    col.querySelector('.blockp').style.height = `${Math.round(34 + (h / top) * 58)}px`;
+    col.querySelector('.blockp').style.height = `${Math.round(92 + (h / top) * 36)}px`;
     col.querySelector('.blockp i').textContent = rank + 1;
   });
   const mi = rows.findIndex(([n]) => n === 'Leqi'), ahead = rows[mi - 1];
-  setHTML($('mine'), mi > 2 ? `<span class="rk">#${mi + 1}</span>${face('Leqi')}<span class="grow"><b>You</b><span>${(ahead[1] - rows[mi][1]).toFixed(1)}h behind ${ahead[0]}</span></span><b class="hrs">${rows[mi][1].toFixed(1)}h</b>`
+  setHTML($('mine'), mi > 2 ? `<span class="rk">#${mi + 1}</span>${face('Leqi')}<span class="grow"><b>You</b><span>${ahead[1] - rows[mi][1] < .05 ? `Tied with ${ahead[0]}` : `${(ahead[1] - rows[mi][1]).toFixed(1)}h behind ${ahead[0]}`}</span><span class="gap"><i style="width:${Math.round(rows[mi][1] / Math.max(ahead[1], .1) * 100)}%"></i></span></span><b class="hrs">${rows[mi][1].toFixed(1)}h</b>`
     : `<span class="grow"><b>You’re #${mi + 1}</b><span>${mi ? `${(ahead[1] - rows[mi][1]).toFixed(1)}h to pass ${ahead[0]}` : 'Top of the board. Keep the oven warm.'}</span></span>`);
 }
 $('lead-mode').addEventListener('click', (e) => {
@@ -2624,11 +2955,13 @@ const hhmm = (h) => `${Math.floor(h) % 24}:${String(Math.round((h % 1) * 60) % 6
 const isLive = (e) => SCH.day === 0 && e.at <= nowH() && nowH() < e.at + e.len / 60;
 function schedDays() {
   const d = new Date();
-  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}">${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'} <b>${x.getDate()}</b>${SCHED[i].length ? '<i></i>' : ''}</button>`; }).join('');
+  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}">${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'} <b>${x.getDate()}</b></button>`; }).join('');
 }
 function schedLanes() {
-  const s0 = dayStart(), now = nowH(), all = schedEvents();
-  return `<div class="sch-hours">${Array.from({ length: 9 }, (_, i) => `<span>${(s0 + i) % 24}:00</span>`).join('')}</div>`
+  const s0 = dayStart(), now = nowH(), all = schedEvents(), nowX = (now - s0) * HOUR_W;
+  // an hour label the Now tag would sit on is hidden rather than drawn underneath it
+  const underNow = (i) => !SCH.day && i * HOUR_W + 4 < nowX + 26 && i * HOUR_W + 40 > nowX - 20;
+  return `<div class="sch-hours">${Array.from({ length: 9 }, (_, i) => `<span class="${underNow(i) ? 'hid' : ''}">${(s0 + i) % 24}:00</span>`).join('')}</div>`
     + (SCH.day ? '' : `<span class="sch-now" style="left:${(now - s0) * HOUR_W}px"></span>`)
     + all.map((e, i) => {
       const live = isLive(e), done = live ? Math.round((now - e.at) / (e.len / 60) * 100) : 0, bg = SCH_BG[e.lane % 4];
@@ -2664,26 +2997,36 @@ function schedCard() {
     : mine ? `Starts in ${inT} · ${e.len} min · ${e.with.length} going`
     : going ? `<b class="lv">You’re in</b> · starts in ${inT} · ${e.len} min`
     : `${hhmm(e.at)} · ${e.len} min · ${e.with.length === 1 ? 'be the second one in' : `${e.with.length} going`}`;
-  const note = mine && waiting.length ? `<p class="sch-note">Waiting for ${waiting.join(', ')}</p>` : going && !mine ? `<p class="sch-note">We’ll remind you 10 min before.</p>` : '';
+  // a booking only opens 10 minutes before it starts; until then it's a reservation, not a way to start early
+  const soon = until <= 10, opens = hhmm(e.at - 1 / 6);
+  const note = mine && waiting.length ? `<p class="sch-note">Waiting for ${waiting.join(', ')}</p>`
+    : (going || mine) && !soon ? `<p class="sch-note">We’ll remind you at ${opens} to pick your dessert.</p>` : '';
+  const ready = soon ? `<button class="btn rounded m" type="button" data-sch="ready">Get ready · starts in ${inT}</button>`
+    : `<button class="btn rounded m" type="button" disabled>Opens at ${opens}</button>`;
   const acts = live ? `<button class="btn rounded m" type="button" data-sch="join">Join now · ${left} min left</button>`
-    : mine ? `<button class="btn soft rounded m" type="button" data-sch="share">Share link</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
-    : going ? `<button class="btn soft rounded m" type="button" data-sch="in">Leave</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
+    : mine ? `<button class="btn soft rounded m" type="button" data-sch="share">Share link</button>${ready}`
+    : going ? `<button class="btn soft rounded m" type="button" data-sch="in">Leave</button>${ready}`
     : `<button class="btn rounded m" type="button" data-sch="in">I’m in · remind me</button>`;
   return `<div class="row sch-sum">${face(e.who, 'lead')}<div class="grow"><b class="k">${esc(e.label)}</b><p class="kk">${meta}</p></div><span class="faces sch-faces">${e.with.filter((n) => n !== e.who).slice(0, 3).map((n) => face(n)).join('')}</span></div>${note}
     <div class="sch-acts">${acts}</div>`;
 }
 function drawSched(scrollToNow) {
   const keepX = $('sch-wrap')?.scrollLeft || 0, list = SCHED[SCH.day], live = list.filter(isLive).length;
-  setHTML($('live-hero'), `<div class="ach"><p class="k">Today’s bakes</p><span class="kk">${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
+  const dayName = SCH.day ? new Date(Date.now() + SCH.day * 864e5).toLocaleDateString('en-US', { weekday: 'long' }) : 'Today';
+  // the schedule is yours and your friends' plans, wherever they are; open tables by place are further down
+  setHTML($('live-hero'), `<div class="ach"><p class="k">${dayName}’s plans</p><span class="kk">You and friends · ${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
     <div class="sch-days">${schedDays()}</div><div class="sch-wrap" id="sch-wrap"><div class="sch-lanes">${schedLanes()}</div></div><div class="sch-card" id="sch-card" style="background:${cardTint()}">${schedCard()}</div>`);
   // keep the timeline where it was, unless we're arriving or switching day
-  if (scrollToNow) $('sch-wrap').scrollLeft = SCH.day ? 0 : Math.max(0, (nowH() - dayStart()) * HOUR_W - 60); else $('sch-wrap').scrollLeft = keepX;
+  // another day opens on its first bake (or the free slot), not on an empty morning
+  const first = SCH.day && schedEvents().reduce((a, e) => (a && a.at <= e.at ? a : e), null);
+  if (scrollToNow) $('sch-wrap').scrollLeft = SCH.day ? Math.max(0, (first.at - dayStart()) * HOUR_W - 20) : Math.max(0, (nowH() - dayStart()) * HOUR_W - 60); else $('sch-wrap').scrollLeft = keepX;
 }
 const cardTint = () => { const e = schedEvents()[SCH.sel]; return e && !e.plan ? SCH_BG[e.lane % 4] : 'var(--brand-tint)'; };
 function schedCardSwap() { const c = $('sch-card'); c.style.background = cardTint(); c.innerHTML = schedCard(); if (!reduced) c.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' }); }
 $('live-hero').addEventListener('click', (e) => {
   const d = e.target.closest('[data-day]'), ev = e.target.closest('[data-ev]'), a = e.target.closest('[data-sch]');
-  if (d) { SCH.day = +d.dataset.day; SCH.sel = 0; SCH.plan = null; buzz(6); drawSched(true); return; }
+  // a new day starts on the bake that's live now, else its first one
+  if (d) { SCH.day = +d.dataset.day; SCH.plan = null; SCH.sel = Math.max(0, schedEvents().findIndex(isLive)); buzz(6); drawSched(true); return; }
   if (ev) { const w = $('sch-wrap'), x = w.scrollLeft, mid = ev.offsetLeft + ev.offsetWidth / 2 - w.clientWidth / 2; SCH.sel = +ev.dataset.ev; buzz(6); $('live-hero').querySelector('.sch-lanes').innerHTML = schedLanes(); w.scrollLeft = x; w.scrollTo({ left: Math.max(0, mid), behavior: reduced ? 'auto' : 'smooth' }); schedCardSwap(); return; }
   const at = e.target.closest('[data-pat]'), ln = e.target.closest('[data-plen]'), inv = e.target.closest('[data-inv]');
   if (at) { SCH.plan.at = +at.dataset.pat; buzz(6); schedCardSwap(); return; }
@@ -2710,10 +3053,10 @@ $('live-hero').addEventListener('click', (e) => {
 // each room's round counts down in real seconds; a new round starts when it hits zero
 function tickRooms() {
   if (tab !== 'rooms' || stack.length) { clearInterval(roomClock); roomClock = null; return; }
-  const cards = $('rooms').querySelectorAll('.rm-card');
   ROOMS.forEach((r, i) => {
     r.left = r.left > 1 ? r.left - 1 : r.len * 60;
-    const c = cards[i]; if (!c) return;
+    if (i === sheetRoom && $('sheet-shop').classList.contains('on')) { const s = $('shop-body'); setText(s.querySelector('.tclock'), mmss(r.left)); s.querySelector('.rbar i').style.width = ((1 - r.left / (r.len * 60)) * 100).toFixed(1) + '%'; }
+    const c = $('rooms').querySelector(`.rm-card[data-card="${i}"]`); if (!c) return;
     setText(c.querySelector('.tclock'), mmss(r.left));
     c.querySelector('.rbar i').style.width = ((1 - r.left / (r.len * 60)) * 100).toFixed(1) + '%';
   });
@@ -2722,7 +3065,7 @@ function liveTick() {
   if (tab !== 'rooms' || stack.length) { clearInterval(liveTimer); liveTimer = null; return; }
   const i = Math.floor(Math.random() * ROOMS.length);
   ROOMS[i].k++;
-  const card = $('rooms').querySelectorAll('.rm-card')[i];
+  const card = $('rooms').querySelector(`.rm-card[data-card="${i}"]`);
   if (card) { const b = card.querySelector('.cnt b'); rolling.set(b, ROOMS[i].k - 1); roll(b, ROOMS[i].k); card.setAttribute('aria-label', `${ROOMS[i].n}, ${ROOMS[i].k} baking`); }
 }
 // tapping a bubble opens its panel (tap again to close); Cheer sends hearts up from their bubble
@@ -2739,13 +3082,14 @@ function hearts(el) {
   }
 }
 $('friends-all').addEventListener('click', (e) => {
-  const c = e.target.closest('[data-cheer]');
-  if (c) { const n = c.dataset.cheer; buzz([8, 20, 8]); toast(`<b>Cheer sent</b><span>${esc(n)} sees it when their round ends</span>`); hearts($('friends-all').querySelector(`.fb[data-f="${n}"] .fring`)); return; }
   const b = e.target.closest('.fb'); if (!b) return;
-  fbSel = fbSel === b.dataset.f ? '' : b.dataset.f; buzz(8);
-  $('friends-all').querySelectorAll('.fb').forEach((x) => x.classList.toggle('sel', x.dataset.f === fbSel));
-  const panel = $('fpanel'); panel.firstElementChild.innerHTML = friendPanel(); panel.classList.toggle('open', !!fbSel);
-  if (fbSel) { const bb = b.getBoundingClientRect(), pr = panel.getBoundingClientRect(); panel.style.setProperty('--ax', `${((bb.left + bb.width / 2 - pr.left) / pr.width * 100).toFixed(1)}%`); }
+  buzz(8); friendSheet(b.dataset.f);
+});
+// the boards: tap a face on the podium or a row to see that person
+$('leaderboard').addEventListener('click', (e) => { const w = e.target.closest('.who[data-n]'); if (w) personSheet(w.dataset.n); });
+$('local-board').addEventListener('click', (e) => {
+  const r = e.target.closest('[data-lb]'); if (r) { const [n, rank, h] = JSON.parse(r.dataset.lb); personSheet(n, rank, h, WHERE[RF.scope]); return; }
+  if (e.target.closest('[data-lb-all]')) localSheet();
 });
 // arriving on Rooms: the live count counts up, cards and rows arrive, numbers and bars fill
 function playRooms() {
@@ -2799,10 +3143,9 @@ function renderTabs() {
   setHTML($('recent'), last ? `<span class="badge">${shape('star', '#8CA7F4')}${art(last.r, 'class="art"')}</span><span class="g"><span class="kk">Recently baked · ${last.when}</span><b>${recipeById(last.r).name}</b></span><span class="pill mint">${last.min} min</span>${ICON.chev}`
     : '<span class="g"><span class="kk">Recently baked</span><b>Your first dessert shows up here</b></span>');
   setText($('me-case'), CASE.length ? `${CASE.length} desserts so far` : 'Nothing baked yet');
-  setHTML($('friends-all'), FRIENDS.length ? `<div class="bubbles">${FRIENDS.map(friendBubble).join('')}</div><div class="fpanel${fbSel ? ' open' : ''}" id="fpanel"><div>${friendPanel()}</div></div>` : inviteRow('Nobody here yet. Invite a classmate.'));
+  setHTML($('friends-all'), FRIENDS.length ? `<div class="bubbles">${FRIENDS.map(friendBubble).join('')}</div>` : inviteRow('Nobody here yet. Invite a classmate.'));
   setText($('friends-count'), FRIENDS.length ? `${FRIENDS.length} in the oven` : '');
-  setHTML($('rooms'), ROOMS.map(roomCard).join(''));
-  setHTML($('room-dots'), ROOMS.map(() => '<i></i>').join(''));
+  renderRooms();
   setHTML($('case-grid'), CASE.length ? CASE.map((c, i) => `<button type="button" data-go="case" data-i="${i}" class="case-item rounded ${c.isNew ? 'new' : ''}"><div class="art">${art(c.r)}</div><p class="t">${recipeById(c.r).name}</p><p class="s">${c.when} · ${c.min} min · ${c.tops} toppings</p><span><span class="tag hi rounded">${c.grade}</span></span></button>`).join('')
     : `<div class="empty-card rounded">${art('cupcake')}<p class="t">Your first dessert lands here</p><p class="s">Every bake you finish is kept in the case, burnt ones too.</p></div>`);
   setText($('case-sub'), CASE.length ? `${CASE.length} desserts · ${(CASE.reduce((a, c) => a + c.min, 0) / 60).toFixed(1)} h of focus` : 'Nothing baked yet');
@@ -3081,7 +3424,7 @@ function celebrate() { buzz([30, 60, 18]); slip('Batter ready', `${minutes()} mi
 
 // Goals: a sheet slides up after each crack; tap a goal row later to change or remove it.
 function openSheet(id) { $(id).classList.add('on'); $(id).setAttribute('aria-hidden', 'false'); $('scrim').classList.add('on'); $('scrim').dataset.for = id; }
-function closeSheet(id) { $(id).classList.remove('on'); $(id).setAttribute('aria-hidden', 'true'); $('scrim').classList.remove('on'); }
+function closeSheet(id) { if (id === 'sheet-shop') { sheetRedraw = null; sheetRoom = -1; } $(id).classList.remove('on'); $(id).setAttribute('aria-hidden', 'true'); $('scrim').classList.remove('on'); }
 function openWrite({ title, value, ideas, alt, ok }) {
   setText($('goal-title'), title); $('goal').value = value; $('goal-ok').disabled = !value.trim(); setText($('goal-ok'), ok);
   setText($('goal-alt'), alt);
@@ -3338,6 +3681,7 @@ function renderResult() {
     <div class="slip-foot">${barcode(receiptNo % 7 + 3)}<small>Baked by Leqi<br>thanks for baking</small></div>`;
   setHTML($('r-slip'), slipHTML('Sweet Study oven', body));
   setText($('to-deco'), B.early ? 'Take a break anyway' : 'Take a 5-min break');
+  metNow = metNext; metNext = null; renderMet();
   B.grade = h;
 }
 // the big moment: the verdict comes into focus, toppings pop off the dessert, and the receipt prints
@@ -3640,6 +3984,7 @@ $('app').addEventListener('click', (e) => {
   const go = g.dataset.go;
   if (go === 'room') openRoom(+g.dataset.i);
   else if (go === 'settings') { renderSettings(); openPage('settings'); }
+  else if (go === 'friends') { renderFriendsPage(); openPage('friends'); }
   else if (go === 'report') openReport();
   else if (go === 'case') openCase(+g.dataset.i);
   else if (go === 'me') setTab('me');
@@ -3648,6 +3993,63 @@ $('app').addEventListener('click', (e) => {
 });
 const drawMe = () => document.querySelectorAll('[data-me]').forEach((el) => { el.innerHTML = avatarSvg('Leqi'); });
 drawMe();
+
+/* ---------- friends: both people have to agree. Ways in: an invite link, a username, or a table you shared ---------- */
+const REQS = NEW ? [] : [{ n: 'Noa', via: 'Quiet library · today' }, { n: 'Kai', via: 'By your username' }];
+const MET = NEW ? [] : [{ n: 'Lin', where: 'Quiet library · today' }, { n: 'Ivy', where: 'Thesis corner · Thursday' }];
+const SENT = new Set();
+const USERNAMES = { Noa: 'noa.k', Kai: 'kai.builds', Lin: 'lin.piano', Ivy: 'ivy_writes', Ben: 'ben.sql', Ash: 'ash.reads' };
+const PROFILE = { Noa: ['#C9D5FA', 'Organic chemistry'], Kai: ['#FFF07A', 'Portfolio review'], Lin: ['#FFC4F8', 'Piano theory'], Ivy: ['#BCCBF9', 'Essay outline'], Ben: ['#FFF07A', 'SQL practice'], Ash: ['#FFC4F8', 'Reading list'] };
+let metNow = null; // the strangers you just shared a table with, offered on the result screen
+const isFriend = (n) => FRIENDS.some((f) => f.n === n);
+function addFriend(n) { if (isFriend(n)) return; const [c, subj] = PROFILE[n] || ['#F2F2F4', 'Studying']; FRIENDS.push({ n, c, d: 'Strawberry macaron', left: 25, subj }); }
+function friendsChanged() {
+  setText($('me-friends'), `${FRIENDS.length} ${FRIENDS.length === 1 ? 'friend' : 'friends'}`);
+  $('me-req').hidden = !REQS.length; setText($('me-req'), String(REQS.length));
+  renderTabs(); if (!$('s-friends').hidden) renderFriendsPage();
+  if ($('r-met').innerHTML) renderMet();
+  if (sheetRedraw && $('sheet-shop').classList.contains('on')) sheetRedraw();
+}
+const addBtn = (n) => isFriend(n) ? '<span class="tag brand">Friend</span>' : SENT.has(n) ? '<span class="sent">Requested</span>' : `<button class="btn small rounded" type="button" data-fr="add" data-n="${n}">Add</button>`;
+function renderFriendsPage() {
+  const q = ($('fr-search')?.value || '').trim().toLowerCase().replace(/^@/, '');
+  const hits = q ? Object.entries(USERNAMES).filter(([n, u]) => u.includes(q) || n.toLowerCase().startsWith(q)) : [];
+  const section = (title, body, aside = '') => `<div class="section"><div class="section-h"><h2>${title}</h2>${aside}</div>${body}</div>`;
+  setHTML($('friends-body'), `
+    <div class="section"><div class="invite rounded">
+      <p class="t">Invite a classmate</p>
+      <p class="s">Friends see each other’s plans, names and what you’re working on. It only works once you both say yes.</p>
+      <div class="link-row"><span class="url" id="invite-url">sweetstudy.app/i/leqi</span><button class="btn soft small rounded" type="button" data-fr="copy">Copy</button></div>
+      <button class="btn rounded" type="button" data-fr="share">Share invite</button>
+    </div></div>
+    ${section('Find by username', `<label class="field rounded"><input id="fr-search" autocomplete="off" placeholder="@username" value="${esc(q)}"></label>
+      ${hits.length ? `<div class="list rounded fr-list">${hits.map(([n, u]) => `<div class="row">${face(n)}<span class="grow"><span class="t">${n}</span><span class="s">@${u}</span></span>${addBtn(n)}</div>`).join('')}</div>` : q ? '<p class="fr-none">No one with that username yet.</p>' : ''}`)}
+    ${REQS.length ? section('Requests', `<div class="list rounded fr-list">${REQS.map((r) => `<div class="row">${face(r.n)}<span class="grow"><span class="t">${r.n}</span><span class="s">${r.via}</span></span><button class="fr-x" type="button" data-fr="decline" data-n="${r.n}" aria-label="Decline ${r.n}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="btn small rounded" type="button" data-fr="accept" data-n="${r.n}">Accept</button></div>`).join('')}</div>`, `<span class="aside">${REQS.length} waiting</span>`) : ''}
+    ${MET.length ? section('People you studied with', `<div class="list rounded fr-list">${MET.map((m) => `<div class="row">${face(m.n)}<span class="grow"><span class="t">${isFriend(m.n) ? m.n : `${m.n[0]}.`}</span><span class="s">${m.where}</span></span>${addBtn(m.n)}</div>`).join('')}</div>`) : ''}
+    ${section('Your friends', FRIENDS.length ? `<div class="list rounded fr-list">${FRIENDS.map((f) => `<div class="row">${face(f.n)}<span class="grow"><span class="t">${f.n}</span><span class="s">${esc(f.subj || f.d)}</span></span><button class="fr-remove" type="button" data-fr="remove" data-n="${f.n}">Remove</button></div>`).join('')}</div>` : '<p class="fr-none">No friends yet. Send your invite to a classmate.</p>', `<span class="aside">${FRIENDS.length}</span>`)}
+    <div class="spacer"></div>`);
+  const s = $('fr-search'); if (q && s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+$('friends-body').addEventListener('input', (e) => { if (e.target.id === 'fr-search') renderFriendsPage(); });
+// after a bake at an open table: the people you sat with, by initial, each with Add
+function renderMet() {
+  setHTML($('r-met'), metNow && metNow.people.length ? `<div class="met rounded"><p class="k">You studied with</p><p class="s">${metNow.room} · ask to be friends to see their names and plans next time</p>
+    <div class="fr-list">${metNow.people.map((n) => `<div class="row">${face(n)}<span class="grow"><span class="t">${isFriend(n) ? n : `${n[0]}.`}</span><span class="s">${PROFILE[n] ? 'Same table, same round' : ''}</span></span>${addBtn(n)}</div>`).join('')}</div></div>` : '');
+}
+$('app').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-fr]'); if (!b) return;
+  const act = b.dataset.fr, n = b.dataset.n;
+  if (act === 'copy') {
+    const url = 'https://' + $('invite-url').textContent;
+    const done = () => toast('<b>Link copied</b><span>Whoever opens it can send you a request</span>');
+    try { navigator.clipboard.writeText(url).then(done, () => toast('<span>Couldn’t copy. Press and hold the link to copy it.</span>')); } catch (_) { toast('<span>Couldn’t copy. Press and hold the link to copy it.</span>'); }
+  } else if (act === 'share') toast('<b>Share invite</b><span>On iPhone this opens the share sheet</span>');
+  else if (act === 'add') { SENT.add(n); buzz(8); toast(`<b>Request sent</b><span>You’ll be friends once ${isFriend(n) ? n : 'they'} accept</span>`); friendsChanged(); }
+  else if (act === 'accept') { REQS.splice(REQS.findIndex((r) => r.n === n), 1); addFriend(n); buzz([8, 20, 8]); toast(`<b>You and ${n} are friends</b><span>You’ll see each other’s plans now</span>`); friendsChanged(); }
+  else if (act === 'decline') { REQS.splice(REQS.findIndex((r) => r.n === n), 1); toast('<span>Request declined. They won’t be told.</span>'); friendsChanged(); }
+  else if (act === 'remove') ask({ title: `Remove ${n}?`, text: 'You’ll stop seeing each other’s plans and names. You can add each other again later.', no: 'Cancel', yes: 'Remove' }).then((y) => { if (!y) return; FRIENDS.splice(FRIENDS.findIndex((f) => f.n === n), 1); friendsChanged(); });
+});
+friendsChanged();
 /* ---------- your shape: the whole library in a grid, and the colours ---------- */
 function openShapes() {
   const draw = () => setHTML($('shop-body'), `<div class="stack shapes-sheet"><div class="sh-head"><span class="sh-prev">${shapeSvg(MY_SHAPE.k, MY_SHAPE.c)}</span><div><h3>Your shape</h3><p class="t-subhead muted">Friends see it at the table, on the board and in rooms.</p></div></div>

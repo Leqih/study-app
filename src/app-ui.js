@@ -13,11 +13,59 @@ const FRIENDS = [
   { n: 'Ava', c: '#BCCBF9', d: 'Strawberry cupcake', left: 31, subj: 'Japanese N3 vocab' },
   { n: 'Sam', c: '#FFF07A', d: 'Latte', left: 6, subj: 'Reading notes' },
 ];
+// Rooms sit at a scope (your campus, your city, or open to everyone) and have a type of work.
+// A wider scope includes the narrower ones; Friends shows any room a friend is in.
 const ROOMS = [
-  { n: 'Quiet library', s: 'No chat · cameras off', k: 12, f: ['Mia', 'Jun', 'Ava'], len: 25, left: 760 },
-  { n: 'Exam sprint', s: '50-minute rounds', k: 34, f: ['Sam', 'Ava'], len: 50, left: 1860 },
-  { n: 'Night owls', s: 'Open until 2 am', k: 8, f: ['Jun'], len: 25, left: 410 },
+  { n: 'Quiet library', s: 'No chat · cameras off', k: 12, f: ['Mia', 'Jun', 'Ava'], len: 25, left: 760, at: 'campus', type: 'Coursework' },
+  { n: 'Exam sprint', s: '50-minute rounds', k: 34, f: ['Sam', 'Ava'], len: 50, left: 1860, at: 'city', type: 'Exams' },
+  { n: 'Night owls', s: 'Open until 2 am', k: 8, f: ['Jun'], len: 25, left: 410, at: 'world', type: 'Writing' },
+  { n: 'GRE morning club', s: 'Starts 7 am · cameras on', k: 9, f: [], host: 'Noa', len: 50, left: 1320, at: 'campus', type: 'Exams' },
+  { n: 'Thesis corner', s: 'Bobst Library, 4th floor', k: 6, f: [], host: 'Ivy', len: 50, left: 2410, at: 'campus', type: 'Writing' },
+  { n: 'Language exchange', s: 'Chat in the breaks', k: 21, f: [], host: 'Lin', len: 25, left: 980, at: 'city', type: 'Language' },
+  { n: 'Makers’ desk', s: 'Code, design, slides', k: 48, f: [], host: 'Kai', len: 50, left: 600, at: 'city', type: 'Deep work' },
+  { n: 'Job hunt hour', s: 'Applications and prep', k: 17, f: [], host: 'Ben', len: 50, left: 1700, at: 'city', type: 'Job hunt' },
+  { n: 'Inbox zero', s: 'Emails, forms, chores', k: 130, f: [], host: 'Kai', len: 25, left: 300, at: 'world', type: 'Admin' },
+  { n: 'Silent reading', s: 'Books and papers', k: 210, f: [], host: 'Lin', len: 50, left: 2050, at: 'world', type: 'Reading' },
 ];
+// Explore is about place; friends have their own tab
+const SCOPES = [['campus', 'NYU'], ['city', 'New York'], ['world', 'Everywhere']];
+// the local board: top focus hours this week at each place; people you haven't added show as a first initial
+const LOCAL = {
+  campus: { me: 12, of: 340, top: [['Noa', 9.4], ['Kai', 8.8], ['Jun', 6.2], ['Lin', 5.9], ['Mia', 4.1]] },
+  city: { me: 148, of: 5200, top: [['Ivy', 14.2], ['Ben', 12.7], ['Noa', 9.4], ['Ash', 9.1], ['Kai', 8.8]] },
+  world: { me: 2304, of: 88000, top: [['Rae', 31.5], ['Oli', 28.0], ['Zed', 26.4], ['Ivy', 14.2], ['Ben', 12.7]] },
+};
+function renderLocal() {
+  const L = LOCAL[RF.scope], best = L.top[0][1], label = SCOPES.find(([k]) => k === RF.scope)[1];
+  setText($('local-title'), RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`);
+  setText($('local-sub'), `This week · ${L.of.toLocaleString('en-US')} bakers`);
+  setHTML($('local-board'), L.top.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('') + `<div class="lb-gap" aria-hidden="true">···</div>` + lbRow(L.me, 'Leqi', myHours.week || 0, best)
+    + `<button class="lb-all" type="button" data-lb-all aria-haspopup="dialog">See the top 20${ICON.chev}</button>`);
+}
+// one row of a local board; anyone but you opens their sheet
+function lbRow(rank, n, h, best) {
+  const me = n === 'Leqi', friend = FRIENDS.some((f) => f.n === n), tag = me ? 'div' : 'button';
+  return `<${tag} class="lb-row${me ? ' me' : ''}"${me ? '' : ` type="button" aria-haspopup="dialog" data-lb='${JSON.stringify([n, rank, h])}'`}><span class="lb-rk">${rank.toLocaleString('en-US')}</span>${face(n)}<span class="grow"><b>${me ? 'You' : friend ? n : `${n[0]}.`}</b>${friend ? '<span class="tag brand">Friend</span>' : ''}<span class="lb-bar"><i style="width:${Math.round(h / best * 100)}%"></i></span></span><b class="lb-h">${h.toFixed(1)}h</b></${tag}>`;
+}
+// the whole top 20 for this place, in a sheet that scrolls
+const LB_MORE = ['Ash', 'Rae', 'Oli', 'Zed', 'Pia', 'Teo', 'Uma', 'Kit', 'Bo', 'Eli', 'Fay', 'Gus', 'Hal', 'Ida', 'Jo'];
+function localSheet() {
+  const L = LOCAL[RF.scope], best = L.top[0][1], label = SCOPES.find(([k]) => k === RF.scope)[1];
+  const pool = LB_MORE.filter((n) => !L.top.some(([x]) => x === n)), last = L.top[L.top.length - 1][1], mine = myHours.week || 0, inTop = L.me <= 20;
+  // ranks 6–20 step down from fifth place; if you're among them you sit at your rank and everyone else steps around you
+  const top = inTop ? Math.max(mine, .1) : last;
+  const all = [...L.top];
+  for (let k = 6, p = 0; k <= 20; k++) {
+    if (inTop && k === L.me) { all.push(['Leqi', mine]); continue; }
+    const h = inTop && k < L.me ? last - (last - top) * (k - 5) / (L.me - 5) : (inTop ? top : last) * Math.pow(.96, k - (inTop ? L.me : 5));
+    all.push([pool[p++], +h.toFixed(1)]);
+  }
+  showSheet(`<div class="ls-head"><h3>${RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`}</h3><p>This week · ${L.of.toLocaleString('en-US')} bakers · tap anyone to see more</p></div>
+    <div class="ls-list" id="local-all">${all.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('')}${inTop ? '' : `<div class="lb-gap" aria-hidden="true">···</div>${lbRow(L.me, 'Leqi', mine, best)}`}</div>`, localSheet);
+}
+const ROOM_TYPES = ['All', 'Exams', 'Coursework', 'Language', 'Writing', 'Deep work', 'Admin', 'Job hunt', 'Reading'];
+const AT_LABEL = { campus: 'NYU', city: 'New York', world: 'Online' };
+const WHERE = { friends: 'with friends', campus: 'at NYU', city: 'in New York', world: 'everywhere' };
 const SHOPS = [
   { n: 'Corner Patisserie', d: '350 m', walk: '4 min walk', off: '10% off', c: '#FFC4F8', x: 28, y: 36, menu: [['cupcake', 'Strawberry cupcake', 4.8], ['macaron', 'Strawberry macaron', 2.6], ['shortcake', 'Shortcake slice', 5.9]] },
   { n: 'Bloom Café', d: '600 m', walk: '8 min walk', off: '10% off', c: '#C9D5FA', x: 72, y: 26, menu: [['latte', 'Latte', 4.2], ['macaron', 'Macaron', 2.4]] },
@@ -260,43 +308,144 @@ function joinFriend(who) {
   startBake(f.left, CARRY);
   toast(`<b>Joined ${esc(f.n)}</b><span>You’ll both finish in ${f.left} min</span>`);
 }
-const inviteRow = (s) => `<div class="row"><span class="tile success rounded">${ICON.plus}</span><span class="grow"><span class="t">Bake with a friend</span><span class="s">${s}</span></span><button class="btn soft small rounded" type="button" data-go="invite">Invite</button></div>`;
-// friends as bubbles: each face in a ring that fills as their bake goes, minutes left on a tag, sizes and heights varied
-let fbSel = '';
-const FB_SIZE = [78, 62, 70, 58], FB_DY = [0, 22, 6, 28];
-const friendBubble = (f, i) => { const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100); return `<button class="fb${f.n === fbSel ? ' sel' : ''}" type="button" data-f="${f.n}" style="--p:${p};--sz:${FB_SIZE[i % 4]}px;--dy:${FB_DY[i % 4]}px" aria-label="${f.n}, ${f.left} minutes left"><span class="fring"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(17,17,19,.08)" stroke-width="4"/><circle cx="50" cy="50" r="47" fill="none" stroke="#8CA7F4" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>${face(f.n)}</span><span class="fbm"><b data-to="${f.left}">${f.left}</b>m</span><span class="fbn">${f.n}</span></button>`; };
-
-// the panel under the bubbles: what they're studying, how far along, and join or cheer
-function friendPanel() {
-  const f = FRIENDS.find((x) => x.n === fbSel);
-  if (!f) return `<p class="fp-hint">Tap a friend to see what they’re working on</p>`;
-  const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100), room = ROOMS.find((r) => r.f.includes(f.n));
-  return `<div class="fp">${face(f.n)}<div class="grow"><b>${f.n}</b><span>${f.subj || f.d}</span></div><span class="fp-min"><b>${f.left}</b> min left</span></div>
-    <span class="fp-bar"><i style="width:${p}%"></i></span><p class="fp-s">${f.d}${room ? ` · ${room.n}` : ''}</p>
-    <div class="fp-acts"><button class="btn soft small rounded" type="button" data-cheer="${f.n}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>Cheer</button><button class="btn small rounded" type="button" data-go="join" data-who="${f.n}">Join · ${f.left} min</button></div>`;
+// a table of people you don't know: bake for what's left of its round, no names in the toast
+function joinTable(i) {
+  const r = ROOMS[i], min = Math.max(1, Math.ceil(r.left / 60));
+  together = r.host; P.together = true;
+  recipe = recipeById(['macaron', 'shortcake', 'latte', 'cupcake'][i % 4]) || recipe; renderRecipes();
+  startBake(min, CARRY);
+  toast(`<b>You took a seat at ${esc(r.n)}</b><span>The round ends in ${min} min</span>`);
 }
+const inviteRow = (s) => `<div class="row"><span class="tile success rounded">${ICON.plus}</span><span class="grow"><span class="t">Bake with a friend</span><span class="s">${s}</span></span><button class="btn soft small rounded" type="button" data-go="invite">Invite</button></div>`;
+// friends as bubbles: each face in a ring that fills as their bake goes, minutes left on a tag; tap one for their sheet
+const friendBubble = (f) => { const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100); return `<button class="fb" type="button" aria-haspopup="dialog" data-f="${f.n}" style="--p:${p}" aria-label="${f.n}, ${f.subj || f.d}, ${f.left} minutes left"><span class="fring"><svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(140,167,244,.2)" stroke-width="4"/><circle cx="50" cy="50" r="47" fill="none" stroke="#8CA7F4" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>${face(f.n)}</span><span class="fbm"><b data-to="${f.left}">${f.left}</b>m</span><span class="fbn">${f.n}</span><span class="fbs">${esc(f.subj || f.d)}</span></button>`; };
+
 // a room: name, rules, who's in it in their shapes, the live count in a scallop, and join
 const ROOM_SH = [['scallop', '#F3DDFC'], ['flower8', '#E3E9FD'], ['star', '#DDEB9E']];
 // a room card: the table scene, then this round's clock and who's in, then one button
-function roomCard(r, i) {
+const ROOM_BG = ['#f3ddfc', '#e3e9fd', '#f5edc8'], ROOM_DEEP = ['#e3a6f7', '#bccaf9', '#ecd77f'];
+// c picks the colour: cards cycle pink, blue, yellow in the order they're shown, so neighbours never match
+function roomCard(r, i, c = i) {
   const who = FRIENDS.find((f) => r.f.includes(f.n)), p = 1 - r.left / (r.len * 60);
-  return `<div class="rm-slot"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-expanded="false" aria-label="${r.n}, ${r.k} baking">
-    <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here</span></div>
-    ${roomTable(r, i)}
-    <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm"><b>${r.f.length}</b> ${r.f.length > 1 ? 'friends' : 'friend'} · +${r.k - r.f.length} bakers<br>${r.len}-min rounds</p></div>
+  // friends by face and name; everyone else only as a count
+  const fr = r.f.filter((n) => FRIENDS.some((f) => f.n === n));
+  const names = fr.length === 1 ? fr[0] : fr.length === 2 ? `${fr[0]} & ${fr[1]}` : `${fr[0]}, ${fr[1]} +${fr.length - 2}`;
+  const crowd = fr.length ? `<span class="rm-fr">${fr.slice(0, 3).map((n) => face(n)).join('')}<b>${names}</b></span><br>+${r.k - fr.length} others · ${r.len}-min rounds`
+    : `<b>${r.k}</b> bakers · no friends yet<br>${r.len}-min rounds`;
+  return `<div class="rm-slot" style="--room-color:${ROOM_BG[c % 3]};--deep:${ROOM_DEEP[c % 3]}"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${r.n}, ${r.k} baking">
+    <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here · ${AT_LABEL[r.at]} · ${r.type}</span></div>
+    ${roomTable(r, i, c)}
+    <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm">${crowd}</p></div>
     <span class="rbar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>
-    <div class="rm-more"><div>${roomMore(r, i)}</div></div>
-    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0]}">${who ? `Join ${who.n} · ${who.left} min` : 'Join table'}</button></div></div>`;
+    <button class="btn rounded rm-join" type="button" data-seat="${i}" data-who="${r.f[0] || r.host}">${who ? `Join ${who.n} · ${who.left} min` : `Take a seat · ${Math.ceil(r.left / 60)} min`}</button></div></div>`;
 }
-// what a card shows when it's opened: who's at the table and on what, the room's rules, and the way into the room
-const OTHER_SUBJ = { Noa: 'Organic chemistry', Kai: 'Portfolio review', Lin: 'Piano theory', Ivy: 'Essay outline', Ben: 'SQL practice' };
-function roomMore(r, i) {
-  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3);
-  const subj = (n) => (FRIENDS.find((f) => f.n === n) || {}).subj || OTHER_SUBJ[n] || 'Studying';
-  return `<p class="mh">At the table</p>${people.map((n) => `<div class="mrow">${face(n)}<span class="grow"><b>${n}</b><span>${subj(n)}</span></span>${r.f.includes(n) ? '<span class="tag brand">Friend</span>' : ''}</div>`).join('')}
-    <div class="chips mchips">${r.s.split(' · ').map((x) => `<span class="chip rounded">${x}</span>`).join('')}<span class="chip rounded">${LOCKS[P.lock].name} lock</span></div>
-    <button class="mopen" type="button" data-go="room" data-i="${i}">Open the room${ICON.chev}</button>`;
+// which rooms show: the scope (friends, campus, city, everywhere) and one type, remembered between visits
+const RF_KEY = 'sweet-study-room-filter-v1', RANK = { campus: 1, city: 2, world: 3 };
+let RF = { scope: 'campus', type: 'All' };
+try { const s = JSON.parse(localStorage.getItem(RF_KEY) || 'null'); if (s && SCOPES.some(([k]) => k === s.scope) && ROOM_TYPES.includes(s.type)) RF = s; } catch (_) {}
+const inScope = (r, scope) => scope === 'friends' ? r.f.length > 0 : RANK[r.at] <= RANK[scope];
+const shownRooms = () => ROOMS.filter((r) => inScope(r, RF.scope) && (RF.type === 'All' || r.type === RF.type));
+function renderRooms() {
+  setText($('scope-name'), SCOPES.find(([k]) => k === RF.scope)[1]);
+  setHTML($('type-row'), ROOM_TYPES.map((t) => `<button type="button" role="tab" data-rtype="${t}" aria-selected="${t === RF.type}">${t}</button>`).join(''));
+  const list = shownRooms(), wider = SCOPES[SCOPES.findIndex(([k]) => k === RF.scope) + 1];
+  setHTML($('rooms'), list.length ? list.map((r, pos) => roomCard(r, ROOMS.indexOf(r), pos)).join('')
+    : `<div class="rm-slot"><div class="rm-empty"><b>No ${RF.type === 'All' ? '' : RF.type.toLowerCase() + ' '}tables ${WHERE[RF.scope]} right now</b><span>Start one, or look a little further out.</span>
+      <div class="acts">${wider ? `<button class="btn soft small rounded" type="button" data-scope="${wider[0]}">Look ${WHERE[wider[0]]}</button>` : ''}<button class="btn small rounded" type="button" data-go="pick">Start a table</button></div></div></div>`);
+  setHTML($('room-dots'), list.length > 1 ? list.map(() => '<i></i>').join('') : '');
+  $('rooms').scrollLeft = 0; layoutRooms(); renderLocal();
 }
+function setRoomFilter(next) {
+  RF = { ...RF, ...next }; try { localStorage.setItem(RF_KEY, JSON.stringify(RF)); } catch (_) {}
+  buzz(6); renderRooms(); stagger($('rooms'));
+}
+function scopeMenu(open) {
+  const m = $('scope-menu'); m.hidden = !open; $('scope-btn').setAttribute('aria-expanded', String(open));
+  if (open) setHTML(m, SCOPES.map(([k, label]) => { const n = ROOMS.filter((r) => inScope(r, k)).length; return `<button type="button" role="menuitemradio" aria-checked="${k === RF.scope}" data-scope="${k}"><span class="grow">${label}</span><span class="n">${n} ${n === 1 ? 'table' : 'tables'}</span><svg class="ok" width="14" height="12" viewBox="0 0 12 10" aria-hidden="true"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>`; }).join(''));
+}
+$('scope-btn').addEventListener('click', (e) => { e.stopPropagation(); scopeMenu($('scope-menu').hidden); });
+// Rooms has two circles: Friends (plans, who's baking, the board — no place filter) and Explore (open tables by place)
+const RTAB_KEY = 'sweet-study-rooms-tab-v1';
+let rtab = 'friends';
+try { if (localStorage.getItem(RTAB_KEY) === 'explore') rtab = 'explore'; } catch (_) {}
+function showRoomsTab(t, animate) {
+  rtab = t; try { localStorage.setItem(RTAB_KEY, t); } catch (_) {}
+  $('rm-tabs').querySelectorAll('[data-rtab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rtab === t)));
+  $('pane-friends').hidden = t !== 'friends'; $('pane-explore').hidden = t !== 'explore';
+  scopeMenu(false);
+  if (t === 'explore') { layoutRooms(); if (animate) stagger($('rooms')); }
+  else if (animate) { stagger($('friends-all').querySelector('.bubbles')); stagger($('leaderboard')); }
+}
+$('rm-tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-rtab]'); if (!b || b.dataset.rtab === rtab) return; buzz(6); showRoomsTab(b.dataset.rtab, true); });
+showRoomsTab(rtab);
+$('s-rooms').addEventListener('click', (e) => {
+  const s = e.target.closest('[data-scope]'), t = e.target.closest('[data-rtype]');
+  if (s) { scopeMenu(false); setRoomFilter({ scope: s.dataset.scope }); return; }
+  if (t) { setRoomFilter({ type: t.dataset.rtype }); t.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' }); return; }
+  if (!$('scope-menu').hidden && !e.target.closest('#scope-menu')) scopeMenu(false);
+});
+/* ---------- sheets: tapping a table, a friend or someone on a board slides up their details; swipe the scrim to close ---------- */
+let sheetRedraw = null; // redraws the open sheet when friendships change underneath it
+function showSheet(html, redraw) { setHTML($('shop-body'), html); sheetRedraw = redraw || null; openSheet('sheet-shop'); }
+// a table: its clock, who's at it (friends by name, everyone else as a count), its rules, then open the room or sit down
+let sheetRoom = -1;
+function roomSheet(i) {
+  const r = ROOMS[i], c = [...$('rooms').querySelectorAll('.rm-card')].findIndex((x) => +x.dataset.card === i);
+  const fr = r.f.filter((n) => FRIENDS.some((f) => f.n === n)), others = ['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n)).slice(0, 3);
+  const subj = (n) => (FRIENDS.find((f) => f.n === n) || {}).subj || 'Studying', who = FRIENDS.find((f) => r.f.includes(f.n));
+  sheetRoom = i; const k = Math.max(c, 0) % 3;
+  // the hero is the card's own awning and table, bigger: the dessert on its stand, who's sitting, and your empty seat
+  showSheet(`<div class="rs">
+    <div class="ph rs-hero" style="--tint:${ROOM_BG[k]};--deep:${ROOM_DEEP[k]}"><div class="rs-top"><span class="rs-at">${PIN}${AT_LABEL[r.at]} · ${r.type}</span><span class="rs-live"><i></i><b>${r.k}</b> here</span></div>
+      <h3>${r.n}</h3><p>${r.s} · ${LOCKS[P.lock].name} lock</p>${roomTable(r, i, k)}</div>
+    <div class="stks">${sticker(CLOCK, `<span class="tclock">${mmss(r.left)}</span>`, `left this round<span class="rbar"><i style="width:${((1 - r.left / (r.len * 60)) * 100).toFixed(1)}%"></i></span>`, 0)}${sticker(PEOPLE, fr.length ? `${fr.length} ${fr.length === 1 ? 'friend' : 'friends'}` : 'No friends yet', fr.length ? `${r.k - fr.length} others` : `${r.k} bakers`, 1)}${sticker(TOQUE_IC, `${r.len} min`, 'per round', 2)}</div>
+    <p class="mh">At the table</p>${fr.map((n) => `<button class="mrow" type="button" data-person="${n}">${face(n)}<span class="grow"><b>${n}</b><span>${subj(n)}</span></span><span class="tag brand">Friend</span></button>`).join('')}
+    <div class="mrow others"><span class="faces">${others.map((n) => face(n)).join('')}</span><span class="grow"><b>${r.k - fr.length} ${fr.length ? 'others' : 'bakers'}</b><span>Names show once you add each other</span></span></div></div>
+    <div class="acts"><button class="btn soft rounded" type="button" data-go="room" data-i="${i}">Open the room</button><button class="btn rounded" type="button" data-sheet-seat="${i}">${who ? `Join ${who.n} · ${who.left} min` : `Take a seat · ${Math.ceil(r.left / 60)} min`}</button></div>`, () => roomSheet(i));
+}
+// a person's sheet opens on a hero in their colour with a scalloped hem: their face in a chef's hat, bobbing,
+// inside a ring that fills as their bake goes; the details below are paper stickers, each a little askew
+const HEART = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.4 7-12a7 7 0 0 0-14 0c0 5.6 7 12 7 12z" fill="#BCCBF9"/><circle cx="12" cy="10" r="2.6" fill="#fff"/></svg>';
+const CLOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#DDEB9E"/><path d="M12 7v5l3.4 2" fill="none" stroke="#111113" stroke-width="2" stroke-linecap="round"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z" fill="#F5C542"/></svg>';
+const PEOPLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4" fill="#E3A6F7"/><path d="M2 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5z" fill="#E3A6F7"/><circle cx="17" cy="9" r="3" fill="#BCCBF9"/><path d="M14.5 14.2c.8-.3 1.6-.4 2.5-.4 3 0 5 2 5 5.2h-5" fill="#BCCBF9"/></svg>';
+const TOQUE_IC = '<svg viewBox="0 0 30 26" aria-hidden="true"><path d="M8 23v-6a5 5 0 0 1-1.6-9.7A6 6 0 0 1 15 5a6 6 0 0 1 8.6 2.3A5 5 0 0 1 22 17v6z" fill="#fff" stroke="#C9CBD6" stroke-width="1.4"/><path d="M8 19h14v4H8z" fill="#ECD77F"/></svg>';
+const CHEERS = {};
+function personHero(n, tint, p, pill, title, sub) {
+  const ring = p == null ? '' : `<svg class="ph-arc" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5"/><circle cx="50" cy="50" r="46" fill="none" stroke="#111113" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>`;
+  return `<div class="ph" style="--tint:${tint}"><span class="ph-ring">${ring}<span class="bob">${toque()}${face(n)}</span>${pill ? `<span class="ph-pill">${pill}</span>` : ''}</span><h3>${title}</h3><p>${sub}</p></div>`;
+}
+const sticker = (icon, big, small, k) => `<span class="stk" style="--r:${[-3, 2.5, -1.5][k]}deg;--bgc:${['#FCEBFE', '#ECF0FE', '#F4F9DE'][k]}"><span class="ic">${icon}</span><b>${big}</b><small>${small}</small></span>`;
+// a friend: what they're on, how far along, where, then cheer or join
+function friendSheet(n) {
+  const f = FRIENDS.find((x) => x.n === n); if (!f) return;
+  const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100), room = ROOMS.find((r) => r.f.includes(f.n)), wk = (LEAD.week.find(([x]) => x === n) || [])[1] || 0;
+  const dish = (RECIPES.find((r) => r.name === f.d) || recipeById('macaron')).id, ch = CHEERS[n] || 0;
+  showSheet(`${personHero(n, f.c, p, `<b>${f.left}</b>m left`, n, esc(f.subj || f.d))}
+    <div class="stks">${sticker(art(dish), f.d.replace('Strawberry ', ''), 'in the oven', 0)}${sticker(PIN, room ? room.n : 'Solo', room ? `${room.k} at the table` : 'baking alone', 1)}${sticker(CLOCK, `${wk.toFixed(1)}h`, 'this week', 2)}</div>
+    <div class="acts ps-acts"><button class="cheer" type="button" data-cheer="${n}" aria-label="Cheer ${n}">${HEART}<span>${ch ? `× ${ch}` : 'Cheer'}</span></button><button class="btn rounded" type="button" data-go="join" data-who="${n}">Join · ${f.left} min</button></div>`);
+}
+// someone you haven't added: an initial, where they rank, and a way to ask
+function strangerSheet(n, rank, h, where) {
+  showSheet(`${personHero(n, '#E9E9EF', null, '', `${n[0]}.`, `Bakes ${where}`)}
+    <div class="stks">${sticker(STAR, `#${rank}`, where.replace(/^(at|in) /, ''), 0)}${sticker(CLOCK, `${h.toFixed(1)}h`, 'this week', 1)}${sticker(HEART, 'Not yet', 'friends', 2)}</div>
+    <p class="ps-note">Their name, plans and what they’re working on show once you both agree to be friends.</p>
+    <div class="acts">${SENT.has(n) ? '<button class="btn soft rounded" type="button" disabled>Requested · waiting for them</button>' : `<button class="btn rounded" type="button" data-fr="add" data-n="${n}">Ask to be friends</button>`}</div>`, () => strangerSheet(n, rank, h, where));
+}
+const personSheet = (n, rank, h, where) => n === 'Leqi' ? null : FRIENDS.some((f) => f.n === n) ? friendSheet(n) : strangerSheet(n, rank, h, where);
+$('shop-body').addEventListener('click', (e) => {
+  const s = e.target.closest('[data-sheet-seat]'), p = e.target.closest('[data-person]'), c = e.target.closest('[data-cheer]'), g = e.target.closest('[data-go="join"], [data-go="room"]');
+  if (s) { closeSheet('sheet-shop'); const b = $('rooms').querySelector(`[data-seat="${s.dataset.sheetSeat}"]`); b.scrollIntoView({ block: 'nearest', inline: 'center' }); setTimeout(() => b.click(), 380); }
+  else if (p) personSheet(p.dataset.person);
+  else if (e.target.closest('[data-lb]')) { const [n, rank, h] = JSON.parse(e.target.closest('[data-lb]').dataset.lb); personSheet(n, rank, h, WHERE[RF.scope]); }
+  else if (c) {
+    const n = c.dataset.cheer; CHEERS[n] = (CHEERS[n] || 0) + 1; buzz([8, 20, 8]);
+    setText(c.querySelector('span'), `× ${CHEERS[n]}`); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+    hearts($('shop-body').querySelector('.ph-ring')); if (CHEERS[n] === 1) toast(`<b>Cheer sent</b><span>${esc(n)} sees it when their round ends</span>`);
+  }
+  else if (g) closeSheet('sheet-shop');
+});
 // a chef's toque: three puffs over a band; `ghost` is the dashed one waiting on your seat
 const toque = (ghost) => ghost
   ? '<svg class="toque ghost" viewBox="0 0 30 24" aria-hidden="true"><path d="M8 21v-6a5 5 0 0 1-1.6-9.7A6 6 0 0 1 15 3a6 6 0 0 1 8.6 2.3A5 5 0 0 1 22 15v6z" fill="#F3DDFC" stroke="#C349EE" stroke-width="1.4" stroke-dasharray="2.4 2"/></svg>'
@@ -305,15 +454,21 @@ const toque = (ghost) => ghost
 // the room's dessert stands on a cake stand in the middle, the cloth hangs down with a scalloped hem, two legs, a soft floor shadow
 const TABLE_TC = ['#F3DDFC', '#E3E9FD', '#EBF6C9'], TABLE_EDGE = ['#E3A6F7', '#BCCBF9', '#DDEB9E'];
 const SEATS = [26, 72, 196, 242];
-function roomTable(r, i) {
-  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3), dessert = ['macaron', 'shortcake', 'latte'][i % 3];
+function roomTable(r, i, c = i) {
+  const people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3), dessert = ['macaron', 'shortcake', 'latte', 'cupcake'][i % 4];
   const seat = (x, k) => k < 3
     ? `<span class="seat" style="left:${x}px;--tilt:${[-7, 5, -4][k]}deg"><span class="bob" style="--dl:${-k * .8}s">${toque()}${face(people[k])}</span></span>`
     : `<span class="seat empty" style="left:${x}px">${toque(true)}<span class="you">You</span></span>`;
   const hem = Array.from({ length: 12 }, (_, k) => `<circle cx="${11 + k * 22}" cy="0" r="11"/>`).join('');
-  return `<div class="scene" style="--tc:${TABLE_TC[i % 3]};--te:${TABLE_EDGE[i % 3]}">${SEATS.map(seat).join('')}
+  return `<div class="scene" style="--tc:${TABLE_TC[c % 3]};--te:${TABLE_EDGE[c % 3]}">${SEATS.map(seat).join('')}
     <span class="stand" aria-hidden="true">${art(dessert, 'class="dish"')}<i class="plate-t"></i><i class="stem"></i></span>
     <span class="tbl" aria-hidden="true"><i class="top"></i><i class="cloth"><svg viewBox="0 0 264 11" preserveAspectRatio="none" class="hem"><g style="fill:var(--tc)">${hem}</g></svg></i><i class="leg l"></i><i class="leg r"></i></span></div>`;
+}
+// the strangers at the table you sat down at, offered as friends on the result screen
+let metNext = null;
+function tableMates(i) {
+  const r = ROOMS[i], people = [...r.f, ...['Noa', 'Kai', 'Lin', 'Ivy', 'Ben'].filter((n) => !r.f.includes(n))].slice(0, 3);
+  metNext = { room: r.n, people: people.filter((n) => !FRIENDS.some((f) => f.n === n) && !REQS.some((q) => q.n === n)) };
 }
 // taking a seat: your face flies from the button to the free seat, sits down, and the bake starts with the room
 $('rooms').addEventListener('click', (e) => {
@@ -323,17 +478,18 @@ $('rooms').addEventListener('click', (e) => {
   const fly = document.createElement('span'); fly.className = 'flyer'; fly.innerHTML = avatarSvg('Leqi'); $('app').appendChild(fly);
   const x0 = (from.left + from.width / 2 - app.left) * k - 19, y0 = (from.top - app.top) * k - 10, x1 = (to.left - app.left) * k, y1 = (to.top - app.top) * k;
   fly.style.left = '0px'; fly.style.top = '0px';
-  const land = () => { fly.remove(); empty.classList.remove('empty'); empty.classList.add('taken'); empty.innerHTML = `<span class="bob">${toque()}${face('Leqi')}</span>`; buzz([10, 30, 16]); setText(b, 'Tying your apron…'); setTimeout(() => joinFriend(b.dataset.who), 650); };
+  const land = () => { fly.remove(); empty.classList.remove('empty'); empty.classList.add('taken'); empty.innerHTML = `<span class="bob">${toque()}${face('Leqi')}</span>`; buzz([10, 30, 16]); setText(b, 'Tying your apron…'); tableMates(+b.dataset.seat); setTimeout(() => FRIENDS.some((f) => f.n === b.dataset.who) ? joinFriend(b.dataset.who) : joinTable(+b.dataset.seat), 650); };
   if (reduced) { land(); return; }
   fly.animate([{ transform: `translate(${x0}px, ${y0}px) scale(.8)` }, { transform: `translate(${(x0 + x1) / 2}px, ${Math.min(y0, y1) - 60}px) scale(1.15)`, offset: .5 }, { transform: `translate(${x1}px, ${y1}px) scale(1)` }],
     { duration: 650, easing: 'cubic-bezier(.3,.1,.3,1)', fill: 'forwards' }).onfinish = land;
 }, true);
-// tapping a card (not its button) opens or closes its details where it is
+// tapping a card (not its button) slides its details up in a sheet
 $('rooms').addEventListener('click', (e) => {
   if (e.target.closest('[data-go], [data-seat]')) return;
   const c = e.target.closest('.rm-card'); if (!c) return;
-  const open = !c.classList.contains('open'); c.classList.toggle('open', open); c.setAttribute('aria-expanded', String(open)); buzz(6);
+  buzz(6); roomSheet(+c.dataset.card);
 });
+$('rooms').addEventListener('keydown', (e) => { const c = e.target.closest('.rm-card'); if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); roomSheet(+c.dataset.card); } });
 function layoutRooms() {
   const rail = $('rooms'), slots = [...rail.querySelectorAll('.rm-slot')];
   if (!slots.length) return;
@@ -352,10 +508,12 @@ let leadP = 'week', myHours = { today: 0, week: 0 };
 const LEAD = { week: [['Jun', 6.2], ['Mia', 4.1], ['Ava', 3.2], ['Sam', 1.5]], today: [['Jun', 1.5], ['Mia', .8], ['Ava', 1.2], ['Sam', .3]] };
 const POD = [[1, 'second'], [0, 'first'], [2, 'third']];
 function renderBoardWeek(myHrs, todayHrs) {
-  if (myHrs !== undefined) myHours = { week: myHrs, today: todayHrs };
+  if (myHrs !== undefined) { myHours = { week: myHrs, today: todayHrs }; renderLocal(); }
   const rows = [...LEAD[leadP].filter(([n]) => FRIENDS.some((f) => f.n === n)), ['Leqi', myHours[leadP]]].sort((a, b) => b[1] - a[1]);
   const top = Math.max(rows[0][1], .1), el = $('leaderboard');
-  if (!el.querySelector('.podium')) el.innerHTML = `<div class="podium">${POD.map(([, c]) => `<div class="pcol ${c}"><span class="who"></span><span class="nm"></span><b data-to="0">0.0h</b><div class="blockp"><i></i></div></div>`).join('')}</div><div class="mine" id="mine"></div>`;
+  // each column: the face sits on its block (first place wears a crown); name, hours and rank are on the block itself
+  const crown = '<svg class="crown" viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14 3 4l5 4 4-7 4 7 5-4 1 10z" fill="#F5C542"/><path d="M2 14h20v2H2z" fill="#E2AE2C"/></svg>';
+  if (!el.querySelector('.podium')) el.innerHTML = `<div class="podium">${POD.map(([, c]) => `<div class="pcol ${c}">${c === 'first' ? crown : ''}<span class="who"></span><div class="blockp"><span class="nm"></span><b data-to="0">0.0h</b><i></i></div></div>`).join('')}</div><div class="mine" id="mine"></div>`;
   POD.forEach(([rank, c]) => {
     const col = el.querySelector(`.pcol.${c}`), [n, h] = rows[rank] || ['', 0];
     const who = col.querySelector('.who');
@@ -363,11 +521,11 @@ function renderBoardWeek(myHrs, todayHrs) {
     col.classList.toggle('me', n === 'Leqi');
     col.querySelector('.nm').textContent = n === 'Leqi' ? 'You' : n;
     const num = col.querySelector('[data-to]'); num.dataset.to = h; roll(num, h, (v) => `${v.toFixed(1)}h`, 700);
-    col.querySelector('.blockp').style.height = `${Math.round(34 + (h / top) * 58)}px`;
+    col.querySelector('.blockp').style.height = `${Math.round(92 + (h / top) * 36)}px`;
     col.querySelector('.blockp i').textContent = rank + 1;
   });
   const mi = rows.findIndex(([n]) => n === 'Leqi'), ahead = rows[mi - 1];
-  setHTML($('mine'), mi > 2 ? `<span class="rk">#${mi + 1}</span>${face('Leqi')}<span class="grow"><b>You</b><span>${(ahead[1] - rows[mi][1]).toFixed(1)}h behind ${ahead[0]}</span></span><b class="hrs">${rows[mi][1].toFixed(1)}h</b>`
+  setHTML($('mine'), mi > 2 ? `<span class="rk">#${mi + 1}</span>${face('Leqi')}<span class="grow"><b>You</b><span>${ahead[1] - rows[mi][1] < .05 ? `Tied with ${ahead[0]}` : `${(ahead[1] - rows[mi][1]).toFixed(1)}h behind ${ahead[0]}`}</span><span class="gap"><i style="width:${Math.round(rows[mi][1] / Math.max(ahead[1], .1) * 100)}%"></i></span></span><b class="hrs">${rows[mi][1].toFixed(1)}h</b>`
     : `<span class="grow"><b>You’re #${mi + 1}</b><span>${mi ? `${(ahead[1] - rows[mi][1]).toFixed(1)}h to pass ${ahead[0]}` : 'Top of the board. Keep the oven warm.'}</span></span>`);
 }
 $('lead-mode').addEventListener('click', (e) => {
@@ -403,11 +561,13 @@ const hhmm = (h) => `${Math.floor(h) % 24}:${String(Math.round((h % 1) * 60) % 6
 const isLive = (e) => SCH.day === 0 && e.at <= nowH() && nowH() < e.at + e.len / 60;
 function schedDays() {
   const d = new Date();
-  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}">${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'} <b>${x.getDate()}</b>${SCHED[i].length ? '<i></i>' : ''}</button>`; }).join('');
+  return Array.from({ length: 5 }, (_, i) => { const x = new Date(d.getTime() + i * 864e5); return `<button type="button" data-day="${i}" class="${i === SCH.day ? 'on' : ''}">${i ? x.toLocaleDateString('en-US', { weekday: 'short' }) : 'Today'} <b>${x.getDate()}</b></button>`; }).join('');
 }
 function schedLanes() {
-  const s0 = dayStart(), now = nowH(), all = schedEvents();
-  return `<div class="sch-hours">${Array.from({ length: 9 }, (_, i) => `<span>${(s0 + i) % 24}:00</span>`).join('')}</div>`
+  const s0 = dayStart(), now = nowH(), all = schedEvents(), nowX = (now - s0) * HOUR_W;
+  // an hour label the Now tag would sit on is hidden rather than drawn underneath it
+  const underNow = (i) => !SCH.day && i * HOUR_W + 4 < nowX + 26 && i * HOUR_W + 40 > nowX - 20;
+  return `<div class="sch-hours">${Array.from({ length: 9 }, (_, i) => `<span class="${underNow(i) ? 'hid' : ''}">${(s0 + i) % 24}:00</span>`).join('')}</div>`
     + (SCH.day ? '' : `<span class="sch-now" style="left:${(now - s0) * HOUR_W}px"></span>`)
     + all.map((e, i) => {
       const live = isLive(e), done = live ? Math.round((now - e.at) / (e.len / 60) * 100) : 0, bg = SCH_BG[e.lane % 4];
@@ -443,26 +603,36 @@ function schedCard() {
     : mine ? `Starts in ${inT} · ${e.len} min · ${e.with.length} going`
     : going ? `<b class="lv">You’re in</b> · starts in ${inT} · ${e.len} min`
     : `${hhmm(e.at)} · ${e.len} min · ${e.with.length === 1 ? 'be the second one in' : `${e.with.length} going`}`;
-  const note = mine && waiting.length ? `<p class="sch-note">Waiting for ${waiting.join(', ')}</p>` : going && !mine ? `<p class="sch-note">We’ll remind you 10 min before.</p>` : '';
+  // a booking only opens 10 minutes before it starts; until then it's a reservation, not a way to start early
+  const soon = until <= 10, opens = hhmm(e.at - 1 / 6);
+  const note = mine && waiting.length ? `<p class="sch-note">Waiting for ${waiting.join(', ')}</p>`
+    : (going || mine) && !soon ? `<p class="sch-note">We’ll remind you at ${opens} to pick your dessert.</p>` : '';
+  const ready = soon ? `<button class="btn rounded m" type="button" data-sch="ready">Get ready · starts in ${inT}</button>`
+    : `<button class="btn rounded m" type="button" disabled>Opens at ${opens}</button>`;
   const acts = live ? `<button class="btn rounded m" type="button" data-sch="join">Join now · ${left} min left</button>`
-    : mine ? `<button class="btn soft rounded m" type="button" data-sch="share">Share link</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
-    : going ? `<button class="btn soft rounded m" type="button" data-sch="in">Leave</button><button class="btn rounded m" type="button" data-sch="ready">Pick your dessert</button>`
+    : mine ? `<button class="btn soft rounded m" type="button" data-sch="share">Share link</button>${ready}`
+    : going ? `<button class="btn soft rounded m" type="button" data-sch="in">Leave</button>${ready}`
     : `<button class="btn rounded m" type="button" data-sch="in">I’m in · remind me</button>`;
   return `<div class="row sch-sum">${face(e.who, 'lead')}<div class="grow"><b class="k">${esc(e.label)}</b><p class="kk">${meta}</p></div><span class="faces sch-faces">${e.with.filter((n) => n !== e.who).slice(0, 3).map((n) => face(n)).join('')}</span></div>${note}
     <div class="sch-acts">${acts}</div>`;
 }
 function drawSched(scrollToNow) {
   const keepX = $('sch-wrap')?.scrollLeft || 0, list = SCHED[SCH.day], live = list.filter(isLive).length;
-  setHTML($('live-hero'), `<div class="ach"><p class="k">Today’s bakes</p><span class="kk">${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
+  const dayName = SCH.day ? new Date(Date.now() + SCH.day * 864e5).toLocaleDateString('en-US', { weekday: 'long' }) : 'Today';
+  // the schedule is yours and your friends' plans, wherever they are; open tables by place are further down
+  setHTML($('live-hero'), `<div class="ach"><p class="k">${dayName}’s plans</p><span class="kk">You and friends · ${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
     <div class="sch-days">${schedDays()}</div><div class="sch-wrap" id="sch-wrap"><div class="sch-lanes">${schedLanes()}</div></div><div class="sch-card" id="sch-card" style="background:${cardTint()}">${schedCard()}</div>`);
   // keep the timeline where it was, unless we're arriving or switching day
-  if (scrollToNow) $('sch-wrap').scrollLeft = SCH.day ? 0 : Math.max(0, (nowH() - dayStart()) * HOUR_W - 60); else $('sch-wrap').scrollLeft = keepX;
+  // another day opens on its first bake (or the free slot), not on an empty morning
+  const first = SCH.day && schedEvents().reduce((a, e) => (a && a.at <= e.at ? a : e), null);
+  if (scrollToNow) $('sch-wrap').scrollLeft = SCH.day ? Math.max(0, (first.at - dayStart()) * HOUR_W - 20) : Math.max(0, (nowH() - dayStart()) * HOUR_W - 60); else $('sch-wrap').scrollLeft = keepX;
 }
 const cardTint = () => { const e = schedEvents()[SCH.sel]; return e && !e.plan ? SCH_BG[e.lane % 4] : 'var(--brand-tint)'; };
 function schedCardSwap() { const c = $('sch-card'); c.style.background = cardTint(); c.innerHTML = schedCard(); if (!reduced) c.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' }); }
 $('live-hero').addEventListener('click', (e) => {
   const d = e.target.closest('[data-day]'), ev = e.target.closest('[data-ev]'), a = e.target.closest('[data-sch]');
-  if (d) { SCH.day = +d.dataset.day; SCH.sel = 0; SCH.plan = null; buzz(6); drawSched(true); return; }
+  // a new day starts on the bake that's live now, else its first one
+  if (d) { SCH.day = +d.dataset.day; SCH.plan = null; SCH.sel = Math.max(0, schedEvents().findIndex(isLive)); buzz(6); drawSched(true); return; }
   if (ev) { const w = $('sch-wrap'), x = w.scrollLeft, mid = ev.offsetLeft + ev.offsetWidth / 2 - w.clientWidth / 2; SCH.sel = +ev.dataset.ev; buzz(6); $('live-hero').querySelector('.sch-lanes').innerHTML = schedLanes(); w.scrollLeft = x; w.scrollTo({ left: Math.max(0, mid), behavior: reduced ? 'auto' : 'smooth' }); schedCardSwap(); return; }
   const at = e.target.closest('[data-pat]'), ln = e.target.closest('[data-plen]'), inv = e.target.closest('[data-inv]');
   if (at) { SCH.plan.at = +at.dataset.pat; buzz(6); schedCardSwap(); return; }
@@ -489,10 +659,10 @@ $('live-hero').addEventListener('click', (e) => {
 // each room's round counts down in real seconds; a new round starts when it hits zero
 function tickRooms() {
   if (tab !== 'rooms' || stack.length) { clearInterval(roomClock); roomClock = null; return; }
-  const cards = $('rooms').querySelectorAll('.rm-card');
   ROOMS.forEach((r, i) => {
     r.left = r.left > 1 ? r.left - 1 : r.len * 60;
-    const c = cards[i]; if (!c) return;
+    if (i === sheetRoom && $('sheet-shop').classList.contains('on')) { const s = $('shop-body'); setText(s.querySelector('.tclock'), mmss(r.left)); s.querySelector('.rbar i').style.width = ((1 - r.left / (r.len * 60)) * 100).toFixed(1) + '%'; }
+    const c = $('rooms').querySelector(`.rm-card[data-card="${i}"]`); if (!c) return;
     setText(c.querySelector('.tclock'), mmss(r.left));
     c.querySelector('.rbar i').style.width = ((1 - r.left / (r.len * 60)) * 100).toFixed(1) + '%';
   });
@@ -501,7 +671,7 @@ function liveTick() {
   if (tab !== 'rooms' || stack.length) { clearInterval(liveTimer); liveTimer = null; return; }
   const i = Math.floor(Math.random() * ROOMS.length);
   ROOMS[i].k++;
-  const card = $('rooms').querySelectorAll('.rm-card')[i];
+  const card = $('rooms').querySelector(`.rm-card[data-card="${i}"]`);
   if (card) { const b = card.querySelector('.cnt b'); rolling.set(b, ROOMS[i].k - 1); roll(b, ROOMS[i].k); card.setAttribute('aria-label', `${ROOMS[i].n}, ${ROOMS[i].k} baking`); }
 }
 // tapping a bubble opens its panel (tap again to close); Cheer sends hearts up from their bubble
@@ -518,13 +688,14 @@ function hearts(el) {
   }
 }
 $('friends-all').addEventListener('click', (e) => {
-  const c = e.target.closest('[data-cheer]');
-  if (c) { const n = c.dataset.cheer; buzz([8, 20, 8]); toast(`<b>Cheer sent</b><span>${esc(n)} sees it when their round ends</span>`); hearts($('friends-all').querySelector(`.fb[data-f="${n}"] .fring`)); return; }
   const b = e.target.closest('.fb'); if (!b) return;
-  fbSel = fbSel === b.dataset.f ? '' : b.dataset.f; buzz(8);
-  $('friends-all').querySelectorAll('.fb').forEach((x) => x.classList.toggle('sel', x.dataset.f === fbSel));
-  const panel = $('fpanel'); panel.firstElementChild.innerHTML = friendPanel(); panel.classList.toggle('open', !!fbSel);
-  if (fbSel) { const bb = b.getBoundingClientRect(), pr = panel.getBoundingClientRect(); panel.style.setProperty('--ax', `${((bb.left + bb.width / 2 - pr.left) / pr.width * 100).toFixed(1)}%`); }
+  buzz(8); friendSheet(b.dataset.f);
+});
+// the boards: tap a face on the podium or a row to see that person
+$('leaderboard').addEventListener('click', (e) => { const w = e.target.closest('.who[data-n]'); if (w) personSheet(w.dataset.n); });
+$('local-board').addEventListener('click', (e) => {
+  const r = e.target.closest('[data-lb]'); if (r) { const [n, rank, h] = JSON.parse(r.dataset.lb); personSheet(n, rank, h, WHERE[RF.scope]); return; }
+  if (e.target.closest('[data-lb-all]')) localSheet();
 });
 // arriving on Rooms: the live count counts up, cards and rows arrive, numbers and bars fill
 function playRooms() {
@@ -578,10 +749,9 @@ function renderTabs() {
   setHTML($('recent'), last ? `<span class="badge">${shape('star', '#8CA7F4')}${art(last.r, 'class="art"')}</span><span class="g"><span class="kk">Recently baked · ${last.when}</span><b>${recipeById(last.r).name}</b></span><span class="pill mint">${last.min} min</span>${ICON.chev}`
     : '<span class="g"><span class="kk">Recently baked</span><b>Your first dessert shows up here</b></span>');
   setText($('me-case'), CASE.length ? `${CASE.length} desserts so far` : 'Nothing baked yet');
-  setHTML($('friends-all'), FRIENDS.length ? `<div class="bubbles">${FRIENDS.map(friendBubble).join('')}</div><div class="fpanel${fbSel ? ' open' : ''}" id="fpanel"><div>${friendPanel()}</div></div>` : inviteRow('Nobody here yet. Invite a classmate.'));
+  setHTML($('friends-all'), FRIENDS.length ? `<div class="bubbles">${FRIENDS.map(friendBubble).join('')}</div>` : inviteRow('Nobody here yet. Invite a classmate.'));
   setText($('friends-count'), FRIENDS.length ? `${FRIENDS.length} in the oven` : '');
-  setHTML($('rooms'), ROOMS.map(roomCard).join(''));
-  setHTML($('room-dots'), ROOMS.map(() => '<i></i>').join(''));
+  renderRooms();
   setHTML($('case-grid'), CASE.length ? CASE.map((c, i) => `<button type="button" data-go="case" data-i="${i}" class="case-item rounded ${c.isNew ? 'new' : ''}"><div class="art">${art(c.r)}</div><p class="t">${recipeById(c.r).name}</p><p class="s">${c.when} · ${c.min} min · ${c.tops} toppings</p><span><span class="tag hi rounded">${c.grade}</span></span></button>`).join('')
     : `<div class="empty-card rounded">${art('cupcake')}<p class="t">Your first dessert lands here</p><p class="s">Every bake you finish is kept in the case, burnt ones too.</p></div>`);
   setText($('case-sub'), CASE.length ? `${CASE.length} desserts · ${(CASE.reduce((a, c) => a + c.min, 0) / 60).toFixed(1)} h of focus` : 'Nothing baked yet');
@@ -860,7 +1030,7 @@ function celebrate() { buzz([30, 60, 18]); slip('Batter ready', `${minutes()} mi
 
 // Goals: a sheet slides up after each crack; tap a goal row later to change or remove it.
 function openSheet(id) { $(id).classList.add('on'); $(id).setAttribute('aria-hidden', 'false'); $('scrim').classList.add('on'); $('scrim').dataset.for = id; }
-function closeSheet(id) { $(id).classList.remove('on'); $(id).setAttribute('aria-hidden', 'true'); $('scrim').classList.remove('on'); }
+function closeSheet(id) { if (id === 'sheet-shop') { sheetRedraw = null; sheetRoom = -1; } $(id).classList.remove('on'); $(id).setAttribute('aria-hidden', 'true'); $('scrim').classList.remove('on'); }
 function openWrite({ title, value, ideas, alt, ok }) {
   setText($('goal-title'), title); $('goal').value = value; $('goal-ok').disabled = !value.trim(); setText($('goal-ok'), ok);
   setText($('goal-alt'), alt);
@@ -1117,6 +1287,7 @@ function renderResult() {
     <div class="slip-foot">${barcode(receiptNo % 7 + 3)}<small>Baked by Leqi<br>thanks for baking</small></div>`;
   setHTML($('r-slip'), slipHTML('Sweet Study oven', body));
   setText($('to-deco'), B.early ? 'Take a break anyway' : 'Take a 5-min break');
+  metNow = metNext; metNext = null; renderMet();
   B.grade = h;
 }
 // the big moment: the verdict comes into focus, toppings pop off the dessert, and the receipt prints

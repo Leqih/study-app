@@ -159,6 +159,7 @@ $('app').addEventListener('click', (e) => {
   const go = g.dataset.go;
   if (go === 'room') openRoom(+g.dataset.i);
   else if (go === 'settings') { renderSettings(); openPage('settings'); }
+  else if (go === 'friends') { renderFriendsPage(); openPage('friends'); }
   else if (go === 'report') openReport();
   else if (go === 'case') openCase(+g.dataset.i);
   else if (go === 'me') setTab('me');
@@ -167,6 +168,63 @@ $('app').addEventListener('click', (e) => {
 });
 const drawMe = () => document.querySelectorAll('[data-me]').forEach((el) => { el.innerHTML = avatarSvg('Leqi'); });
 drawMe();
+
+/* ---------- friends: both people have to agree. Ways in: an invite link, a username, or a table you shared ---------- */
+const REQS = NEW ? [] : [{ n: 'Noa', via: 'Quiet library · today' }, { n: 'Kai', via: 'By your username' }];
+const MET = NEW ? [] : [{ n: 'Lin', where: 'Quiet library · today' }, { n: 'Ivy', where: 'Thesis corner · Thursday' }];
+const SENT = new Set();
+const USERNAMES = { Noa: 'noa.k', Kai: 'kai.builds', Lin: 'lin.piano', Ivy: 'ivy_writes', Ben: 'ben.sql', Ash: 'ash.reads' };
+const PROFILE = { Noa: ['#C9D5FA', 'Organic chemistry'], Kai: ['#FFF07A', 'Portfolio review'], Lin: ['#FFC4F8', 'Piano theory'], Ivy: ['#BCCBF9', 'Essay outline'], Ben: ['#FFF07A', 'SQL practice'], Ash: ['#FFC4F8', 'Reading list'] };
+let metNow = null; // the strangers you just shared a table with, offered on the result screen
+const isFriend = (n) => FRIENDS.some((f) => f.n === n);
+function addFriend(n) { if (isFriend(n)) return; const [c, subj] = PROFILE[n] || ['#F2F2F4', 'Studying']; FRIENDS.push({ n, c, d: 'Strawberry macaron', left: 25, subj }); }
+function friendsChanged() {
+  setText($('me-friends'), `${FRIENDS.length} ${FRIENDS.length === 1 ? 'friend' : 'friends'}`);
+  $('me-req').hidden = !REQS.length; setText($('me-req'), String(REQS.length));
+  renderTabs(); if (!$('s-friends').hidden) renderFriendsPage();
+  if ($('r-met').innerHTML) renderMet();
+  if (sheetRedraw && $('sheet-shop').classList.contains('on')) sheetRedraw();
+}
+const addBtn = (n) => isFriend(n) ? '<span class="tag brand">Friend</span>' : SENT.has(n) ? '<span class="sent">Requested</span>' : `<button class="btn small rounded" type="button" data-fr="add" data-n="${n}">Add</button>`;
+function renderFriendsPage() {
+  const q = ($('fr-search')?.value || '').trim().toLowerCase().replace(/^@/, '');
+  const hits = q ? Object.entries(USERNAMES).filter(([n, u]) => u.includes(q) || n.toLowerCase().startsWith(q)) : [];
+  const section = (title, body, aside = '') => `<div class="section"><div class="section-h"><h2>${title}</h2>${aside}</div>${body}</div>`;
+  setHTML($('friends-body'), `
+    <div class="section"><div class="invite rounded">
+      <p class="t">Invite a classmate</p>
+      <p class="s">Friends see each other’s plans, names and what you’re working on. It only works once you both say yes.</p>
+      <div class="link-row"><span class="url" id="invite-url">sweetstudy.app/i/leqi</span><button class="btn soft small rounded" type="button" data-fr="copy">Copy</button></div>
+      <button class="btn rounded" type="button" data-fr="share">Share invite</button>
+    </div></div>
+    ${section('Find by username', `<label class="field rounded"><input id="fr-search" autocomplete="off" placeholder="@username" value="${esc(q)}"></label>
+      ${hits.length ? `<div class="list rounded fr-list">${hits.map(([n, u]) => `<div class="row">${face(n)}<span class="grow"><span class="t">${n}</span><span class="s">@${u}</span></span>${addBtn(n)}</div>`).join('')}</div>` : q ? '<p class="fr-none">No one with that username yet.</p>' : ''}`)}
+    ${REQS.length ? section('Requests', `<div class="list rounded fr-list">${REQS.map((r) => `<div class="row">${face(r.n)}<span class="grow"><span class="t">${r.n}</span><span class="s">${r.via}</span></span><button class="fr-x" type="button" data-fr="decline" data-n="${r.n}" aria-label="Decline ${r.n}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><button class="btn small rounded" type="button" data-fr="accept" data-n="${r.n}">Accept</button></div>`).join('')}</div>`, `<span class="aside">${REQS.length} waiting</span>`) : ''}
+    ${MET.length ? section('People you studied with', `<div class="list rounded fr-list">${MET.map((m) => `<div class="row">${face(m.n)}<span class="grow"><span class="t">${isFriend(m.n) ? m.n : `${m.n[0]}.`}</span><span class="s">${m.where}</span></span>${addBtn(m.n)}</div>`).join('')}</div>`) : ''}
+    ${section('Your friends', FRIENDS.length ? `<div class="list rounded fr-list">${FRIENDS.map((f) => `<div class="row">${face(f.n)}<span class="grow"><span class="t">${f.n}</span><span class="s">${esc(f.subj || f.d)}</span></span><button class="fr-remove" type="button" data-fr="remove" data-n="${f.n}">Remove</button></div>`).join('')}</div>` : '<p class="fr-none">No friends yet. Send your invite to a classmate.</p>', `<span class="aside">${FRIENDS.length}</span>`)}
+    <div class="spacer"></div>`);
+  const s = $('fr-search'); if (q && s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+$('friends-body').addEventListener('input', (e) => { if (e.target.id === 'fr-search') renderFriendsPage(); });
+// after a bake at an open table: the people you sat with, by initial, each with Add
+function renderMet() {
+  setHTML($('r-met'), metNow && metNow.people.length ? `<div class="met rounded"><p class="k">You studied with</p><p class="s">${metNow.room} · ask to be friends to see their names and plans next time</p>
+    <div class="fr-list">${metNow.people.map((n) => `<div class="row">${face(n)}<span class="grow"><span class="t">${isFriend(n) ? n : `${n[0]}.`}</span><span class="s">${PROFILE[n] ? 'Same table, same round' : ''}</span></span>${addBtn(n)}</div>`).join('')}</div></div>` : '');
+}
+$('app').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-fr]'); if (!b) return;
+  const act = b.dataset.fr, n = b.dataset.n;
+  if (act === 'copy') {
+    const url = 'https://' + $('invite-url').textContent;
+    const done = () => toast('<b>Link copied</b><span>Whoever opens it can send you a request</span>');
+    try { navigator.clipboard.writeText(url).then(done, () => toast('<span>Couldn’t copy. Press and hold the link to copy it.</span>')); } catch (_) { toast('<span>Couldn’t copy. Press and hold the link to copy it.</span>'); }
+  } else if (act === 'share') toast('<b>Share invite</b><span>On iPhone this opens the share sheet</span>');
+  else if (act === 'add') { SENT.add(n); buzz(8); toast(`<b>Request sent</b><span>You’ll be friends once ${isFriend(n) ? n : 'they'} accept</span>`); friendsChanged(); }
+  else if (act === 'accept') { REQS.splice(REQS.findIndex((r) => r.n === n), 1); addFriend(n); buzz([8, 20, 8]); toast(`<b>You and ${n} are friends</b><span>You’ll see each other’s plans now</span>`); friendsChanged(); }
+  else if (act === 'decline') { REQS.splice(REQS.findIndex((r) => r.n === n), 1); toast('<span>Request declined. They won’t be told.</span>'); friendsChanged(); }
+  else if (act === 'remove') ask({ title: `Remove ${n}?`, text: 'You’ll stop seeing each other’s plans and names. You can add each other again later.', no: 'Cancel', yes: 'Remove' }).then((y) => { if (!y) return; FRIENDS.splice(FRIENDS.findIndex((f) => f.n === n), 1); friendsChanged(); });
+});
+friendsChanged();
 /* ---------- your shape: the whole library in a grid, and the colours ---------- */
 function openShapes() {
   const draw = () => setHTML($('shop-body'), `<div class="stack shapes-sheet"><div class="sh-head"><span class="sh-prev">${shapeSvg(MY_SHAPE.k, MY_SHAPE.c)}</span><div><h3>Your shape</h3><p class="t-subhead muted">Friends see it at the table, on the board and in rooms.</p></div></div>
