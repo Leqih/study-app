@@ -505,7 +505,37 @@ function playRooms() {
   clearInterval(liveTimer); liveTimer = setInterval(liveTick, 9000);
   clearInterval(roomClock); roomClock = setInterval(tickRooms, 1000);
 }
+const TABLE_KEY = 'sweet-study-table-v1';
+let tableBakes = [];
+try {
+  const saved = JSON.parse(localStorage.getItem(TABLE_KEY) || '[]');
+  if (Array.isArray(saved)) tableBakes = saved.filter(x => x && recipeById(x.recipe) && Number.isFinite(x.minutes) && x.minutes > 0 && typeof x.day === 'string');
+} catch (_) {}
+function tableDay() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function renderDessertTable() {
+  const today = tableBakes.filter(x => x.day === tableDay());
+  const mins = today.reduce((n, x) => n + x.minutes, 0);
+  setText($('dessert-total'), mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`);
+  setText($('dessert-count'), `${today.length} ${today.length === 1 ? 'bake' : 'bakes'}`);
+  setText($('dessert-note'), today.length ? 'A little collection of your day.' : 'A quiet table, for now.');
+  setHTML($('dessert-table'), today.length ? today.map((x, i) => `<button type="button" class="table-dessert" data-bake="${i}" style="--dessert-size:${Math.round(54 + 46 * Math.min(x.minutes, 90) / 90)}px" aria-label="${esc(recipeById(x.recipe).name)}, ${x.minutes} minutes"><span class="dessert-art">${art(x.recipe)}</span><span class="dessert-minutes">${x.minutes}m</span></button>`).join('') : '<span class="empty-plate" aria-hidden="true"></span>');
+}
+function collectTableBake() {
+  const minutes = Math.round((B.total - B.left) / 60);
+  if (minutes <= 0) return;
+  tableBakes.push({ recipe: recipe.id, minutes, day: tableDay() });
+  try { localStorage.setItem(TABLE_KEY, JSON.stringify(tableBakes)); } catch (_) {}
+  renderDessertTable();
+}
+$('dessert-table').addEventListener('click', e => {
+  const button = e.target.closest('.table-dessert'); if (!button) return;
+  if (!reduced) button.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-7deg)' }, { transform: 'rotate(5deg)' }, { transform: 'rotate(0)' }], { duration: 400 });
+  const item = tableBakes.filter(x => x.day === tableDay())[Number(button.dataset.bake)];
+  if (item) setText($('dessert-note'), `${recipeById(item.recipe).name} · ${item.minutes} min of focus`);
+});
+setInterval(renderDessertTable, 60000);
 function renderTabs() {
+  renderDessertTable();
   // Home: friends baking now, each face inside its own flat shape
   const frames = [['flower6', '#E3A6F7'], ['star', '#8CA7F4'], ['scallop', '#DDEB9E']];
   const more = FRIENDS.length - 3;
@@ -527,7 +557,7 @@ function renderTabs() {
   setHTML($('map'), `<span class="pin me" style="left:48%;top:56%"></span>` + SHOPS.map((s, i) => `<span class="pin" style="left:${s.x}%;top:${s.y}%"><svg viewBox="0 0 30 36" width="30" height="36"><polygon points="4,0 26,0 30,4 30,22 15,36 0,22 0,4" fill="#10131A"/><polygon points="9,7 21,7 23,9 23,17 21,19 9,19 7,17 7,9" fill="${s.c}"/></svg></span>`).join(''));
   // the week as minutes per day; every number on Home and Me is summed from it
   // each bake is [recipe, minutes]; today's come from the case, so a joined 18-minute bake counts as 18
-  const today = CASE.filter((c) => c.when === 'Just now').map((c) => [c.r, c.min]);
+  const today = tableBakes.filter(c => c.day === tableDay()).map(c => [c.recipe, c.minutes]);
   const past = NEW ? [[], [], [], [], []] : [[['cupcake', 50], ['latte', 15]], [['macaron', 25]], [['latte', 15]], [['macaron', 25]], [['cupcake', 50]]];
   const WEEK = [...['M', 'T', 'W', 'T', 'F'].map((d, i) => [d, past[i]]), ['S', today, true], ['S', []]];
   const mins = (list) => list.reduce((a, b) => a + b[1], 0);
@@ -557,7 +587,7 @@ function renderTabs() {
   setText($('streak-hint'), today.length ? 'kept today' : !streak ? 'first bake starts it' : PREFS.restDay ? 'bake today or rest' : 'bake today');
   setText($('goal-of'), `Goal ${goal} min`);
   // the greeting follows today's progress, not just whether a bake happened
-  setText($('hello-sub'), todayMin >= goal ? 'goal reached.' : todayMin ? 'keep it going.' : 'ready to bake?');
+  setText($('hello-sub'), todayMin ? 'your day, in little moments.' : 'a little space for today.');
   // today in three numbers, like a daily focus report: score weighted by minutes, minutes with the phone down, times you left
   const todayBakes = CASE.filter((c) => c.when === 'Just now');
   const scored = todayBakes.reduce((a, c) => [a[0] + (c.score ?? 100) * c.min, a[1] + c.min], [0, 0]);
@@ -1014,6 +1044,8 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 function finishBake() {
+  if (!B.timer) return;
+  collectTableBake();
   clearSavedBake();
   clearInterval(B.timer); B.timer = null; B.rest = 0; B.restKind = '';
   CARRY = B.goals.filter((g) => !g.done).map((g) => g.text);

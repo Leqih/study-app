@@ -1220,6 +1220,19 @@ button.pill { position: relative; }
 #s-rooms .sch-ev.sel { text-decoration: underline; text-underline-offset: 4px; }
 #s-rooms .sch-ev.going::before { content: '✓'; margin-right: 4px; }
 #s-rooms .scene .tbl::before { display: none; }
+
+/* A daily collection, drawn with flat dishes and actual completed sessions. */
+.dessert-dashboard { padding: 22px 20px 16px; }
+.dessert-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dessert-heading h2 { margin-top: 4px; font-size: 32px; line-height: 1.15; letter-spacing: -.04em; font-weight: 600; }
+.dessert-table { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 14px 4px; min-height: 150px; padding: 24px 0 14px; }
+.table-dessert { width: 100px; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 7px; transform-origin: 50% 85%; }
+.dessert-art { width: var(--dessert-size); display: block; position: relative; }
+.dessert-art svg { width: 100%; display: block; position: relative; z-index: 1; }
+.dessert-art::before { content: ''; position: absolute; width: 108%; height: 32%; bottom: 0; left: -4%; background: #f3edfa; border-radius: 50%; }
+.dessert-minutes { font-size: 11px; color: var(--text-2); }
+.empty-plate { width: 150px; height: 54px; border-radius: 50%; background: #f3edfa; align-self: center; }
+.dessert-note { font-size: 12px; color: var(--text-2); text-align: center; min-height: 18px; }
 </style>
 </head>
 <body>
@@ -1245,13 +1258,11 @@ button.pill { position: relative; }
         <div class="scroll">
           <div class="stack pad">
             <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
-            <div class="blk open arrive">
-              <div class="top">
-                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
-                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
-              </div>
-              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
-            </div>
+            <section class="blk dessert-dashboard arrive" aria-label="Today's dessert collection">
+              <div class="dessert-heading"><div><p class="kk">Today’s table</p><h2 id="dessert-total">0 min</h2></div><span id="dessert-count" class="kk">0 bakes</span></div>
+              <div id="dessert-table" class="dessert-table"></div>
+              <p id="dessert-note" class="dessert-note">A quiet table, for now.</p>
+            </section>
             <div class="blk hello clip join arrive">
               <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
               <div class="today-stats">
@@ -2673,7 +2684,37 @@ function playRooms() {
   clearInterval(liveTimer); liveTimer = setInterval(liveTick, 9000);
   clearInterval(roomClock); roomClock = setInterval(tickRooms, 1000);
 }
+const TABLE_KEY = 'sweet-study-table-v1';
+let tableBakes = [];
+try {
+  const saved = JSON.parse(localStorage.getItem(TABLE_KEY) || '[]');
+  if (Array.isArray(saved)) tableBakes = saved.filter(x => x && recipeById(x.recipe) && Number.isFinite(x.minutes) && x.minutes > 0 && typeof x.day === 'string');
+} catch (_) {}
+function tableDay() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function renderDessertTable() {
+  const today = tableBakes.filter(x => x.day === tableDay());
+  const mins = today.reduce((n, x) => n + x.minutes, 0);
+  setText($('dessert-total'), mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`);
+  setText($('dessert-count'), `${today.length} ${today.length === 1 ? 'bake' : 'bakes'}`);
+  setText($('dessert-note'), today.length ? 'A little collection of your day.' : 'A quiet table, for now.');
+  setHTML($('dessert-table'), today.length ? today.map((x, i) => `<button type="button" class="table-dessert" data-bake="${i}" style="--dessert-size:${Math.round(54 + 46 * Math.min(x.minutes, 90) / 90)}px" aria-label="${esc(recipeById(x.recipe).name)}, ${x.minutes} minutes"><span class="dessert-art">${art(x.recipe)}</span><span class="dessert-minutes">${x.minutes}m</span></button>`).join('') : '<span class="empty-plate" aria-hidden="true"></span>');
+}
+function collectTableBake() {
+  const minutes = Math.round((B.total - B.left) / 60);
+  if (minutes <= 0) return;
+  tableBakes.push({ recipe: recipe.id, minutes, day: tableDay() });
+  try { localStorage.setItem(TABLE_KEY, JSON.stringify(tableBakes)); } catch (_) {}
+  renderDessertTable();
+}
+$('dessert-table').addEventListener('click', e => {
+  const button = e.target.closest('.table-dessert'); if (!button) return;
+  if (!reduced) button.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-7deg)' }, { transform: 'rotate(5deg)' }, { transform: 'rotate(0)' }], { duration: 400 });
+  const item = tableBakes.filter(x => x.day === tableDay())[Number(button.dataset.bake)];
+  if (item) setText($('dessert-note'), `${recipeById(item.recipe).name} · ${item.minutes} min of focus`);
+});
+setInterval(renderDessertTable, 60000);
 function renderTabs() {
+  renderDessertTable();
   // Home: friends baking now, each face inside its own flat shape
   const frames = [['flower6', '#E3A6F7'], ['star', '#8CA7F4'], ['scallop', '#DDEB9E']];
   const more = FRIENDS.length - 3;
@@ -2695,7 +2736,7 @@ function renderTabs() {
   setHTML($('map'), `<span class="pin me" style="left:48%;top:56%"></span>` + SHOPS.map((s, i) => `<span class="pin" style="left:${s.x}%;top:${s.y}%"><svg viewBox="0 0 30 36" width="30" height="36"><polygon points="4,0 26,0 30,4 30,22 15,36 0,22 0,4" fill="#10131A"/><polygon points="9,7 21,7 23,9 23,17 21,19 9,19 7,17 7,9" fill="${s.c}"/></svg></span>`).join(''));
   // the week as minutes per day; every number on Home and Me is summed from it
   // each bake is [recipe, minutes]; today's come from the case, so a joined 18-minute bake counts as 18
-  const today = CASE.filter((c) => c.when === 'Just now').map((c) => [c.r, c.min]);
+  const today = tableBakes.filter(c => c.day === tableDay()).map(c => [c.recipe, c.minutes]);
   const past = NEW ? [[], [], [], [], []] : [[['cupcake', 50], ['latte', 15]], [['macaron', 25]], [['latte', 15]], [['macaron', 25]], [['cupcake', 50]]];
   const WEEK = [...['M', 'T', 'W', 'T', 'F'].map((d, i) => [d, past[i]]), ['S', today, true], ['S', []]];
   const mins = (list) => list.reduce((a, b) => a + b[1], 0);
@@ -2725,7 +2766,7 @@ function renderTabs() {
   setText($('streak-hint'), today.length ? 'kept today' : !streak ? 'first bake starts it' : PREFS.restDay ? 'bake today or rest' : 'bake today');
   setText($('goal-of'), `Goal ${goal} min`);
   // the greeting follows today's progress, not just whether a bake happened
-  setText($('hello-sub'), todayMin >= goal ? 'goal reached.' : todayMin ? 'keep it going.' : 'ready to bake?');
+  setText($('hello-sub'), todayMin ? 'your day, in little moments.' : 'a little space for today.');
   // today in three numbers, like a daily focus report: score weighted by minutes, minutes with the phone down, times you left
   const todayBakes = CASE.filter((c) => c.when === 'Just now');
   const scored = todayBakes.reduce((a, c) => [a[0] + (c.score ?? 100) * c.min, a[1] + c.min], [0, 0]);
@@ -3182,6 +3223,8 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 function finishBake() {
+  if (!B.timer) return;
+  collectTableBake();
   clearSavedBake();
   clearInterval(B.timer); B.timer = null; B.rest = 0; B.restKind = '';
   CARRY = B.goals.filter((g) => !g.done).map((g) => g.text);

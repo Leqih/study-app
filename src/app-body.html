@@ -20,13 +20,11 @@
         <div class="scroll">
           <div class="stack pad">
             <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
-            <div class="blk open arrive">
-              <div class="top">
-                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
-                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
-              </div>
-              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
-            </div>
+            <section class="blk dessert-dashboard arrive" aria-label="Today's dessert collection">
+              <div class="dessert-heading"><div><p class="kk">Today’s table</p><h2 id="dessert-total">0 min</h2></div><span id="dessert-count" class="kk">0 bakes</span></div>
+              <div id="dessert-table" class="dessert-table"></div>
+              <p id="dessert-note" class="dessert-note">A quiet table, for now.</p>
+            </section>
             <div class="blk hello clip join arrive">
               <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
               <div class="today-stats">
