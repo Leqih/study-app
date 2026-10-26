@@ -1186,27 +1186,28 @@ button.pill { position: relative; }
 #speed { min-height: 44px; }
 #clock-label, #session-left { color: var(--text-2); font-size: 13px; }
 
-/* Rooms: bakery reservation tickets, with a separate tear-off seat stub. */
+/* Rooms: flat color and soft silhouettes. */
 #s-rooms .large { padding-bottom: 8px; }
-#s-rooms .rm-pad { padding-top: 20px; }
-#s-rooms .sched { position: relative; border-radius: 8px 28px 8px 8px; border-top: 5px solid var(--blue-soft); box-shadow: 4px 5px 0 #dbe6bb; padding-top: 24px; }
-#s-rooms .sched::before { content: 'THE DAILY BATCH'; position: absolute; top: -15px; left: 18px; padding: 6px 12px; background: #e3a6f7; color: #111113; font: 600 10px var(--mono); letter-spacing: .12em; transform: rotate(-3deg); border-radius: 3px; }
-#s-rooms .rm-rail { padding-top: 30px; padding-bottom: 18px; gap: 20px; }
-#s-rooms .rm-slot { --ticket: #f3ddfc; --ticket-edge: #dca4ef; padding-top: 12px; }
-#s-rooms .rm-slot:nth-child(2) { --ticket: #e3e9fd; --ticket-edge: #a6b8ef; }
-#s-rooms .rm-slot:nth-child(3) { --ticket: #f5edc8; --ticket-edge: #dfca7f; }
-#s-rooms .rm-card { border-radius: 70px 70px 24px 24px; padding: 28px 18px 16px; background: linear-gradient(var(--ticket) 0 115px, #fff 115px); box-shadow: 0 6px 0 var(--ticket-edge), 0 12px 22px -16px #525c35; border: 1px solid var(--ticket-edge); }
-#s-rooms .room-ticket-label { align-self: center; background: #111113; color: white; padding: 7px 13px; border-radius: 4px; font: 500 10px var(--mono); letter-spacing: .15em; margin: -42px 0 18px; transform: rotate(-3deg); }
-#s-rooms .rm-head { display: block; text-align: center; position: relative; }
+#s-rooms .rm-pad { padding-top: 12px; }
+#s-rooms .sched { border: 0; border-radius: 24px; box-shadow: none; }
+#s-rooms .rm-rail { padding-top: 18px; padding-bottom: 18px; gap: 20px; }
+#s-rooms .rm-slot { --room-color: #f3ddfc; }
+#s-rooms .rm-slot:nth-child(2) { --room-color: #e3e9fd; }
+#s-rooms .rm-slot:nth-child(3) { --room-color: #f5edc8; }
+#s-rooms .rm-card { border-radius: 88px 88px 28px 28px; padding: 30px 18px 18px; background: var(--room-color); border: 0; box-shadow: none; filter: none; }
+#s-rooms .rm-slot:nth-child(2) .rm-card { border-radius: 28px 88px 28px 28px; }
+#s-rooms .rm-slot:nth-child(3) .rm-card { border-radius: 88px 28px 28px 28px; }
+#s-rooms .rm-head { display: block; text-align: center; }
 #s-rooms .rm-head h3 { font-size: 23px; }
-#s-rooms .rm-card .cnt { margin-top: 10px; background: white; border: 1px solid var(--ticket-edge); }
-#s-rooms .rm-round { position: relative; border-top: 2px dashed var(--ticket-edge); padding-top: 18px; margin: 10px -18px 0; padding-left: 18px; padding-right: 18px; }
-#s-rooms .rm-round::before, #s-rooms .rm-round::after { content: ''; position: absolute; top: -11px; width: 20px; height: 20px; background: var(--bg); border-radius: 50%; }
-#s-rooms .rm-round::before { left: -10px; box-shadow: inset -1px 0 var(--ticket-edge); }
-#s-rooms .rm-round::after { right: -10px; box-shadow: inset 1px 0 var(--ticket-edge); }
-#s-rooms .rm-join { border-radius: 12px; font-size: 13px; min-height: 48px; }
-#s-rooms .room-section-label { padding: 26px 20px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+#s-rooms .rm-card .cnt { margin-top: 10px; background: transparent; border: 0; color: var(--text); }
+#s-rooms .rm-round { margin-top: 18px; border: 0; }
+#s-rooms .rm-join { border-radius: 24px; font-size: 13px; min-height: 48px; }
+#s-rooms .room-section-label { padding: 24px 20px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 #s-rooms .room-section-label h2 { font-size: 20px; letter-spacing: -.03em; }
-#s-rooms .room-section-label span { font: 11px var(--mono); color: var(--text-2); }
-#s-rooms .stack > .blk { border-radius: 28px 8px 28px 8px; }
-#s-rooms .stack > .blk:last-child { border-radius: 8px 28px 8px 28px; border-top: 4px solid var(--blue-soft); }
+#s-rooms .room-section-label span { font-size: 12px; color: var(--text-2); }
+#s-rooms .blk, #s-rooms .scene *, #s-rooms .sch-ev { box-shadow: none; filter: none; }
+#s-rooms .sch-hours span { border-left: 0; }
+#s-rooms .sch-ev.plan { border: 0; background: var(--brand-tint); }
+#s-rooms .sch-ev.sel { text-decoration: underline; text-underline-offset: 4px; }
+#s-rooms .sch-ev.going::before { content: '✓'; margin-right: 4px; }
+#s-rooms .scene .tbl::before { display: none; }

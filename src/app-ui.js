@@ -281,7 +281,6 @@ const ROOM_SH = [['scallop', '#F3DDFC'], ['flower8', '#E3E9FD'], ['star', '#DDEB
 function roomCard(r, i) {
   const who = FRIENDS.find((f) => r.f.includes(f.n)), p = 1 - r.left / (r.len * 60);
   return `<div class="rm-slot"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-expanded="false" aria-label="${r.n}, ${r.k} baking">
-    <span class="room-ticket-label">TABLE 0${i + 1} · COME ON IN</span>
     <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here</span></div>
     ${roomTable(r, i)}
     <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm"><b>${r.f.length}</b> ${r.f.length > 1 ? 'friends' : 'friend'} · +${r.k - r.f.length} bakers<br>${r.len}-min rounds</p></div>
