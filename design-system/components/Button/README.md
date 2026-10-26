@@ -1,19 +1,21 @@
-A chamfered button that names the action and, when it helps, its outcome after a middle dot.
+A capsule button that names the action and, when it helps, its outcome after a middle dot. Primary actions are black.
 
-**Markup.** `<button class="btn cut">`, plus one variant and at most one size:
+**Markup.** `<button class="btn rounded">`, plus one variant and at most one size:
 
 | Variant | Class | Use |
 | --- | --- | --- |
-| Primary | (none) | The one main action of a screen, in the bottom bar. `text` fill, `on-dark` label. |
-| Accent | `pink` | The step that moves the bake forward once it is ready (“Preheat the oven · 50 min”). `brand` fill, `text` label. |
-| Secondary | `soft` | A gentle alternative beside the primary (“Put the egg back”, “Close”). `brand-tint` fill. |
-| Outline | `line` | A deliberate but unwelcome action (“Open the oven early”). |
-| Text link | `.link` (no `.btn`) | A low-weight alternative under a card (“Pick another recipe”). `brand-strong`. |
+| Primary | (none) | The one main action of a screen. `text` (black) fill, `on-dark` label. |
+| Hero | `go` | The main action of a hero card: a 60-tall black capsule with a 48 round `brand` arrow on the right (`<i>` holding the arrow). |
+| Accent | `pink` | Rare; a step that should stand out without being primary. `brand` fill, black label. |
+| Secondary | `soft` | A gentle alternative beside the primary ("Pause · 2 min", "Decorate"). `sunken` fill. `soft small` is the pink row action ("Join"). |
+| Outline | `line` | A deliberate but unwelcome action ("End early", "Prep first"). Glass fill with a `line-strong` ring. |
+| Text link | `.link` (no `.btn`) | A low-weight alternative under a card ("Choose another recipe"). `text-2`, bold. |
 
-Sizes: default `h-l` 52 with `headline` text and `cut-m`; `m` is `h-m` 40 with `callout`; `small` is `h-s` 32 with `subhead` and `cut-s`, for inline tools.
+Sizes: default `h-l` 56 with `headline`; `m` is `h-m` 42; `small` is `h-s` 34 for row actions and inline tools.
 
 **Rules.**
-- One primary or accent button per screen. In a bottom bar the primary stretches; a secondary sits at its content width beside it.
-- Disabled uses the `disabled` attribute (or `aria-disabled="true"` when it must stay focusable). It turns `sunken` with a `text-3` label; say what is missing in the label (“Crack an egg”) rather than greying a generic one.
-- A hold-to-act button (pouring flour) shows its progress as a 4px `highlight` line along the bottom edge.
-- Never round the corners or add a shadow.
+- One primary or hero button per screen. In a bottom bar the primary stretches; a secondary sits at its content width beside it.
+- Never white text on pink. Pink is for the arrow and for selection.
+- Disabled turns `sunken` with a `text-3` label; say what's missing in the label ("Crack an egg").
+- A hold-to-act button (pouring flour) shows its progress as a 4px `brand` line along the bottom edge.
+- Presses scale to .96 with the spring curve.

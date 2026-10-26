@@ -108,7 +108,7 @@ function jar(c, x, base, w, h, lid, sticker, label) {
   if (sticker) { // sugar: white crystals, pink label
     poly(c, [x + 2, base - h * .55, x + w - 2, base - h * .55, x + w - 2, base - 2, x + 2, base - 2], '#FFFFFF');
     poly(c, [x + 4, base - 22, x + w - 4, base - 22, x + w - 4, base - 12, x + 4, base - 12], lid);
-    c.fillStyle = C.ink; c.font = '500 6px "DM Mono", ui-monospace, monospace'; c.textAlign = 'center'; c.fillText(label, x + w / 2, base - 15);
+    c.fillStyle = C.ink; c.font = '500 6px ui-monospace, "SF Mono", Menlo, Consolas, monospace'; c.textAlign = 'center'; c.fillText(label, x + w / 2, base - 15);
   } else { // sprinkles
     const cols = [C.pink, C.sky, C.lemon, C.caramel, '#FFFFFF'];
     for (let k = 0; k < 18; k++) { c.fillStyle = cols[k % 5]; c.fillRect(x + 3 + (k * 7) % (w - 8), base - 4 - Math.floor(k / 4) * 4, 4, 2); }
@@ -185,7 +185,7 @@ function drawBag(c) {
   // label with a wheat ear
   poly(c, [-30, -64, 30, -64, 31, -22, -31, -22], C.sky); poly(c, [0, -64, 30, -64, 31, -22, 0, -22], C.skyD);
   poly(c, [-31, -27, 31, -27, 31, -22, -31, -22], '#1593CA');
-  c.fillStyle = '#fff'; c.font = '500 12px "DM Mono", ui-monospace, monospace'; c.textAlign = 'center'; c.fillText('FLOUR', 0, -32);
+  c.fillStyle = '#fff'; c.font = '500 12px ui-monospace, "SF Mono", Menlo, Consolas, monospace'; c.textAlign = 'center'; c.fillText('FLOUR', 0, -32);
   poly(c, [-1, -60, 1, -60, 1, -42, -1, -42], '#FFF6E6');
   [[-49], [-53], [-57]].forEach(([y]) => { poly(c, [0, y, -6, y - 3, -4, y + 2], C.lemon); poly(c, [0, y, 6, y - 3, 4, y + 2], C.lemonD); });
   c.restore();
@@ -211,11 +211,11 @@ function drawScale(c, dy) {
   // The display blinks mint after a perfect pour.
   const blink = S.flash > 0 && Math.floor(S.flash * 8) % 2 === 0;
   poly(c, [134, 316, 224, 316, 224, 344, 134, 344], blink ? C.mint : C.ink);
-  c.fillStyle = blink ? C.ink : C.lemon; c.font = '500 18px "DM Mono", ui-monospace, monospace'; c.textAlign = 'center'; c.fillText((S.pouring ? Math.round(S.grams / 10) : minutes()) + ' min', 179, 337); // the scale reads out study time
+  c.fillStyle = blink ? C.ink : C.lemon; c.font = '500 18px ui-monospace, "SF Mono", Menlo, Consolas, monospace'; c.textAlign = 'center'; c.fillText((S.pouring ? Math.round(S.grams / 10) : minutes()) + ' min', 179, 337); // the scale reads out study time
   // Recipe mark on the platform edge: a small flag that turns mint once you're in the window.
   const near = Math.abs(S.grams - RECIPE_G) <= PERFECT_WINDOW;
   poly(c, [258, 318, 304, 318, 300, 342, 254, 342], near ? C.mint : '#FFFFFF');
-  c.fillStyle = C.ink; c.font = '500 11px "DM Mono", ui-monospace, monospace'; c.fillText(`${RECIPE_G / 10} min`, 279, 334);
+  c.fillStyle = C.ink; c.font = '500 11px ui-monospace, "SF Mono", Menlo, Consolas, monospace'; c.fillText(`${RECIPE_G / 10} min`, 279, 334);
 }
 function landGrain(col) { S.heights[col] += GRAIN_VOLUME; S.landed++; S.grams = Math.min(MAX_G, S.landed * G_PER_GRAIN); }
 function stepPour(dt) {

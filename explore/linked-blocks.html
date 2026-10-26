@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linked Blocks Layout</title>
+<style>
+  /* Layout from BRIK (stacked blocks joined by necks, light type, tick bars, a split dock).
+     Graphic language from Classly and Intelly (flat flowers, stars and scallops as frames and
+     backgrounds; a segmented arc gauge with icon badges; steps inside different shapes).
+     Colour is ours: mint, pink, black, on a pale mint page. */
+  :root {
+    --sys: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --page: #D9F0EC; --block: #FFFFFF; --hero: #5BE0D4; --ink: #111113; --t2: #66666E; --t3: #A3A3AB;
+    --pink: #F26BC1; --pink-tint: #FFE1F2; --mint-tint: #CFF3EE; --mint-deep: #2FB8AB;
+    --gap: 7px; --r: 22px; --ease: cubic-bezier(.22, 1, .36, 1); --spring: cubic-bezier(.34, 1.56, .64, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E3E6E8; font-family: var(--sys); -webkit-font-smoothing: antialiased; color: var(--ink); }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 16px 48px; }
+  .page > header h1 { font-size: 26px; font-weight: 700; }
+  .page > header p { margin-top: 6px; color: #55555C; font-size: 15px; line-height: 22px; max-width: 840px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 32px; justify-items: center; margin-top: 24px; }
+  .col { width: 390px; max-width: 100%; }
+  .label { margin-bottom: 12px; } .label b { display: block; font-size: 17px; } .label span { font-size: 14px; color: #55555C; }
+  .notes { margin: 32px auto 0; max-width: 900px; font-size: 14px; line-height: 22px; color: #3A3A40; background: #fff; border-radius: 20px; padding: 20px 24px; }
+  .notes h2 { font-size: 17px; margin-bottom: 8px; }
+  .notes table { width: 100%; border-collapse: collapse; }
+  .notes td { padding: 8px 12px 8px 0; border-top: 1px solid #EEE; vertical-align: top; } .notes td:first-child { width: 22%; font-weight: 600; }
+
+  .phone { width: 390px; max-width: 100%; height: 844px; border-radius: 52px; overflow: hidden; position: relative; background: var(--page); box-shadow: 0 0 0 10px #111, 0 30px 60px -20px rgba(0,0,0,.35); }
+  .sb { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 36px; font-weight: 600; font-size: 16px; position: relative; z-index: 5; }
+  .sb .isl { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; margin-left: -60px; background: #000; border-radius: 20px; }
+  .body { position: absolute; inset: 50px 0 0; padding: 6px 12px 100px; overflow-y: auto; scrollbar-width: none; }
+  .body::-webkit-scrollbar { display: none; }
+  .art svg, .shape svg { display: block; width: 100%; height: 100%; }
+  .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---- blocks, and the necks that join them ---- */
+  .stack { display: flex; flex-direction: column; gap: var(--gap); }
+  .blk { position: relative; background: var(--block); border-radius: var(--r); padding: 16px 18px; }
+  .blk.hero { background: var(--hero); }
+  .blk.clip { overflow: hidden; }
+  .blk.join::before, .blk.join::after { content: ""; position: absolute; top: calc(-1 * var(--gap) - 7px); width: 30px; height: calc(var(--gap) + 14px); background: inherit; z-index: 1;
+    -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+            mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat; }
+  .blk.join::before { left: 26px; } .blk.join::after { right: 26px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); position: relative; }
+  .pair::after { content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--gap) + 14px); height: 30px; margin: -15px 0 0 calc(-1 * (var(--gap) + 14px) / 2); background: var(--block);
+    -webkit-mask: radial-gradient(circle 8px at 50% 0, #0000 97%, #000) top / 100% 51% no-repeat, radial-gradient(circle 8px at 50% 100%, #0000 97%, #000) bottom / 100% 51% no-repeat;
+            mask: radial-gradient(circle 8px at 50% 0, #0000 97%, #000) top / 100% 51% no-repeat, radial-gradient(circle 8px at 50% 100%, #0000 97%, #000) bottom / 100% 51% no-repeat; }
+
+  /* flat shapes, used as backgrounds and frames (never as decoration on their own) */
+  .shape { position: absolute; pointer-events: none; }
+  .spin { animation: spin 40s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
+
+  .brand { display: flex; justify-content: space-between; align-items: center; padding: 18px; }
+  .logo { font-size: 20px; font-weight: 500; letter-spacing: -.04em; }
+  .logo i { font-style: normal; color: var(--pink); }
+  .logo sup { font-size: 9px; vertical-align: top; }
+  .pill { height: 26px; padding: 0 10px; border-radius: 7px; display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .pill.pink { background: var(--pink-tint); color: #A8126A; }
+  .pill.ink { background: var(--ink); color: #fff; }
+  .pill.mint { background: var(--mint-tint); color: #0E6E65; }
+  .pill .mini { width: 14px; height: 14px; }
+
+  .hello { padding: 22px 18px; min-height: 104px; }
+  .hello p { position: relative; font-size: 26px; font-weight: 400; line-height: 31px; letter-spacing: -.02em; }
+  .hello span { color: var(--t2); }
+  .hello .shape { right: -22px; bottom: -34px; width: 132px; height: 132px; }
+  .hello .face { position: absolute; right: 30px; bottom: 16px; width: 42px; height: 42px; }
+
+  .k { font-size: 14px; font-weight: 500; }
+  .kk { font-size: 12px; color: var(--t2); margin-top: 3px; }
+  .hero .kk { color: rgba(17,17,19,.65); }
+  .prog { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .prog b { font-size: 40px; font-weight: 400; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ticks { flex: 1; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; height: 28px; }
+  .ticks i { border-radius: 3px; background: rgba(17,17,19,.14); }
+  .ticks i.on { background: var(--ink); }
+  .ticks i.now { background: var(--pink); }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 10px; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; color: rgba(17,17,19,.55); }
+
+  /* the plain row between blocks: the dessert sits on a scalloped plate */
+  .open { display: flex; align-items: center; gap: 10px; padding: 14px 6px 14px 18px; }
+  .open .g { flex: 1; min-width: 0; }
+  .open h3 { font-size: 20px; font-weight: 400; letter-spacing: -.02em; margin-top: 6px; }
+  .plate { position: relative; width: 82px; height: 82px; flex-shrink: 0; }
+  .plate .shape { inset: 0; }
+  .plate .art { position: absolute; left: 11px; top: 12px; width: 60px; height: 52px; }
+  .sq { height: 42px; padding: 0 16px; border-radius: 12px; background: var(--ink); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; transition: transform .35s var(--spring); }
+  .sq:active { transform: scale(.94); }
+
+  /* small Intelly-style gauge: an arc of segments around a number */
+  .gauge { position: relative; width: 112px; height: 64px; margin: 10px auto 0; }
+  .gauge svg { position: absolute; inset: 0; overflow: visible; }
+  .gauge b { position: absolute; left: 0; right: 0; bottom: -2px; text-align: center; font-size: 24px; font-weight: 400; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .gauge small { font-size: 11px; color: var(--t2); }
+  /* friends inside shape frames */
+  .faces { display: flex; margin-top: 12px; }
+  .frame { position: relative; width: 42px; height: 42px; margin-left: -8px; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+  .frame:first-child { margin-left: 0; }
+  .frame .shape { inset: 0; }
+  .frame > span:not(.shape) { position: absolute; inset: 0; display: grid; place-items: center; }
+  .num { font-size: 24px; font-weight: 400; letter-spacing: -.02em; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .num small { font-size: 13px; color: var(--t2); letter-spacing: 0; }
+
+  .ach { display: flex; justify-content: space-between; align-items: baseline; }
+  .ach a { font-size: 12px; color: var(--t2); }
+  .ach-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .badge { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+  .badge .shape { inset: 0; }
+  .badge .art { position: absolute; left: 9px; top: 10px; width: 30px; height: 26px; }
+  .ach-row b { font-size: 22px; font-weight: 400; letter-spacing: -.02em; }
+  .ach-row .tags { display: flex; gap: 4px; margin-left: auto; }
+
+  .dock { position: absolute; left: 12px; right: 12px; bottom: 26px; display: flex; align-items: center; gap: 8px; justify-content: center; z-index: 6; }
+  .round { width: 46px; height: 46px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; flex-shrink: 0; transition: transform .35s var(--spring); }
+  .round:active { transform: scale(.92); }
+  .round.light { background: #fff; color: var(--ink); }
+  .seg { display: flex; padding: 3px; border-radius: 23px; background: var(--ink); }
+  .seg button { height: 40px; padding: 0 14px; border-radius: 20px; color: #fff; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .08em; transition: background .25s, color .25s; }
+  .seg button.on { background: var(--hero); color: var(--ink); }
+
+  /* ---- bake ---- */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); padding: 18px; }
+  .metrics p { font-size: 12px; color: rgba(17,17,19,.65); }
+  .metrics b { display: block; font-size: 22px; font-weight: 400; letter-spacing: -.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .hint { text-align: center; font-size: 13px; line-height: 18px; margin-top: 20px; }
+  /* the segmented arc gauge around the dessert, with three icon badges on it */
+  .oven { position: relative; width: 258px; height: 258px; margin: 16px auto 0; }
+  .oven svg.segs { position: absolute; inset: 0; }
+  .oven .core { position: absolute; inset: 40px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+  .oven .core .shape { inset: -6px; }
+  .oven .core .art { position: relative; width: 120px; height: 104px; animation: rise 4s ease-in-out infinite; }
+  @keyframes rise { 50% { transform: scale(1.04); } }
+  .ob { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 6px 14px -8px rgba(17,17,19,.4); }
+  .ob .ico { width: 16px; height: 16px; }
+  .ob.a { left: 4px; top: 70px; } .ob.b { right: 4px; top: 70px; } .ob.c { left: 50%; bottom: -6px; margin-left: -17px; background: var(--ink); color: #fff; }
+  /* the round plan: each step in its own shape, the current one filled black */
+  .plan { display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+  .step { position: relative; width: 62px; height: 62px; display: grid; place-content: center; text-align: center; }
+  .step .shape { inset: 0; }
+  .step b, .step small { position: relative; display: block; }
+  .step b { font-size: 18px; font-weight: 500; letter-spacing: -.02em; line-height: 18px; font-variant-numeric: tabular-nums; }
+  .step small { font-family: var(--mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+  .step.now { color: #fff; }
+  .clock { text-align: center; font-size: 80px; font-weight: 300; letter-spacing: -.05em; color: #BCC7C5; font-variant-numeric: tabular-nums; margin-top: 8px; line-height: 1; }
+  .two { position: absolute; left: 12px; right: 12px; bottom: 28px; display: flex; gap: 8px; }
+  .two button { flex: 1; height: 52px; border-radius: 26px; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; transition: transform .35s var(--spring); }
+  .two button:active { transform: scale(.96); }
+  .two .fill { background: var(--ink); color: #fff; }
+  .two .line { box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+  .in { opacity: 0; transform: translateY(8px); animation: in .6s var(--ease) forwards; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  .stack > :nth-child(2) { animation-delay: .05s; } .stack > :nth-child(3) { animation-delay: .1s; } .stack > :nth-child(4) { animation-delay: .15s; } .stack > :nth-child(5) { animation-delay: .2s; } .stack > :nth-child(6) { animation-delay: .25s; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } .in { opacity: 1; transform: none; } }
+  @media (max-width: 440px) { .phone { height: 800px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>细化：连在一起的模块 + 形状图形</h1>
+    <p>排版沿用上一版（BRIK）：连在一起的模块、细字重、竖格进度、分段底栏。新加的图形元素来自 Classly 和 Intelly：扁平的花形、星形、波浪圆当作甜点的底盘和头像的相框；计时用一圈分段弧形进度，上面挂三个小图标；轮次计划放在不同的形状里。颜色仍是青、粉、黑。</p>
+  </header>
+  <div class="cols">
+
+    <section class="col">
+      <div class="label"><b>首页 Home</b><span>形状只用来托住内容：甜点的底盘、朋友的相框、徽章</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span></span></div>
+        <div class="body">
+          <div class="stack">
+            <div class="blk brand in"><span class="logo">Sweet<i>·</i>Study<sup>®</sup></span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#F26BC1"></span>5-day streak</span></div>
+            <div class="blk hello clip in join">
+              <span class="shape spin" data-shape="flower8" data-fill="#CFF3EE"></span>
+              <span class="face" data-shape="smile"></span>
+              <p>Leqi,<br><span>ready to bake?</span></p>
+            </div>
+            <div class="blk hero in join">
+              <p class="k">Weekly goal</p>
+              <p class="kk">Bake a little every day. 3 h of 5 h.</p>
+              <div class="prog"><b>60%</b><div class="ticks" id="ticks"></div></div>
+            </div>
+            <div class="open in">
+              <div class="g"><p class="kk" style="margin:0 0 6px">Today’s order</p><span class="pill ink">2 × 25 min</span><h3>Strawberry cupcake</h3></div>
+              <div class="plate"><span class="shape" data-shape="scallop" data-fill="#FFE1F2"></span><div class="art" data-art="cupcake"></div></div>
+              <button class="sq">START</button>
+            </div>
+            <div class="pair in">
+              <div class="blk"><p class="k">Focus today</p><p class="kk">Goal 120 min</p><div class="gauge" id="gauge"><b>0<small> min</small></b></div></div>
+              <div class="blk"><p class="k">Baking now</p><p class="kk">In Quiet library</p><div class="faces" id="faces"></div><p class="num">3<small> friends</small></p></div>
+            </div>
+            <div class="blk in">
+              <div class="ach"><p class="k">Recently baked</p><a>View all</a></div>
+              <div class="ach-row"><span class="badge"><span class="shape" data-shape="star" data-fill="#5BE0D4"></span><span class="art" data-art="macaron"></span></span><b>Golden macaron</b><span class="tags"><span class="pill mint">25 min</span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="dock">
+          <button class="round light" aria-label="Profile"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></button>
+          <div class="seg"><button class="on">TODAY</button><button>ROOMS</button><button>NEARBY</button></div>
+          <button class="round" aria-label="New bake"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="label"><b>烘焙中 Baking</b><span>分段弧形进度 + 三个图标，轮次放在不同形状里</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span></span></div>
+        <div class="body">
+          <div class="stack">
+            <div class="blk brand in"><span class="logo">Sweet<i>·</i>Study<sup>®</sup></span><span class="pill mint">Standard lock</span></div>
+            <div class="blk hero metrics in join"><div><p>Round</p><b>1 / 2</b></div><div><p>Goals</p><b>0 / 2</b></div><div><p>Exits</p><b>0</b></div></div>
+          </div>
+          <p class="hint">Keep the door shut.<br>Locking your screen is fine.</p>
+          <div class="oven">
+            <svg class="segs" id="segs" viewBox="0 0 258 258" aria-hidden="true"></svg>
+            <div class="core"><span class="shape spin" data-shape="flower12" data-fill="#FFE1F2"></span><div class="art" data-art="cupcake"></div></div>
+            <span class="ob a" title="Lock"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+            <span class="ob b" title="Sound"><svg class="ico" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></span>
+            <span class="ob c" title="Goals"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></span>
+          </div>
+          <div class="plan" id="plan"></div>
+          <p class="clock" id="clock">48:36</p>
+        </div>
+        <div class="two"><button class="fill">PAUSE</button><button class="line">END</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <h2>这一版加了什么</h2>
+    <table>
+      <tr><td>形状托住内容</td><td>参考 Classly / Intelly：甜点放在粉色波浪圆的底盘上，朋友头像放在花形、星形、波浪圆的相框里，"最近出炉"的甜点放在青色星形徽章里。形状从不单独当装饰，每个形状里都装着东西。</td></tr>
+      <tr><td>问候块</td><td>右下角一朵缓慢转动、被裁掉一半的浅青色八瓣花，上面一个简笔笑脸，让最空的那一块有点表情。</td></tr>
+      <tr><td>分段弧形进度</td><td>参考 Intelly 的健康分：烘焙进度是 36 段的圆弧，已完成是青色、当前一段是粉色、剩下是浅灰；圆弧上挂着三个小图标（锁、声音、目标）。首页"今日专注"也是同样的小半圆。</td></tr>
+      <tr><td>形状里的步骤</td><td>参考 Intelly 的 01/02/03：轮次计划是三个形状，烘焙是圆、休息是花；当前这一步是黑色实心。</td></tr>
+      <tr><td>没变的</td><td>连在一起的模块、细字重、竖格周进度、底部"圆按钮 + 分段胶囊 + 圆按钮"、超大浅灰计时、一实一空的按钮。</td></tr>
+    </table>
+  </div>
+</div>
+<script>
+(async () => {
+  let ART = {};
+  try { ART = await (await fetch('../src/art.json')).json(); } catch (e) {}
+  document.querySelectorAll('[data-art]').forEach((el) => { el.innerHTML = ART[el.dataset.art] ? `<svg viewBox="0 0 200 172" aria-hidden="true">${ART[el.dataset.art]}</svg>` : ''; });
+
+  // flat shapes on a 100 × 100 box
+  const pt = (r, a) => `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`;
+  const flower = (n, R = 50, r = 34) => { // rounded petals: arcs between valley points
+    const d = []; for (let i = 0; i < n; i++) { const a0 = (i / n) * 2 * Math.PI, a1 = ((i + 1) / n) * 2 * Math.PI; const pr = (R - r) / 1 + 2;
+      d.push(`${i ? '' : 'M' + pt(r, a0)} A ${(r * Math.sin(Math.PI / n) + pr / 2).toFixed(2)} ${(r * Math.sin(Math.PI / n) + pr / 2).toFixed(2)} 0 0 1 ${pt(r, a1)}`); }
+    return d.join(' ') + 'Z'; };
+  const star = (n, R = 50, r = 34) => 'M' + Array.from({ length: n * 2 }, (_, i) => pt(i % 2 ? r : R, (i / (n * 2)) * 2 * Math.PI - Math.PI / 2)).join(' L') + 'Z';
+  const scallop = (n = 14) => { const r = 44; const d = []; for (let i = 0; i < n; i++) { const a0 = (i / n) * 2 * Math.PI, a1 = ((i + 1) / n) * 2 * Math.PI; d.push(`${i ? '' : 'M' + pt(r, a0)} A 10.5 10.5 0 0 1 ${pt(r, a1)}`); } return d.join(' ') + 'Z'; };
+  const SHAPES = {
+    flower8: () => flower(8, 50, 36), flower12: () => flower(12, 50, 40), flower6: () => flower(6, 50, 32),
+    star: () => star(8, 50, 36), scallop: () => scallop(14),
+  };
+  const shapeSvg = (k, fill) => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${SHAPES[k]()}" fill="${fill}"/></svg>`;
+  document.querySelectorAll('[data-shape]').forEach((el) => {
+    const k = el.dataset.shape;
+    if (k === 'smile') { el.innerHTML = '<svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="20" fill="#5BE0D4"/><circle cx="15" cy="17" r="2.4" fill="#111113"/><circle cx="27" cy="17" r="2.4" fill="#111113"/><path d="M13 25c2.4 3.4 13.6 3.4 16 0" fill="none" stroke="#111113" stroke-width="2.4" stroke-linecap="round"/></svg>'; return; }
+    el.innerHTML = shapeSvg(k, el.dataset.fill || '#5BE0D4');
+  });
+
+  // weekly ticks: 12 of 20 done, today's in pink
+  document.getElementById('ticks').innerHTML = Array.from({ length: 20 }, (_, i) => `<i class="${i < 12 ? 'on' : i === 12 ? 'now' : ''}"></i>`).join('');
+
+  // friends in shape frames
+  const F = [['M', '#FFB3DA', 'flower6'], ['J', '#5BE0D4', 'star'], ['A', '#FFE08A', 'scallop']];
+  document.getElementById('faces').innerHTML = F.map(([n, c, k]) => `<span class="frame"><span class="shape">${shapeSvg(k, c)}</span><span>${n}</span></span>`).join('');
+
+  // segmented arc: n segments around a circle (or a half circle for the small gauge)
+  const arc = (cx, cy, r, from, to, n, done, w, gap = .5) => Array.from({ length: n }, (_, i) => {
+    const span = (to - from) / n, a0 = from + i * span + gap / 2 * span, a1 = from + (i + 1) * span - gap / 2 * span;
+    const p = (a) => `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`;
+    const col = i < done ? '#5BE0D4' : i === done ? '#F26BC1' : 'rgba(17,17,19,.1)';
+    return `<path d="M${p(a0)} A ${r} ${r} 0 0 1 ${p(a1)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" style="transition:stroke .3s"/>`;
+  }).join('');
+  document.getElementById('gauge').insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 112 64" aria-hidden="true">${arc(56, 58, 50, Math.PI, 2 * Math.PI, 14, 0, 7, .35)}</svg>`);
+  const segs = document.getElementById('segs');
+  let done = 0; const N = 36, target = 9;
+  const drawSegs = () => { segs.innerHTML = arc(129, 129, 118, -Math.PI / 2, 1.5 * Math.PI, N, done, 12, .32); };
+  drawSegs(); const grow = setInterval(() => { if (done >= target) return clearInterval(grow); done++; drawSegs(); }, 90);
+
+  // the round plan, each step in its own shape
+  const P = [['25', 'bake', 'scallop', true], ['5', 'break', 'flower6'], ['25', 'bake', 'scallop']];
+  document.getElementById('plan').innerHTML = P.map(([n, l, k, now]) => `<span class="step ${now ? 'now' : ''}"><span class="shape">${shapeSvg(k, now ? '#111113' : l === 'break' ? '#FFE1F2' : '#FFFFFF')}</span><b>${n}</b><small>${l}</small></span>`).join('');
+
+  let left = 48 * 60 + 36; setInterval(() => { left = Math.max(0, left - 1); document.getElementById('clock').textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`; }, 1000);
+})();
+</script>
+</body>
+</html>

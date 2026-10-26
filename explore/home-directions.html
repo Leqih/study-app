@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Directions</title>
+<style>
+  :root { --sys: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9E6EA; font-family: var(--sys); color: #1C1C1E; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 16px 48px; }
+  .page > header { margin-bottom: 24px; }
+  .page > header h1 { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+  .page > header p { margin-top: 6px; color: #5A5A60; font-size: 15px; line-height: 22px; max-width: 720px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 32px; justify-items: center; }
+  .col { width: 390px; max-width: 100%; }
+  .label { margin-bottom: 12px; }
+  .label b { display: block; font-size: 17px; }
+  .label span { font-size: 14px; color: #5A5A60; line-height: 20px; }
+  .notes { margin-top: 16px; font-size: 14px; line-height: 21px; color: #3A3A40; }
+  .notes p + p { margin-top: 6px; }
+  .notes .k { font-weight: 600; }
+
+  /* shared phone shell: 390 × 844, iPhone 14/15 size */
+  .phone { width: 390px; max-width: 100%; height: 844px; border-radius: 48px; overflow: hidden; position: relative; box-shadow: 0 0 0 10px #111, 0 30px 60px -20px rgba(0,0,0,.35); }
+  .sb { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 34px; font-weight: 600; font-size: 16px; position: relative; z-index: 3; }
+  .sb .isl { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; margin-left: -60px; background: #000; border-radius: 20px; }
+  .sb .ic { display: flex; gap: 6px; align-items: center; }
+  .scroll { position: absolute; inset: 50px 0 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 100px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  .art svg { display: block; width: 100%; height: 100%; }
+  .ico { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .av { border-radius: 50%; display: grid; place-items: center; font-weight: 600; color: #fff; flex-shrink: 0; }
+
+  /* =============== A: iOS native, brand as accent =============== */
+  .a { --tint: #D12F8E; --bg: #F2F2F7; --card: #FFFFFF; --sep: rgba(60,60,67,.18); --t2: rgba(60,60,67,.6); --green: #34C759; background: var(--bg); }
+  .a .top { padding: 4px 16px 0; display: flex; align-items: flex-end; justify-content: space-between; }
+  .a .top .d { font-size: 13px; font-weight: 600; color: var(--t2); text-transform: uppercase; letter-spacing: .02em; }
+  .a .top h1 { font-size: 34px; font-weight: 700; letter-spacing: .01em; line-height: 41px; }
+  .a .me { width: 36px; height: 36px; background: #FFB340; font-size: 15px; margin-bottom: 4px; }
+  .a .sec { padding: 0 16px; margin-top: 22px; }
+  .a .sec-h { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px 8px; }
+  .a .sec-h h2 { font-size: 20px; font-weight: 700; }
+  .a .sec-h a { font-size: 15px; color: var(--tint); text-decoration: none; }
+  .a .card { background: var(--card); border-radius: 12px; }
+  .a .focus { padding: 16px; display: flex; gap: 14px; align-items: center; }
+  .a .focus .art { width: 64px; height: 56px; flex-shrink: 0; background: #FCEAF4; border-radius: 12px; padding: 6px 4px 2px; }
+  .a .focus .t { font-size: 17px; font-weight: 600; }
+  .a .focus .s { font-size: 15px; color: var(--t2); margin-top: 2px; }
+  .a .focus-btn { margin: 0 16px 16px; display: flex; gap: 10px; }
+  .a .btn { height: 50px; border-radius: 12px; font-size: 17px; font-weight: 600; display: grid; place-items: center; }
+  .a .btn.fill { flex: 1; background: var(--tint); color: #fff; }
+  .a .btn.gray { width: 50px; background: rgba(118,118,128,.12); color: var(--tint); }
+  .a .rings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .a .tile { padding: 14px 16px; }
+  .a .tile .h { font-size: 13px; color: var(--t2); display: flex; align-items: center; gap: 6px; }
+  .a .tile .v { font-size: 28px; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .a .tile .v small { font-size: 15px; font-weight: 500; color: var(--t2); }
+  .a .tile .bar { height: 6px; border-radius: 3px; background: rgba(118,118,128,.16); margin-top: 10px; overflow: hidden; }
+  .a .tile .bar i { display: block; height: 100%; width: 0; background: var(--green); }
+  .a .tile .foot { font-size: 13px; color: var(--t2); margin-top: 8px; }
+  .a .chart { padding: 16px 16px 12px; }
+  .a .chart .sum { font-size: 13px; color: var(--t2); }
+  .a .chart .big { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .a .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 110px; align-items: end; margin-top: 14px; }
+  .a .bars div { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; font-size: 12px; color: var(--t2); }
+  .a .bars i { width: 100%; max-width: 22px; border-radius: 4px; background: #F2A8D3; }
+  .a .bars .now i { background: var(--tint); }
+  .a .bars .now { color: var(--tint); font-weight: 600; }
+  .a .list .row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-height: 60px; position: relative; }
+  .a .list .row + .row::before { content: ""; position: absolute; left: 68px; right: 0; top: 0; height: .5px; background: var(--sep); }
+  .a .list .av { width: 40px; height: 40px; font-size: 16px; }
+  .a .list .g { flex: 1; min-width: 0; }
+  .a .list .t { font-size: 17px; }
+  .a .list .s { font-size: 14px; color: var(--t2); margin-top: 1px; }
+  .a .pill { height: 30px; padding: 0 14px; border-radius: 15px; background: rgba(209,47,142,.12); color: var(--tint); font-size: 15px; font-weight: 600; }
+  .a .chev { color: rgba(60,60,67,.3); }
+  .a .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding-top: 7px; background: rgba(249,249,249,.94); border-top: .5px solid var(--sep); display: flex; z-index: 3; }
+  .a .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; font-weight: 500; color: #8E8E93; }
+  .a .tabbar .on { color: var(--tint); }
+
+  /* =============== B: brand-forward, restrained =============== */
+  .b { --brand: #E2489F; --brand-soft: #FCE7F2; --bg: #FBF6F0; --card: #FFFFFF; --line: #EEE6DC; --t2: #6E6A66; --mint: #1FB89A; background: var(--bg); }
+  .b .top { padding: 6px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+  .b .top .d { font-size: 14px; color: var(--t2); }
+  .b .top h1 { font-size: 28px; font-weight: 700; letter-spacing: -.01em; margin-top: 2px; }
+  .b .me { width: 40px; height: 40px; background: #F6B73C; font-size: 16px; }
+  .b .sec { padding: 0 20px; margin-top: 24px; }
+  .b .sec-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .b .sec-h h2 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .b .sec-h a { font-size: 15px; font-weight: 600; color: var(--brand); text-decoration: none; }
+  .b .card { background: var(--card); border-radius: 20px; }
+  .b .hero { background: var(--brand-soft); border-radius: 24px; padding: 20px; position: relative; overflow: hidden; }
+  .b .hero .k { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--brand); text-transform: uppercase; }
+  .b .hero h2 { font-size: 24px; font-weight: 700; letter-spacing: -.01em; line-height: 30px; margin-top: 6px; max-width: 190px; }
+  .b .hero .meta { font-size: 15px; color: var(--t2); margin-top: 6px; }
+  .b .hero .art { position: absolute; right: 16px; top: 18px; width: 112px; height: 96px; }
+  .b .hero .btn { margin-top: 20px; height: 52px; border-radius: 16px; background: #1C1C1E; color: #fff; font-size: 17px; font-weight: 600; width: 100%; }
+  .b .hero .alt { display: block; margin: 12px auto 0; font-size: 15px; font-weight: 600; color: var(--brand); }
+  .b .stats { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+  .b .stat { padding: 16px; }
+  .b .stat .h { font-size: 13px; color: var(--t2); }
+  .b .stat .v { font-size: 26px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .b .stat .v small { font-size: 14px; font-weight: 500; color: var(--t2); }
+  .b .stat .bar { height: 8px; border-radius: 4px; background: #F1EAE2; margin-top: 10px; overflow: hidden; }
+  .b .stat .bar i { display: block; height: 100%; width: 0; background: var(--mint); }
+  .b .stat .foot { font-size: 13px; color: var(--t2); margin-top: 8px; }
+  .b .week { padding: 16px 12px 12px; display: grid; grid-template-columns: repeat(7, 1fr); }
+  .b .day { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--t2); }
+  .b .day .art { width: 36px; height: 31px; }
+  .b .day .empty { width: 36px; height: 31px; display: grid; place-items: center; }
+  .b .day .empty::after { content: ""; width: 22px; height: 22px; border-radius: 50%; border: 2px dashed #E3D8CC; }
+  .b .day.now { color: var(--brand); font-weight: 700; }
+  .b .day.now .empty::after { border-color: var(--brand); }
+  .b .friends { padding: 4px 0; }
+  .b .friends .row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+  .b .friends .row + .row { border-top: 1px solid var(--line); }
+  .b .friends .av { width: 44px; height: 44px; font-size: 17px; }
+  .b .friends .g { flex: 1; min-width: 0; }
+  .b .friends .t { font-size: 16px; font-weight: 600; }
+  .b .friends .s { font-size: 14px; color: var(--t2); margin-top: 2px; }
+  .b .friends .p { height: 4px; border-radius: 2px; background: #F1EAE2; margin-top: 8px; overflow: hidden; }
+  .b .friends .p i { display: block; height: 100%; background: var(--mint); }
+  .b .join { height: 34px; padding: 0 16px; border-radius: 17px; background: var(--brand-soft); color: var(--brand); font-size: 15px; font-weight: 600; }
+  .b .tabbar { position: absolute; left: 16px; right: 16px; bottom: 26px; height: 64px; border-radius: 32px; background: rgba(255,255,255,.96); box-shadow: 0 8px 24px -8px rgba(80,50,30,.18), 0 0 0 1px var(--line); display: flex; padding: 0 8px; z-index: 3; }
+  .b .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 10px; font-weight: 600; color: #9A948E; }
+  .b .tabbar .on { color: var(--brand); }
+
+  @media (max-width: 440px) { .phone { height: 780px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>首页两个方向</h1>
+    <p>两版都用圆角和 SF Pro 系统字体（Windows 上会显示为 Segoe UI），内容和数据完全一样，只有风格不同。可以直接在手机框里上下滚动。</p>
+  </header>
+  <div class="cols">
+
+    <!-- ================= A ================= -->
+    <section class="col">
+      <div class="label"><b>A · iOS 原生为底，品牌做点缀</b><span>系统灰底、分组列表、标准标签栏；粉色只用作强调色</span></div>
+      <div class="phone a">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span class="ic">●●● ▮</span></div>
+        <div class="scroll">
+          <div class="top">
+            <div><p class="d">Saturday, 25 October</p><h1>Today</h1></div>
+            <span class="av me">L</span>
+          </div>
+
+          <div class="sec">
+            <div class="rings">
+              <div class="card tile"><p class="h">Focus</p><p class="v">0<small> / 120 min</small></p><div class="bar"><i style="width:2%"></i></div></div>
+              <div class="card tile"><p class="h">Streak</p><p class="v">5<small> days</small></p><p class="foot">Bake today to keep it</p></div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><h2>Up next</h2><a href="#">All recipes</a></div>
+            <div class="card">
+              <div class="focus">
+                <div class="art" data-art="cupcake"></div>
+                <div><p class="t">Strawberry cupcake</p><p class="s">2 × 25 min · 5 min break</p><p class="s">Deep work · Standard lock</p></div>
+              </div>
+              <div class="focus-btn">
+                <button class="btn fill">Start · 50 min</button>
+                <button class="btn gray" aria-label="Options"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><h2>This week</h2></div>
+            <div class="card chart">
+              <p class="sum">Total focus</p><p class="big">3 h 0 min</p>
+              <div class="bars" id="a-bars"></div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><h2>Friends focusing</h2><a href="#">See all</a></div>
+            <div class="card list" id="a-friends"></div>
+          </div>
+
+          <div class="sec">
+            <div class="card list">
+              <div class="row"><span class="av" style="background:#0A84FF;width:40px;height:40px;border-radius:10px">%</span><div class="g"><p class="t">3 shops take your coupons</p><p class="s">10% off after a finished bake</p></div><svg class="ico chev" viewBox="0 0 24 24" width="18"><path d="M9 6l6 6-6 6"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <nav class="tabbar">
+          <button class="on"><svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Today</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"/></svg>Rooms</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Collection</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Nearby</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</button>
+        </nav>
+      </div>
+      <div class="notes">
+        <p><span class="k">像什么：</span>Apple 健康、Forest 新版、Structured 这一类工具型 app。</p>
+        <p><span class="k">优点：</span>几乎全部能用 SwiftUI 默认组件（List、NavigationStack、TabView、Charts）直接实现，深色模式和动态字号自带；最"真"。</p>
+        <p><span class="k">代价：</span>品牌记忆点弱，烘焙这个概念只在插画和烘焙流程里出现。</p>
+      </div>
+    </section>
+
+    <!-- ================= B ================= -->
+    <section class="col">
+      <div class="label"><b>B · 保留品牌感，但收敛</b><span>暖米色底、一张品牌主卡、插画适量；其余是干净的白卡片</span></div>
+      <div class="phone b">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span class="ic">●●● ▮</span></div>
+        <div class="scroll">
+          <div class="top">
+            <div><p class="d">Saturday, 25 October</p><h1>Good morning, Leqi</h1></div>
+            <span class="av me">L</span>
+          </div>
+
+          <div class="sec">
+            <div class="hero">
+              <p class="k">Today’s order</p>
+              <h2>Strawberry cupcake</h2>
+              <p class="meta">2 × 25 min · Deep work</p>
+              <div class="art" data-art="cupcake"></div>
+              <button class="btn">Start baking · 50 min</button>
+              <button class="alt">Choose another recipe</button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="stats">
+              <div class="card stat"><p class="h">Focus today</p><p class="v">0<small> / 120 min</small></p><div class="bar"><i style="width:2%"></i></div></div>
+              <div class="card stat"><p class="h">Streak</p><p class="v">5<small> days</small></p><p class="foot">Bake today to keep it</p></div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><h2>This week</h2><span style="font-size:14px;color:var(--t2)">6 bakes · 3 h</span></div>
+            <div class="card week" id="b-week"></div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><h2>Friends baking now</h2><a href="#">See all</a></div>
+            <div class="card friends" id="b-friends"></div>
+          </div>
+        </div>
+        <nav class="tabbar">
+          <button class="on"><svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"/></svg>Rooms</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Case</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Nearby</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Me</button>
+        </nav>
+      </div>
+      <div class="notes">
+        <p><span class="k">像什么：</span>Headspace、Finch、Duolingo 这一类有角色和世界观的习惯类 app。</p>
+        <p><span class="k">优点：</span>一眼能认出是"烘焙学习"，有情绪价值；结构仍是常规卡片，开发难度适中。</p>
+        <p><span class="k">代价：</span>主卡、浮动标签栏、插画要自定义开发；深色模式需要单独设计一套暖色。</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script>
+(async () => {
+  let ART = {};
+  try { ART = await (await fetch('../src/art.json')).json(); } catch (e) {}
+  const svg = (k, vb = '0 0 200 172') => ART[k] ? `<svg viewBox="${vb}" aria-hidden="true">${ART[k]}</svg>` : '';
+  const SB = '<svg width="18" height="12" viewBox="0 0 19 12"><rect x="0" y="7.5" width="3.2" height="4.5" rx="1" fill="#000"/><rect x="5.2" y="5" width="3.2" height="7" rx="1" fill="#000"/><rect x="10.4" y="2.5" width="3.2" height="9.5" rx="1" fill="#000"/><rect x="15.6" y="0" width="3.2" height="12" rx="1" fill="#000"/></svg><svg width="16" height="12" viewBox="0 0 17 12"><path d="M8.5 2.3c2.4 0 4.6.9 6.3 2.5l1.2-1.3A10.6 10.6 0 0 0 8.5.5 10.6 10.6 0 0 0 1 3.5l1.2 1.3a8.8 8.8 0 0 1 6.3-2.5ZM8.5 5.9c1.4 0 2.7.5 3.7 1.4l1.2-1.3a7.2 7.2 0 0 0-9.8 0l1.2 1.3c1-.9 2.3-1.4 3.7-1.4ZM8.5 9.4c.5 0 1 .2 1.3.5L8.5 11.4 7.2 9.9c.3-.3.8-.5 1.3-.5Z" fill="#000"/></svg><svg width="26" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="#000" stroke-opacity=".35"/><rect x="2" y="2" width="20" height="9" rx="2.5" fill="#000"/><path d="M25 4.5v4a2.2 2.2 0 0 0 0-4Z" fill="#000" fill-opacity=".4"/></svg>';
+  document.querySelectorAll('.sb .ic').forEach((el) => { el.innerHTML = SB; });
+  document.querySelectorAll('[data-art]').forEach((el) => { el.innerHTML = svg(el.dataset.art, el.dataset.vb); });
+
+  const WEEK = [['M', 65, 'cupcake'], ['T', 25, 'macaron'], ['W', 15, 'latte'], ['T', 25, 'macaron'], ['F', 50, 'cupcake'], ['S', 0, '', true], ['S', 0]];
+  document.getElementById('a-bars').innerHTML = WEEK.map(([d, m, , now]) =>
+    `<div class="${now ? 'now' : ''}"><i style="height:${m ? Math.max(6, m / 65 * 80) : 4}px;${m ? '' : 'background:rgba(118,118,128,.16)'}"></i>${now ? 'Sa' : d}</div>`).join('');
+  document.getElementById('b-week').innerHTML = WEEK.map(([d, m, r, now]) =>
+    `<div class="day ${now ? 'now' : ''}">${r ? `<div class="art">${svg(r)}</div>` : '<div class="empty"></div>'}${now ? 'Today' : d}</div>`).join('');
+
+  const FR = [['Mia', '#FF6FB5', 'Strawberry macaron', 18, 25], ['Jun', '#3AA0FF', 'Strawberry shortcake', 42, 75], ['Ava', '#1FB89A', 'Strawberry cupcake', 31, 50]];
+  document.getElementById('a-friends').innerHTML = FR.map(([n, c, d, left]) =>
+    `<div class="row"><span class="av" style="background:${c}">${n[0]}</span><div class="g"><p class="t">${n}</p><p class="s">${d} · ${left} min left</p></div><button class="pill">Join</button></div>`).join('');
+  document.getElementById('b-friends').innerHTML = FR.map(([n, c, d, left, tot]) =>
+    `<div class="row"><span class="av" style="background:${c}">${n[0]}</span><div class="g"><p class="t">${n}</p><p class="s">${d} · ${left} min left</p><div class="p"><i style="width:${Math.round((1 - left / tot) * 100)}%"></i></div></div><button class="join">Join</button></div>`).join('');
+})();
+</script>
+</body>
+</html>

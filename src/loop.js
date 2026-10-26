@@ -32,4 +32,5 @@ function render(now) {
 function frame(now) { const dt = Math.min(.033, (now - last) / 1000); last = now; if (scr('prep').classList.contains('on')) { advance(dt); render(now); } requestAnimationFrame(frame); }
 // Test hook, only with ?debug: run the simulation forward without waiting for real frames, then draw it.
 if (/[?&]debug\b/.test(location.search)) window.__sim = (seconds) => { for (let i = 0; i < seconds * 60; i++) advance(1 / 60); render(performance.now()); };
-(document.fonts ? Promise.all([document.fonts.load('500 18px "DM Mono"'), document.fonts.load('600 20px Outfit')]) : Promise.resolve()).catch(() => {}).finally(() => { update(); requestAnimationFrame(frame); });
+// system fonts are already there, so the first frame can draw straight away
+update(); requestAnimationFrame(frame);

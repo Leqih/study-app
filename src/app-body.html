@@ -18,42 +18,35 @@
       <!-- ================= TAB: HOME ================= -->
       <section class="screen on" id="s-home" aria-label="Home">
         <div class="scroll">
-          <div class="large">
-            <div><p class="sub">Saturday, 25 October</p><h1>Ready to bake?</h1></div>
-            <button class="avatar cut" type="button" data-me data-go="me" aria-label="Your profile"></button>
-          </div>
-          <div class="section">
-            <div class="order cut">
-              <div class="order-head">
-                <p class="k">TODAY’S ORDER</p>
-                <h2>Little Bear wants a<br>strawberry cupcake</h2>
+          <div class="stack pad">
+            <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
+            <div class="blk hello clip join arrive">
+              <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
+              <div class="today-stats">
+                <div><b id="ts-score">–</b><small>Focus score</small></div>
+                <div><b id="ts-free">0m</b><small>Phone-free</small></div>
+                <div><b id="ts-exits">0</b><small>Exits</small></div>
               </div>
-              <div class="hero-oven" aria-hidden="true">
-                <svg viewBox="0 0 300 220" data-art="oven"></svg>
-                <div class="oven-food"><svg viewBox="0 0 200 172" data-art="cupcake"></svg></div>
-                <div class="door"><svg viewBox="0 0 168 132" data-art="doorFront"></svg></div>
-                <span class="oven-clock">50:00</span>
-              </div>
-              <div class="order-meta"><span class="tag white cut">Deep work</span><span class="tag white cut">2 × 25 min</span><span class="tag white cut">+ 5 min break</span></div>
-              <button class="btn cut" type="button" data-go="start">Start baking</button>
-              <button class="link" type="button" data-go="pick">Pick another recipe</button>
             </div>
+            <div class="seam" aria-hidden="true"><span class="today-ck" id="today-ck"></span><span class="face" data-shape="smile"></span></div>
+            <div class="blk hero arrive">
+              <div class="hd"><div><p class="k">Weekly goal</p><p class="kk" id="week-sum">Bake a little every day.</p></div><b id="week-pct">0%</b></div>
+              <div class="cookies" id="ticks" aria-hidden="true"></div>
+            </div>
+            <div class="blk open arrive">
+              <div class="top">
+                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
+                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
+              </div>
+              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
+            </div>
+            <div class="pair arrive">
+              <div class="blk col"><p class="k">Focus today</p><p class="kk" id="goal-of">Goal 120 min</p><div class="gauge" id="gauge"><svg id="gauge-arc" viewBox="0 0 140 76" aria-hidden="true"></svg><b><span id="today-min">0</span><small> min</small></b></div><p class="kk center" id="today-hint"></p></div>
+              <button class="blk col" type="button" data-tab="rooms"><p class="k"><i class="live-dot" aria-hidden="true"></i>Baking now</p><p class="kk">In Quiet library</p><span class="faces-sh" id="friends"></span><p class="num"><span id="friends-n">3</span><small> friends</small></p></button>
+            </div>
+            <button class="blk recent arrive" type="button" data-tab="case" id="recent" aria-label="Recently baked, open the dessert case"></button>
           </div>
-          <div class="section">
-            <div class="section-h"><h2>This week</h2><span class="aside" id="week-sum"></span></div>
-            <div class="week cut" id="week"></div>
-          </div>
-          <div class="section">
-            <div class="section-h"><h2>Friends baking now</h2><button type="button" data-tab="rooms">See all</button></div>
-            <div class="list cut" id="friends"></div>
-          </div>
-          <div class="section">
-            <button class="coupon cut" type="button" data-tab="nearby">
-              <span class="tile cut">−10%</span>
-              <span class="grow"><span class="t">3 shops nearby take your coupons</span><span class="s">Finish a bake, get 10% off the real one</span></span>
-              <svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-            </button>
-          </div>
+          <p class="hint" id="streak-hint" hidden></p>
           <div class="tab-pad"></div>
         </div>
       </section>
@@ -62,11 +55,13 @@
       <section class="screen" id="s-rooms" aria-label="Study rooms">
         <div class="scroll">
           <div class="large"><div><p class="sub">Bake alongside other people</p><h1>Study rooms</h1></div></div>
-          <div class="section"><div class="list cut" id="rooms"></div></div>
-          <div class="section">
-            <div class="section-h"><h2>Friends</h2></div>
-            <div class="list cut" id="friends-all"></div>
-          </div>
+          <div class="pad rm-pad"><div class="blk sched" id="live-hero"></div></div>
+          <div class="rm-rail" id="rooms"></div>
+          <div class="rm-dots" id="room-dots" aria-hidden="true"></div>
+          <div class="pad"><div class="stack">
+            <div class="blk"><div class="ach"><p class="k"><i class="live-dot" aria-hidden="true"></i>Friends baking now</p><span class="kk" id="friends-count"></span></div><div id="friends-all"></div></div>
+            <div class="blk"><div class="ach"><p class="k">Focus board</p><div class="case-mode lead-mode" id="lead-mode" role="group" aria-label="Period"><button type="button" data-p="today" aria-pressed="false">Today</button><button type="button" data-p="week" aria-pressed="true">Week</button></div></div><div class="lead" id="leaderboard"></div></div>
+          </div></div>
           <div class="tab-pad"></div>
         </div>
       </section>
@@ -74,8 +69,9 @@
       <!-- ================= TAB: CASE ================= -->
       <section class="screen" id="s-case" aria-label="Dessert case">
         <div class="scroll">
-          <div class="large"><div><p class="sub" id="case-sub">Everything you’ve baked</p><h1>Dessert case</h1></div></div>
-          <div class="section"><div class="case-grid" id="case-grid"></div></div>
+          <div class="large"><div><p class="sub" id="case-sub">Everything you’ve baked</p><h1>Dessert case</h1></div><div class="case-mode" id="case-mode" role="group" aria-label="Layout"><button type="button" data-mode="grid" aria-pressed="true">Grid</button><button type="button" data-mode="board" aria-pressed="false">Display</button></div></div>
+          <div class="section" id="grid-wrap"><div class="case-grid" id="case-grid"></div></div>
+          <div class="section" id="board-wrap" hidden><div class="board" id="board"></div><div class="board-tools" id="board-tools"></div><div class="board-cap"><b>Leqi’s case</b><span id="board-sub"></span></div></div>
           <div class="tab-pad"></div>
         </div>
       </section>
@@ -84,8 +80,8 @@
       <section class="screen" id="s-nearby" aria-label="Nearby">
         <div class="scroll">
           <div class="large"><div><p class="sub">Order the real thing after you bake</p><h1>Nearby</h1></div></div>
-          <div class="map cut" id="map" aria-hidden="true"></div>
-          <div class="section"><div class="list cut" id="shops"></div></div>
+          <div class="map rounded" id="map" aria-hidden="true"></div>
+          <div class="section"><div class="list rounded" id="shops"></div></div>
           <div class="tab-pad"></div>
         </div>
       </section>
@@ -94,19 +90,21 @@
       <section class="screen" id="s-me" aria-label="Me">
         <div class="scroll">
           <div class="large"><div><h1>Me</h1></div></div>
-          <div class="me-head"><span class="avatar l cut" data-me></span><div><p class="t-title3">Leqi</p><p class="t-subhead muted">Baker since September</p></div></div>
+          <div class="me-head"><button class="me-shape" type="button" data-go="my-shape" aria-label="Choose your shape"><span class="avatar l" data-me></span><i class="edit" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></i></button><div><p class="t-title3">Leqi</p><p class="t-subhead muted">Baker since September · tap your shape to change it</p></div></div>
           <div class="section">
             <div class="stats">
-              <div class="stat cut"><b id="me-bakes">6</b><span>this week</span></div>
-              <div class="stat cut"><b id="me-hours">4.5h</b><span>focused</span></div>
-              <div class="stat cut"><b>92%</b><span>door kept shut</span></div>
+              <div class="stat rounded"><b id="me-bakes">6</b><span>this week</span></div>
+              <div class="stat rounded"><b id="me-hours">4.5h</b><span>focused</span></div>
+              <div class="stat rounded"><b id="me-shut">92%</b><span>door kept shut</span></div>
             </div>
           </div>
           <div class="section">
-            <div class="list cut">
-              <button class="row" type="button" data-go="settings"><span class="tile brand cut"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow"><span class="t">Default focus lock</span><span class="s" id="me-lock">Standard · 180°</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-go="settings"><span class="tile info cut"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></span><span class="grow"><span class="t">Settings</span><span class="s">Notifications, haptics, sounds</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-tab="rooms"><span class="tile success cut"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span><span class="s">5 friends</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+            <div class="list rounded">
+              <button class="row" type="button" data-tab="case"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><span class="grow"><span class="t">Dessert case</span><span class="s" id="me-case">Everything you’ve baked</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="report"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="grow"><span class="t">October report</span><span class="s">Your month as a receipt</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="settings"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow"><span class="t">Default focus lock</span><span class="s" id="me-lock">Standard · 180°</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="settings"><span class="tile info rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></span><span class="grow"><span class="t">Settings</span><span class="s">Notifications, haptics, sounds</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-tab="rooms"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span><span class="s">5 friends</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
             </div>
           </div>
           <div class="tab-pad"></div>
@@ -121,12 +119,14 @@
         </header>
         <div class="progress" data-step="1"></div>
         <div class="scroll">
-          <div class="intro"><h1>What are we baking?</h1><p>The recipe sets how long you’ll study and how it’s split.</p></div>
-          <div class="recipes" id="recipes" role="radiogroup" aria-label="Recipes"></div>
-          <div class="section tight"><div class="plan card cut" id="plan"></div></div>
+          <div class="intro"><h1 id="recipe-h">What are we baking?</h1></div>
+          <div class="route" id="route"></div>
+          <div class="names" aria-hidden="true"><div class="strip" id="names"></div></div>
+          <div class="carousel" id="recipes" role="radiogroup" aria-label="Recipes"></div>
+          <p class="recipe-meta" id="recipe-meta"></p>
           <div class="spacer"></div>
         </div>
-        <div class="bottom"><button class="btn cut" type="button" id="recipe-go">Start prepping</button></div>
+        <div class="bottom"><button class="btn line rounded" type="button" id="recipe-prep">Prep first</button><button class="btn wide rounded" type="button" id="recipe-go">Start</button></div>
       </section>
 
       <!-- ================= FLOW 2: PREP ================= -->
@@ -137,10 +137,10 @@
         </header>
         <div class="progress" data-step="2"></div>
         <div class="prep-seg">
-          <div class="seg cut" role="tablist" aria-label="Prep steps">
-            <button class="cut" role="tab" type="button" id="tab-pour"></button>
-            <button class="cut" role="tab" type="button" id="tab-crack"></button>
-            <button class="cut" role="tab" type="button" id="tab-whisk"></button>
+          <div class="seg rounded" role="tablist" aria-label="Prep steps">
+            <button class="rounded" role="tab" type="button" id="tab-pour"></button>
+            <button class="rounded" role="tab" type="button" id="tab-crack"></button>
+            <button class="rounded" role="tab" type="button" id="tab-whisk"></button>
           </div>
         </div>
         <section class="kitchen" id="kitchen" aria-label="Kitchen counter"><div class="stage">
@@ -156,8 +156,8 @@
           <div class="tools" id="tools"></div>
         </div>
         <div class="bottom">
-          <button class="btn line cut" id="secondary" type="button" hidden></button>
-          <button class="btn cut" id="primary" type="button"><span id="primary-label">Hold to pour</span><span class="fill" id="fill"></span></button>
+          <button class="btn line rounded" id="secondary" type="button" hidden></button>
+          <button class="btn rounded" id="primary" type="button"><span id="primary-label">Hold to pour</span><span class="fill" id="fill"></span></button>
         </div>
       </section>
 
@@ -176,7 +176,7 @@
           </div>
           <div class="section">
             <div class="section-h"><h2>Locked while baking</h2></div>
-            <div class="list cut" id="blocked"></div>
+            <div class="list rounded" id="blocked"></div>
           </div>
           <div class="section">
             <div class="section-h"><h2>Still allowed</h2></div>
@@ -187,89 +187,64 @@
             <div class="chips" id="sounds"></div>
           </div>
           <div class="section">
-            <div class="list cut"><div class="row"><span class="faces" id="together-faces"></span><span class="grow"><span class="t">Bake with Mia and Jun</span><span class="s">They’ll see your oven in Quiet library</span></span><button class="switch cut" role="switch" aria-checked="true" id="together" aria-label="Bake together"></button></div></div>
+            <div class="list rounded"><div class="row"><span class="faces" id="together-faces"></span><span class="grow"><span class="t">Bake with Mia and Jun</span><span class="s">They’ll see your oven in Quiet library</span></span><button class="switch rounded" role="switch" aria-checked="true" id="together" aria-label="Bake together"></button></div></div>
           </div>
           <div class="spacer"></div>
         </div>
-        <div class="bottom"><button class="btn cut" type="button" id="preheat-go">Close the door · start</button></div>
+        <div class="bottom"><button class="btn rounded" type="button" id="preheat-go">Close the door · start</button></div>
       </section>
 
       <!-- ================= FLOW 4: BAKE ================= -->
       <section class="screen flow" id="s-bake" aria-label="Baking">
-        <header class="nav">
-          <span class="icon" aria-hidden="true"><svg width="18" height="20" viewBox="0 0 18 20"><path d="M3 9h12v10H3zM5.5 9V6a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="#10131A" stroke-width="2.2"/></svg></span>
-          <p class="title">Baking<small id="bake-dessert">Strawberry cupcake</small></p>
-          <button class="speed cut" type="button" id="speed" aria-label="Demo speed">60×</button>
-        </header>
-        <div class="progress" data-step="4"></div>
+        <div class="bk-top">
+          <span class="pill white">Round <b id="bake-round">1 / 2</b></span>
+          <span class="row-pills"><button class="pill white" type="button" id="speed" aria-label="Demo speed">60×</button><span class="pill white" id="lock-name">Standard lock</span></span>
+        </div>
         <div class="scroll">
-          <div class="bake-top"><p class="r" id="bake-round">Round 1 of 2</p><p class="clock" id="clock">50:00</p></div>
-          <div class="oven-wrap" role="img" aria-label="Your dessert baking in the oven">
-            <svg viewBox="0 0 300 220" data-art="oven"></svg>
-            <div class="oven-light" id="oven-light"></div>
-            <div class="oven-food"><svg viewBox="0 0 200 172" data-art="cupcake" id="oven-food"></svg></div>
-            <div class="door" id="door"><svg viewBox="0 0 168 132" data-art="doorFront"></svg></div>
-            <span class="oven-clock" id="oven-clock">50:00</span>
+          <p class="bk-name" id="bake-dessert">Strawberry cupcake</p>
+          <div class="oven-ring">
+            <svg class="segs" id="segs" viewBox="0 0 280 280" aria-hidden="true"></svg>
+            <div class="core"><svg class="art" viewBox="0 0 200 172" data-art="cupcake" id="oven-food" role="img" aria-label="Your dessert baking"></svg></div>
           </div>
-          <div class="section tight">
-            <div class="phases" id="phases"></div>
-          </div>
-          <div class="section">
-            <div class="section-h"><h2>This round’s goals</h2><span class="aside" id="goal-count"></span></div>
-            <div class="list cut" id="bake-goals"></div>
-          </div>
-          <div class="section">
-            <div class="chips"><span class="chip cut"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg><span id="bake-sound">Oven hum</span></span><span class="chip cut" id="bake-friends">Mia, Jun baking too</span></div>
-          </div>
+          <p class="clock" id="clock">50:00</p>
+          <p class="bk-hint" id="bake-hint">Keep the door shut. Locking your screen is fine.</p>
+          <div class="plan-bar" id="plan-shapes" aria-hidden="true"></div>
+          <div class="bk-tools"><span class="chip white" id="bake-sound"></span><button class="chip white" type="button" id="leave">Leave the app (demo)</button></div>
+          <div class="pad"><div class="blk">
+            <div class="ach"><p class="k">Goals</p><span class="kk"><span id="goal-count">0 / 0</span> done · <span id="exit-count">0</span> exits</span></div>
+            <div class="glist" id="bake-goals"></div>
+          </div></div>
+          <p class="bk-hint" id="bake-friends"></p>
           <div class="spacer"></div>
         </div>
-        <div class="lockbar cut"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg><span><b id="lock-name">Standard</b> · <span id="lock-count">4 app types locked</span> · <span id="exit-count">0 exits</span></span></div>
-        <div class="bottom">
-          <button class="btn soft cut" type="button" id="leave">Try leaving</button>
-          <button class="btn line wide cut" type="button" id="emergency">Open the oven early</button>
-        </div>
+        <div class="two"><button class="fill" type="button" id="pause">Pause</button><button class="line" type="button" id="emergency">End early</button></div>
       </section>
 
       <!-- ================= FLOW 5: RESULT ================= -->
       <section class="screen flow" id="s-result" aria-label="Out of the oven">
-        <header class="nav"><span class="icon"></span><p class="title">Out of the oven</p><span class="step">5/6</span></header>
-        <div class="progress" data-step="5"></div>
+        <header class="nav"><span class="icon"></span><p class="title">Out of the oven</p><span class="step"></span></header>
         <div class="scroll">
           <div class="verdict"><p class="k" id="v-k">DING!</p><h1 id="v-h">Golden perfect</h1><p id="v-p">The door stayed shut.</p></div>
-          <div class="plate"><svg viewBox="0 0 200 172" data-art="cupcake" id="result-food"></svg></div>
-          <div class="section">
-            <div class="stats">
-              <div class="stat cut"><b id="r-min">50</b><span>minutes</span></div>
-              <div class="stat cut"><b id="r-exits">0</b><span>exits</span></div>
-              <div class="stat cut"><b id="r-goals">2/2</b><span>goals done</span></div>
-            </div>
-          </div>
-          <div class="section">
-            <div class="section-h"><h2>Toppings earned</h2></div>
-            <div class="toppings" id="earned"></div>
-          </div>
-          <div class="section">
-            <div class="section-h"><h2>Goals</h2></div>
-            <div class="list cut" id="r-goal-list"></div>
-          </div>
+          <div class="plate"><span class="rays" aria-hidden="true"></span><svg viewBox="0 0 200 172" data-art="cupcake" id="result-food"></svg></div>
+          <div class="pad"><div id="r-slip"></div></div>
           <div class="spacer"></div>
         </div>
-        <div class="bottom"><button class="btn cut" type="button" id="to-deco">Decorate · 5-min break</button></div>
+        <div class="bottom"><button class="btn rounded" type="button" id="to-deco">Decorate · 5-min break</button></div>
       </section>
 
       <!-- ================= FLOW 6: DECORATE ================= -->
       <section class="screen flow" id="s-decorate" aria-label="Decorate">
-        <header class="nav"><span class="icon"></span><p class="title">Decorate<small>Break time</small></p><span class="step">6/6</span></header>
-        <div class="progress" data-step="6"></div>
+        <header class="nav"><span class="icon"></span><p class="title">Break<small>Decorate if you like</small></p><span class="step"></span></header>
         <div class="bake-top"><p class="r">Break ends in</p><p class="clock" id="break-clock">05:00</p></div>
         <div class="flex1"></div>
         <div class="deco" id="deco"><svg viewBox="0 0 200 172" data-art="cupcake" id="deco-food"></svg></div>
         <div class="flex1"></div>
-        <p class="hint deco-hint" id="deco-hint">Tap a topping to add it, then drag it into place.</p>
-        <div class="tray" id="tray"></div>
+        <p class="hint deco-hint" id="deco-hint"></p>
+        <button class="link" type="button" id="order-real" hidden>Golden bake: 10% off the real one nearby</button>
+        <div class="tray" id="tray" hidden></div>
         <div class="bottom">
-          <button class="btn soft cut" type="button" id="order-real">Order one · −10%</button>
-          <button class="btn wide cut" type="button" id="save-case">Save to case</button>
+          <button class="btn soft rounded" type="button" id="deco-toggle">Decorate</button>
+          <button class="btn wide rounded" type="button" id="save-case">Save to case</button>
         </div>
       </section>
 
@@ -279,7 +254,28 @@
           <p class="title" id="room-title">Room</p><span class="step"></span>
         </header>
         <div class="scroll" id="room-body"></div>
-        <div class="bottom"><button class="btn cut" type="button" data-go="join" id="room-join">Bake in this room</button></div>
+        <div class="bottom"><button class="btn rounded" type="button" data-go="join" id="room-join">Bake in this room</button></div>
+      </section>
+      <section class="screen flow" id="s-shop" aria-label="Shop">
+        <header class="nav">
+          <button class="icon" type="button" data-go="back" aria-label="Back"><svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="#111113" stroke-width="2.4"/></svg></button>
+          <p class="title" id="shop-nav">Shop</p>
+          <button class="icon" type="button" data-go="shop-share" aria-label="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></button>
+        </header>
+        <div class="scroll" id="shop-page"></div>
+        <div class="cartbar" id="cartbar"></div>
+      </section>
+      <section class="screen flow" id="s-report" aria-label="Monthly report">
+        <header class="nav">
+          <button class="icon" type="button" data-go="back" aria-label="Back"><svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="#111113" stroke-width="2.4"/></svg></button>
+          <p class="title">Monthly report</p><span class="step"></span>
+        </header>
+        <div class="scroll">
+          <div class="rc-title"><h1>October<br>report</h1><p class="tiny">sweet study · monthly receipt · no.10</p><span class="rc-cap" id="rc-cap" aria-hidden="true"></span></div>
+          <div class="pad" style="margin-top:16px"><div id="receipt"></div></div>
+          <div class="spacer"></div><div class="spacer"></div>
+        </div>
+        <div class="bottom"><button class="btn line rounded" type="button" id="rc-save">Save image</button><button class="btn wide rounded" type="button" id="rc-share">Share with friends</button></div>
       </section>
       <section class="screen flow" id="s-settings" aria-label="Settings">
         <header class="nav">
@@ -289,24 +285,22 @@
         <div class="scroll" id="settings-body"></div>
       </section>
 
-      <nav class="tabbar" id="tabbar" role="tablist" aria-label="Main">
-        <button type="button" role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12 13 4l9 8v10H4z"/><path d="M10 22v-6h6v6"/></svg>Home</button>
-        <button type="button" role="tab" data-tab="rooms" aria-selected="false"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM18 3.5a4 4 0 0 1 0 7.5M23 21v-2a5 5 0 0 0-3-4.5"/></svg>Rooms</button>
-        <button type="button" role="tab" data-tab="case" aria-selected="false"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h20v16H3zM3 13h20M13 5v16"/></svg>Case</button>
-        <button type="button" role="tab" data-tab="nearby" aria-selected="false"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 23s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12z"/><path d="M13 13.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>Nearby</button>
-        <button type="button" role="tab" data-tab="me" aria-selected="false"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM4 23v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg>Me</button>
+      <nav class="tabbar dock" id="tabbar" aria-label="Main">
+        <button class="round light" type="button" data-tab="me" aria-label="Me"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></button>
+        <div class="seg-dock" role="tablist"><button type="button" role="tab" data-tab="home" aria-selected="true">Today</button><button type="button" role="tab" data-tab="rooms" aria-selected="false">Rooms</button><button type="button" role="tab" data-tab="nearby" aria-selected="false">Nearby</button></div>
+        <button class="round" type="button" data-go="pick" aria-label="New bake"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       </nav>
 
-      <div class="toast cut" id="toast" role="status" aria-live="polite"></div>
+      <div class="toast rounded" id="toast" role="status" aria-live="polite"></div>
       <div class="scrim" id="scrim"></div>
 
       <!-- goal sheet -->
       <form class="sheet" id="sheet-goal" role="dialog" aria-modal="true" aria-labelledby="goal-title" aria-hidden="true">
         <span class="grabber"></span>
         <h3 id="goal-title">Egg 1 is for…</h3>
-        <label class="field cut"><input id="goal" maxlength="40" autocomplete="off" placeholder="One thing you’ll finish this round" aria-labelledby="goal-title"></label>
+        <label class="field rounded"><input id="goal" maxlength="40" autocomplete="off" placeholder="One thing you’ll finish this round" aria-labelledby="goal-title"></label>
         <div class="chips" id="ideas"></div>
-        <div class="acts"><button class="btn soft cut" type="button" id="goal-alt">Put the egg back</button><button class="btn cut" type="submit" id="goal-ok" disabled>Add goal</button></div>
+        <div class="acts"><button class="btn soft rounded" type="button" id="goal-alt">Put the egg back</button><button class="btn rounded" type="submit" id="goal-ok" disabled>Add goal</button></div>
       </form>
 
       <!-- shop sheet -->
@@ -315,18 +309,18 @@
         <div id="shop-body"></div>
       </div>
 
-      <div class="alert cut" id="alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-h">
+      <div class="alert rounded" id="alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-h">
         <div class="body"><h3 id="alert-h"></h3><p id="alert-p"></p></div>
         <div class="acts"><button type="button" id="alert-no"></button><button type="button" class="danger" id="alert-yes"></button></div>
       </div>
 
       <div class="away" id="away" role="dialog" aria-modal="true" aria-labelledby="away-h">
         <div class="hs-grid" id="hs-grid"></div>
-        <div class="hs-card cut">
+        <div class="hs-card rounded">
           <p class="k">SWEET STUDY · YOU LEFT THE KITCHEN</p>
           <h2 id="away-h">Your cupcake is getting hot</h2>
-          <p>Come back within <b id="away-n">10</b> s or it starts to burn. Locked apps stay shut until the bake ends.</p>
-          <button class="btn pink cut" type="button" id="away-back">Back to the oven</button>
+          <p id="away-p"></p>
+          <button class="btn pink rounded" type="button" id="away-back">Back to the oven</button>
         </div>
       </div>
       <div class="live-act" id="live-act" role="status" aria-live="polite">
@@ -334,12 +328,14 @@
         <span class="la-c" id="la-time">00:00</span>
         <div class="la-x"><p class="la-h">Baking · <span id="la-time2">00:00</span></p><p class="la-s">Locked apps stay shut. Tap to go back.</p><span class="la-track"><i id="la-bar"></i></span></div>
       </div>
-      <div class="banner cut" id="banner" role="status" aria-live="polite">
-        <span class="b-ico cut"><svg viewBox="0 0 200 172" data-art="cupcake"></svg></span>
+      <div class="banner rounded" id="banner" role="status" aria-live="polite">
+        <span class="b-ico rounded"><svg viewBox="0 0 200 172" data-art="cupcake"></svg></span>
         <div class="b-txt"><p class="b-app">SWEET STUDY · now</p><p class="b-t" id="banner-t"></p><p class="b-b" id="banner-b"></p></div>
       </div>
+      <div id="burst" aria-hidden="true"></div>
+      <div class="intro-ob gone" id="intro" role="dialog" aria-modal="true" aria-label="Welcome to Sweet Study"></div>
       <div class="splash" id="splash" aria-hidden="true">
-        <span class="logo cut"><svg viewBox="0 0 200 172" data-art="cupcake"></svg></span>
+        <span class="logo rounded"><svg viewBox="0 0 200 172" data-art="cupcake"></svg></span>
         <p class="word">Sweet Study</p><p class="tagline">Study like you’re baking</p>
       </div>
 

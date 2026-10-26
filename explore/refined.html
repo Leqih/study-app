@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refined Direction</title>
+<style>
+  /* Built from the two Behance case studies, detail by detail (see the table at the bottom).
+     Colour stays ours: mint and pink as fills, black for actions, on a warm cream base. */
+  :root {
+    --sys: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', sans-serif;
+    --bg: #FBF9F4; --card: #F2EFE7; --white: #FFFFFF;
+    --ink: #161616; --t2: #6E6B66; --t3: #A9A59F; --line: #E6E2D8;
+    --mint: #5BE0D4; --mint-2: #4FD0C4; --mint-p: #C4F1EB; --pink: #F26BC1; --pink-p: #F9C9E6;
+    --ease: cubic-bezier(.22, 1, .36, 1); --spring: cubic-bezier(.34, 1.56, .64, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9E6E0; font-family: var(--sys); -webkit-font-smoothing: antialiased; color: var(--ink); }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 32px 16px 48px; }
+  .page > header h1 { font-size: 26px; font-weight: 700; }
+  .page > header p { margin-top: 6px; color: #55555C; font-size: 15px; line-height: 22px; max-width: 840px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 32px; justify-items: center; margin-top: 24px; }
+  .col { width: 390px; max-width: 100%; }
+  .label { margin-bottom: 12px; } .label b { display: block; font-size: 17px; } .label span { font-size: 14px; color: #55555C; }
+  .notes { margin: 32px auto 0; max-width: 960px; font-size: 14px; line-height: 22px; color: #3A3A40; background: #fff; border-radius: 20px; padding: 20px 24px; }
+  .notes h2 { font-size: 17px; margin: 4px 0 8px; }
+  .notes table { width: 100%; border-collapse: collapse; }
+  .notes td { padding: 8px 12px 8px 0; border-top: 1px solid #EEE; vertical-align: top; }
+  .notes td:first-child { width: 12%; font-weight: 600; } .notes td:nth-child(2) { width: 40%; }
+
+  .phone { width: 390px; max-width: 100%; height: 844px; border-radius: 52px; overflow: hidden; position: relative; background: var(--bg); box-shadow: 0 0 0 10px #111, 0 30px 60px -20px rgba(0,0,0,.35); }
+  .sb { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 36px; font-weight: 600; font-size: 16px; position: relative; z-index: 5; }
+  .sb .isl { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; margin-left: -60px; background: #000; border-radius: 20px; }
+  .scroll { position: absolute; inset: 50px 0 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 120px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  .art svg, .shape svg { display: block; width: 100%; height: 100%; }
+  .ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .shape { position: absolute; pointer-events: none; }
+  .press { transition: transform .35s var(--spring); } .press:active { transform: scale(.95); }
+
+  /* ---------- Home ---------- */
+  .head { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 0; }
+  .head h1 { font-size: 30px; font-weight: 600; letter-spacing: -.025em; }
+  .round { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+  .round.line { box-shadow: inset 0 0 0 1.5px var(--line); }
+  .round.soft { background: var(--card); }
+  .round.dash { background: none; box-shadow: none; outline: 1.5px dashed rgba(22,22,22,.35); outline-offset: -1.5px; }
+
+  /* Classly's "next lesson" card, as the next bake */
+  .next { margin: 16px 16px 0; padding: 14px; border-radius: 18px; background: var(--card); }
+  .next-row { display: flex; align-items: center; gap: 12px; }
+  .thumb { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+  .thumb .shape { inset: 0; }
+  .thumb .art { position: absolute; left: 7px; top: 8px; width: 34px; height: 30px; }
+  .next-row .g { flex: 1; min-width: 0; }
+  .t16 { font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+  .s13 { font-size: 13px; color: var(--t2); margin-top: 2px; }
+  .next-row .r { text-align: right; }
+  .next-row .r b { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+  .acts { display: flex; gap: 8px; margin-top: 14px; }
+  .pill-btn { flex: 1; height: 48px; border-radius: 24px; background: var(--ink); color: #fff; font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .acts .round { width: 48px; height: 48px; background: var(--white); }
+
+  /* Classly's story tiles: solid colour, a flat shape, a label bottom-left, running off the edge */
+  .tiles { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 14px 16px 0; }
+  .tiles::-webkit-scrollbar { display: none; }
+  .tile { position: relative; flex: 0 0 112px; height: 128px; border-radius: 16px; overflow: hidden; text-align: left; }
+  .tile .shape { inset: auto; }
+  .tile .lb { position: absolute; left: 10px; right: 10px; bottom: 10px; font-size: 13px; font-weight: 600; line-height: 16px; }
+  .tile.dark .lb { color: #fff; }
+  .tile .art { position: absolute; width: 86px; height: 74px; left: 13px; top: 12px; }
+
+  .sec-h { display: flex; justify-content: space-between; align-items: center; padding: 26px 16px 10px; }
+  .sec-h h2 { font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+  .chev { width: 9px; height: 15px; color: var(--t3); }
+  .dd { height: 32px; padding: 0 12px 0 14px; border-radius: 16px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Intelly's summary: a big number with a small unit, caps labels, tone-on-tone bars */
+  .week { margin: 0 16px; padding: 16px; border-radius: 18px; background: var(--mint); position: relative; overflow: hidden; }
+  .week .shape { right: -40px; top: -46px; width: 190px; height: 190px; }
+  .big { position: relative; font-size: 56px; font-weight: 500; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .big sup { font-size: 16px; font-weight: 500; letter-spacing: 0; vertical-align: top; position: relative; top: 8px; margin-left: 2px; }
+  .cap { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: rgba(22,22,22,.6); }
+  .stats3 { position: relative; display: flex; gap: 22px; margin-top: 14px; }
+  .stats3 b { display: block; font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 1px; font-variant-numeric: tabular-nums; }
+  .stats3 .u { display: block; height: 2px; margin-top: 5px; border-radius: 1px; background: var(--ink); }
+  .stats3 .u.dash { background: repeating-linear-gradient(90deg, var(--ink) 0 5px, transparent 5px 8px); }
+  .stats3 .u.light { background: rgba(22,22,22,.2); }
+  .bars { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 92px; align-items: end; margin-top: 16px; }
+  .bars div { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .bars i { width: 10px; border-radius: 5px; background: rgba(22,22,22,.12); }
+  .bars i.k { background: var(--ink); }
+  .bars i.miss { background: none; outline: 1.5px dashed rgba(22,22,22,.45); outline-offset: -1.5px; }
+  .bars span { font-size: 10px; color: rgba(22,22,22,.6); font-weight: 500; }
+  .bars .now span { color: var(--ink); font-weight: 700; }
+
+  /* Classly's homework cards, as today's goals */
+  .goals { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 16px; }
+  .goals::-webkit-scrollbar { display: none; }
+  .goal { flex: 0 0 150px; height: 118px; padding: 14px; border-radius: 16px; display: flex; flex-direction: column; justify-content: space-between; text-align: left; }
+  .goal.p { background: var(--pink-p); } .goal.m { background: var(--mint-p); } .goal.c { background: var(--card); }
+  .goal b { font-size: 16px; font-weight: 500; line-height: 20px; letter-spacing: -.01em; }
+  .goal .bot { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--t2); }
+  .goal .bot span { display: inline-flex; align-items: center; gap: 5px; }
+  .donut { width: 22px; height: 22px; }
+
+  /* Intelly's dock: black capsule, raised pink plus, a short line under the active icon */
+  .dock { position: absolute; left: 16px; right: 16px; bottom: 24px; height: 62px; border-radius: 31px; background: var(--ink); display: flex; align-items: center; justify-content: space-around; padding: 0 10px; z-index: 6; }
+  .dock button { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; position: relative; }
+  .dock button.on::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 6px; height: 2px; border-radius: 1px; background: #fff; }
+  .dock button.off { color: rgba(255,255,255,.55); }
+  .dock .plus { width: 58px; height: 58px; margin-top: -30px; border-radius: 50%; background: var(--pink); color: var(--ink); box-shadow: 0 0 0 6px var(--bg); }
+  .dock .plus .ico { width: 24px; height: 24px; stroke-width: 2; }
+
+  /* ---------- Baking: Intelly's detail page on a mint ground ---------- */
+  .bake { background: var(--mint); }
+  .bk-top { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 0; }
+  .bk-top p { font-size: 15px; font-weight: 500; }
+  .strip { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+  .strip div { width: 64px; padding: 8px 0; border-radius: 22px; text-align: center; }
+  .strip .cap { display: block; color: rgba(22,22,22,.6); }
+  .strip b { display: block; font-size: 15px; font-weight: 600; margin-top: 2px; }
+  .strip .now { background: var(--ink); color: #fff; } .strip .now .cap { color: rgba(255,255,255,.7); }
+  .strip .dim { opacity: .45; }
+  .stage { position: relative; height: 270px; margin-top: 8px; text-align: center; }
+  .stage .shape { left: 50%; top: 0; width: 250px; height: 250px; margin-left: -125px; }
+  .stage .name { position: relative; padding-top: 62px; font-size: 18px; font-weight: 500; }
+  .stage .big { font-size: 80px; margin-top: 4px; }
+  .stage .big sup { font-size: 18px; top: 12px; }
+  .stage .why { position: relative; font-size: 13px; margin-top: 6px; display: inline-flex; align-items: center; gap: 5px; }
+  .stage .why b { font-weight: 600; }
+  .stage .sticker { position: absolute; left: 50%; top: 18px; margin-left: 58px; width: 74px; height: 64px; filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 8px 10px rgba(0,0,0,.15)); animation: bob 4s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-5px) rotate(-3deg); } }
+  .trio { display: flex; justify-content: center; gap: 30px; text-align: center; }
+  .trio b { display: block; font-size: 22px; font-weight: 500; letter-spacing: -.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .bk-acts { display: flex; justify-content: center; gap: 8px; margin-top: 18px; padding: 0 16px; }
+  .bk-acts .pill-btn { flex: 0 0 auto; padding: 0 24px; }
+  .bk-acts .round { width: 48px; height: 48px; background: rgba(255,255,255,.55); }
+  .bk-goals { margin: 22px 16px 0; }
+  .bk-goals .hh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .bk-goals h2 { font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+  .glist { border-radius: 18px; background: rgba(255,255,255,.5); }
+  .gi { display: flex; align-items: center; gap: 12px; padding: 14px 16px; font-size: 15px; width: 100%; text-align: left; }
+  .gi + .gi { box-shadow: inset 0 1px 0 rgba(22,22,22,.08); }
+  .gi .c { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(22,22,22,.35); flex-shrink: 0; display: grid; place-items: center; transition: background .25s; }
+  .gi.done .c { background: var(--ink); box-shadow: none; }
+  .gi.done span { color: rgba(22,22,22,.45); text-decoration: line-through; }
+  .gi small { margin-left: auto; font-size: 12px; color: rgba(22,22,22,.55); }
+
+  .in { opacity: 0; transform: translateY(8px); animation: in .6s var(--ease) forwards; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } .in { opacity: 1; transform: none; } }
+  @media (max-width: 440px) { .phone { height: 800px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>细化版：照着两个 Behance 案例的细节做</h1>
+    <p>首页的结构和卡片来自 Classly（下一节课卡片、横滑故事卡、作业卡），数据和操作的做法来自 Intelly（大数字加小单位、大写小标签、同色大形状、黑色胶囊按钮配圆形图标按钮、虚线圆返回按钮、色调柱状图、黑色底栏和凸起的粉色加号）。颜色仍是青、粉、黑，放在暖米色上。界面是英文。</p>
+  </header>
+  <div class="cols">
+
+    <section class="col">
+      <div class="label"><b>首页 Home</b><span>下一份 → 横滑卡片 → 本周 → 今天的目标</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span></span></div>
+        <div class="scroll">
+          <div class="head in"><h1>Hi, Leqi</h1><button class="round line press" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button></div>
+
+          <div class="next in" style="animation-delay:.05s">
+            <div class="next-row">
+              <span class="thumb"><span class="shape" data-shape="scallop" data-fill="#F9C9E6"></span><span class="art" data-art="cupcake"></span></span>
+              <div class="g"><p class="t16">Strawberry cupcake</p><p class="s13">Today’s order · Deep work</p></div>
+              <div class="r"><b>50 min</b><p class="s13">2 rounds</p></div>
+            </div>
+            <div class="acts">
+              <button class="pill-btn press">Start baking<svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+              <button class="round press" aria-label="Change recipe"><svg class="ico" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg></button>
+              <button class="round press" aria-label="Invite a friend"><svg class="ico" viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/></svg></button>
+            </div>
+          </div>
+
+          <div class="tiles in" style="animation-delay:.1s" id="tiles"></div>
+
+          <div class="sec-h in" style="animation-delay:.15s"><h2>This week</h2><button class="dd">Week<svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></button></div>
+          <div class="week in" style="animation-delay:.18s">
+            <span class="shape" data-shape="flower8" data-fill="#4FD0C4"></span>
+            <p class="cap" style="position:relative">Focused this week</p>
+            <p class="big">3<sup>h</sup> 05<sup>min</sup></p>
+            <div class="stats3">
+              <div><b>6</b><span class="cap">bakes</span><span class="u"></span></div>
+              <div><b>4</b><span class="cap">golden</span><span class="u light"></span></div>
+              <div><b>5 d</b><span class="cap">streak</span><span class="u dash"></span></div>
+            </div>
+            <div class="bars" id="bars"></div>
+          </div>
+
+          <div class="sec-h in" style="animation-delay:.22s"><h2>Today’s goals</h2><svg class="chev" viewBox="0 0 10 16"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="goals in" style="animation-delay:.25s" id="goals"></div>
+        </div>
+        <nav class="dock">
+          <button class="on" aria-label="Home"><svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></button>
+          <button class="off" aria-label="Rooms"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"/></svg></button>
+          <button class="plus press" aria-label="New bake"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="off" aria-label="Nearby"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
+          <button class="off" aria-label="Me"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></button>
+        </nav>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="label"><b>烘焙中 Baking</b><span>Intelly 的详情页做法，铺在青色底上</span></div>
+      <div class="phone bake">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span></span></div>
+        <div class="scroll" style="padding-bottom:40px">
+          <div class="bk-top in">
+            <button class="round dash press" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <p>Baking</p>
+            <button class="round dash press" aria-label="Sound"><svg class="ico" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+          </div>
+          <div class="strip in" style="animation-delay:.05s"><div class="now"><span class="cap">Bake</span><b>25</b></div><div><span class="cap">Break</span><b>5</b></div><div><span class="cap">Bake</span><b>25</b></div><div class="dim"><span class="cap">Rest</span><b>5</b></div></div>
+          <div class="stage in" style="animation-delay:.1s">
+            <span class="shape" data-shape="flower8" data-fill="#4FD0C4"></span>
+            <span class="sticker art" data-art="cupcake"></span>
+            <p class="name">Strawberry cupcake</p>
+            <p class="big" id="clock">18:36</p>
+            <p class="why">The door is <b>shut</b> · locking your screen is fine <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></p>
+          </div>
+          <div class="trio in" style="animation-delay:.15s"><div><span class="cap">Round</span><b>1 / 2</b></div><div><span class="cap">Goals</span><b>1 / 2</b></div><div><span class="cap">Exits</span><b>0</b></div></div>
+          <div class="bk-acts in" style="animation-delay:.2s">
+            <button class="pill-btn press">Pause · 2 min</button>
+            <button class="round press" aria-label="Lock settings"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
+            <button class="round press" aria-label="End early"><svg class="ico" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+          </div>
+          <div class="bk-goals in" style="animation-delay:.25s">
+            <div class="hh"><h2>Goals:</h2><button class="dd">Add<svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 6v12M6 12h12"/></svg></button></div>
+            <div class="glist" id="glist">
+              <button class="gi done"><span class="c"><svg width="11" height="9" viewBox="0 0 12 10"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="#fff" stroke-width="2.4"/></svg></span><span>Review chapter 4 notes</span><small>12 min</small></button>
+              <button class="gi"><span class="c"></span><span>Write intro paragraph</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <h2>每个细节的出处</h2>
+    <table>
+      <tr><td>来源</td><td><b>参考里的做法</b></td><td><b>用在这里</b></td></tr>
+      <tr><td>Classly</td><td>暖米色底；卡片比底色深一点的米色，无阴影无描边，圆角约 16</td><td>底色 #FBF9F4，卡片 #F2EFE7，圆角 16–18</td></tr>
+      <tr><td>Classly</td><td>大标题约 30px 中粗；右上角线框铃铛</td><td>"Hi, Leqi" 30/600；铃铛是细描边圆按钮</td></tr>
+      <tr><td>Classly</td><td>"下一节课"卡：左头像、中标题+灰副标题、右粗体时间+灰小字</td><td>"下一份"卡：甜点放在粉色波浪圆里、右边 50 min / 2 rounds</td></tr>
+      <tr><td>Classly</td><td>横滑故事卡：纯色+扁平形状（花、波浪圆、闪电），左下角白色标签，滑出屏幕边缘</td><td>四张：Pick by mood（青+花）、Quick 15（粉+波浪圆）、Bake with Mia（米色+甜点）、Exam sprint（黑+闪电）</td></tr>
+      <tr><td>Classly</td><td>作业卡：纯粉彩底、标题、日历图标+日期、右下角小甜甜圈进度</td><td>今天的目标卡：粉、青、米三色，时间图标+轮次，右下角甜甜圈进度</td></tr>
+      <tr><td>Intelly</td><td>超大数字中等字重，右上角小单位；大写灰色小标签在数值上方</td><td>本周 "3h 05min"、计时 "18:36" 都是这种写法；ROUND / GOALS / EXITS 小标签</td></tr>
+      <tr><td>Intelly</td><td>数字背后一个比底色深一档的同色大形状（月亮、心形）</td><td>青色底上一朵深一档的青色八瓣花，甜点贴纸挂在右上角（像 8.8 旁边的星形）</td></tr>
+      <tr><td>Intelly</td><td>黑色胶囊主按钮 + 两个浅色圆形图标按钮</td><td>首页"Start baking + 换配方 + 邀请"；计时页"Pause + 锁定 + 结束"</td></tr>
+      <tr><td>Intelly</td><td>虚线圆返回按钮；日期条，选中项是黑色竖胶囊，以后的日子变淡</td><td>计时页左右是虚线圆按钮；轮次条：当前一轮黑色竖胶囊，最后的休息变淡</td></tr>
+      <tr><td>Intelly</td><td>细柱状图：同色调的浅柱 + 黑色重点柱 + 虚线柱表示缺数据；三种下划线（实、浅、虚）区分数据</td><td>本周柱状图同样做法；bakes / golden / streak 用三种下划线</td></tr>
+      <tr><td>Intelly</td><td>"Today ▾" 黑色胶囊下拉</td><td>"Week ▾"、"Add +"</td></tr>
+      <tr><td>Intelly</td><td>黑色胶囊底栏，中间凸起的粉色加号，当前项图标下一道短线</td><td>同样做法，加号外圈用米色描一圈把它和底栏分开</td></tr>
+    </table>
+  </div>
+</div>
+<script>
+(async () => {
+  let ART = {};
+  try { ART = await (await fetch('../src/art.json')).json(); } catch (e) {}
+  const art = (k) => ART[k] ? `<svg viewBox="0 0 200 172" aria-hidden="true">${ART[k]}</svg>` : '';
+  document.querySelectorAll('[data-art]').forEach((el) => { el.innerHTML = art(el.dataset.art); });
+
+  // flat shapes on a 100 × 100 box
+  const pt = (r, a) => `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`;
+  const flower = (n, r, bulge) => { // petals as arcs between valley points
+    let d = ''; for (let i = 0; i < n; i++) { const a0 = (i / n) * 2 * Math.PI, a1 = ((i + 1) / n) * 2 * Math.PI; d += `${i ? '' : 'M' + pt(r, a0)} A ${bulge} ${bulge} 0 0 1 ${pt(r, a1)} `; } return d + 'Z'; };
+  const star = (n, R, r) => 'M' + Array.from({ length: n * 2 }, (_, i) => pt(i % 2 ? r : R, (i / (n * 2)) * 2 * Math.PI - Math.PI / 2)).join(' L') + 'Z';
+  // petals as overlapping circles around a centre, so they read as a flower, not a blob
+  const petals = (n, dist, pr) => Array.from({ length: n }, (_, i) => { const a = (i / n) * 2 * Math.PI - Math.PI / 2; return `<circle cx="${(50 + dist * Math.cos(a)).toFixed(2)}" cy="${(50 + dist * Math.sin(a)).toFixed(2)}" r="${pr}"/>`; }).join('') + `<circle cx="50" cy="50" r="${dist}"/>`;
+  const SH = { scallop: () => flower(14, 42, 10.5), star: () => star(10, 50, 30) };
+  const FL = { flower8: () => petals(8, 30, 17), flower4: () => petals(4, 25, 25), flower6: () => petals(6, 28, 20) };
+  const shape = (k, fill) => FL[k] ? `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${fill}">${FL[k]()}</g></svg>` : `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${SH[k]()}" fill="${fill}"/></svg>`;
+  document.querySelectorAll('[data-shape]').forEach((el) => { el.innerHTML = shape(el.dataset.shape, el.dataset.fill); });
+  const bolt = (fill) => `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M58 4L18 58h28l-6 38 42-56H54z" fill="${fill}"/></svg>`;
+
+  // story tiles
+  document.getElementById('tiles').innerHTML = [
+    `<button class="tile press" style="background:#5BE0D4"><span class="shape" style="left:-18px;top:-20px;width:104px;height:104px">${shape('flower4', '#F9C9E6')}</span><span class="shape" style="right:-22px;top:30px;width:64px;height:64px">${shape('flower6', '#FBF9F4')}</span><span class="lb">Pick by<br>mood</span></button>`,
+    `<button class="tile press" style="background:#F9C9E6"><span class="shape" style="left:8px;top:6px;width:96px;height:96px">${shape('scallop', '#F26BC1')}</span><span class="lb" style="position:absolute">Quick 15<br>min</span></button>`,
+    `<button class="tile press" style="background:#F2EFE7"><span class="art">${art('macaron')}</span><span class="lb">Bake with<br>Mia · 18 min</span></button>`,
+    `<button class="tile dark press" style="background:#161616"><span class="shape" style="left:22px;top:6px;width:80px;height:80px">${bolt('#5BE0D4')}</span><span class="lb">Exam<br>sprint</span></button>`,
+  ].join('');
+
+  // this week: tone bars, today's in black, a missed day dashed
+  const W = [['M', 65], ['T', 25], ['W', 0, 'miss'], ['T', 25], ['F', 50], ['S', 15, 'now'], ['S', 0]];
+  document.getElementById('bars').innerHTML = W.map(([d, m, k]) => `<div class="${k === 'now' ? 'now' : ''}"><i class="${k === 'now' ? 'k' : k === 'miss' ? 'miss' : ''}" style="height:${k === 'miss' ? 26 : Math.max(6, m / 65 * 66)}px"></i><span>${d}</span></div>`).join('');
+
+  // today's goals as homework-style cards with a small donut
+  const donut = (p) => `<svg class="donut" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8" fill="none" stroke="rgba(22,22,22,.15)" stroke-width="3.5"/><circle cx="11" cy="11" r="8" fill="none" stroke="#161616" stroke-width="3.5" stroke-dasharray="${(p * 50.3).toFixed(1)} 50.3" transform="rotate(-90 11 11)" stroke-linecap="round"/></svg>`;
+  const clock = '<svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  document.getElementById('goals').innerHTML = [['p', 'Review chapter 4 notes', 'Round 1', .7], ['m', 'Write intro paragraph', 'Round 2', .2], ['c', 'Flashcards: unit 3', 'Any time', 0]]
+    .map(([c, t, w, p]) => `<button class="goal ${c} press"><b>${t}</b><span class="bot"><span>${clock}${w}</span>${donut(p)}</span></button>`).join('');
+
+  document.getElementById('glist').addEventListener('click', (e) => { const g = e.target.closest('.gi'); if (!g) return; g.classList.toggle('done'); g.querySelector('.c').innerHTML = g.classList.contains('done') ? '<svg width="11" height="9" viewBox="0 0 12 10"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="#fff" stroke-width="2.4"/></svg>' : ''; });
+  let left = 18 * 60 + 36; setInterval(() => { left = Math.max(0, left - 1); document.getElementById('clock').innerHTML = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`; }, 1000);
+})();
+</script>
+</body>
+</html>
