@@ -1189,6 +1189,11 @@ button.pill { position: relative; }
 
 #fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 45; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Comfortable primary actions and explicit timer context. */
+#s-home .open .sq { min-height: 48px; }
+#speed { min-height: 44px; }
+#clock-label, #session-left { color: var(--text-2); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -1214,6 +1219,13 @@ button.pill { position: relative; }
         <div class="scroll">
           <div class="stack pad">
             <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
+            <div class="blk open arrive">
+              <div class="top">
+                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
+                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
+              </div>
+              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
+            </div>
             <div class="blk hello clip join arrive">
               <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
               <div class="today-stats">
@@ -1226,13 +1238,6 @@ button.pill { position: relative; }
             <div class="blk hero arrive">
               <div class="hd"><div><p class="k">Weekly goal</p><p class="kk" id="week-sum">Bake a little every day.</p></div><b id="week-pct">0%</b></div>
               <div class="cookies" id="ticks" aria-hidden="true"></div>
-            </div>
-            <div class="blk open arrive">
-              <div class="top">
-                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
-                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
-              </div>
-              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
             </div>
             <div class="pair arrive">
               <div class="blk col"><p class="k">Focus today</p><p class="kk" id="goal-of">Goal 120 min</p><div class="gauge" id="gauge"><svg id="gauge-arc" viewBox="0 0 140 76" aria-hidden="true"></svg><b><span id="today-min">0</span><small> min</small></b></div><p class="kk center" id="today-hint"></p></div>
@@ -1400,7 +1405,9 @@ button.pill { position: relative; }
             <svg class="segs" id="segs" viewBox="0 0 280 280" aria-hidden="true"></svg>
             <div class="core"><svg class="art" viewBox="0 0 200 172" data-art="cupcake" id="oven-food" role="img" aria-label="Your dessert baking"></svg></div>
           </div>
-          <p class="clock" id="clock">50:00</p>
+          <p class="bk-hint" id="clock-label">This round remaining</p>
+          <p class="clock" id="clock">25:00</p>
+          <p class="bk-hint" id="session-left"></p>
           <p class="bk-hint" id="bake-hint">Keep the door shut. Locking your screen is fine.</p>
           <div class="plan-bar" id="plan-shapes" aria-hidden="true"></div>
           <div class="bk-tools"><span class="chip white" id="bake-sound"></span><button class="chip white" type="button" id="leave">Leave the app (demo)</button></div>
@@ -3013,6 +3020,30 @@ $('preheat-go').addEventListener('click', () => startBake());
 // and nothing you do during a break or a pause counts as leaving.
 const ROUND = 1500, MID_BREAK = 300, PAUSE = 120;
 const B = { total: 0, left: 0, speed: 60, timer: null, last: 0, exits: 0, burnt: false, early: false, goals: [], awayAt: 0, awayTimer: null, rest: 0, restKind: '', pauses: 1, roundsDone: 0 };
+const SESSION_KEY = 'sweet-study-session-v1';
+function saveBake() {
+  if (!B.timer) return;
+  try {
+    const { timer, last, awayTimer, awayAt, ...state } = B;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ state, recipe: recipe.id, lock: P.lock, sounds: [...P.sounds], savedAt: Date.now() }));
+  } catch (_) { /* Storage may be unavailable in private browsing. */ }
+}
+function clearSavedBake() { try { localStorage.removeItem(SESSION_KEY); } catch (_) {} }
+async function restoreBake() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (_) { clearSavedBake(); return; }
+  if (!saved) return;
+  const state = saved.state;
+  if (!state || !recipeById(saved.recipe) || !Number.isFinite(state.total) || state.total <= 0 || !Number.isFinite(state.left) || state.left <= 0 || state.left > state.total || !Array.isArray(state.goals) || !state.goals.every(g => typeof g.text === 'string' && typeof g.done === 'boolean') || ![1, 60].includes(state.speed) || !Number.isFinite(state.rest) || state.rest < 0 || !Number.isInteger(state.roundsDone) || state.roundsDone < 0 || !LOCKS[saved.lock] || !Array.isArray(saved.sounds)) { clearSavedBake(); return; }
+  const resume = await ask({ title: 'Resume your bake?', text: 'Your timer and goals were saved. Time while this page was closed does not count as focus time.', no: 'Discard bake', yes: 'Resume' });
+  if (!resume) { clearSavedBake(); return; }
+  recipe = recipeById(saved.recipe); P.lock = saved.lock; P.sounds = new Set(saved.sounds);
+  startBake(state.total / 60, []);
+  Object.assign(B, state, { awayAt: 0, last: performance.now() });
+  renderBake();
+}
+window.addEventListener('pagehide', saveBake);
+setTimeout(restoreBake, 1600);
 function startBake(m = minutes(), goals = S.goals.map((g) => g.text)) {
   Object.assign(B, { total: m * 60, left: m * 60, exits: 0, burnt: false, early: false, goals: goals.map((text) => ({ text, done: false })), rest: 0, restKind: '', pauses: 1, roundsDone: 0 });
   const L = LOCKS[P.lock];
@@ -3048,7 +3079,10 @@ function tickBake() {
 }
 function renderBake() {
   const p = B.total ? 1 - B.left / B.total : 0, elapsed = B.total - B.left, resting = B.rest > 0;
-  setText($('clock'), mmss(resting ? B.rest : B.left));
+  const roundLeft = Math.min(B.left, Math.max(0, (B.roundsDone + 1) * ROUND - elapsed));
+  setText($('clock'), mmss(resting ? B.rest : roundLeft));
+  setText($('clock-label'), resting ? (B.restKind === 'pause' ? 'Pause remaining' : 'Break remaining') : 'This round remaining');
+  setText($('session-left'), `${mmss(B.left)} focus remaining overall · ring shows total progress`);
   $('clock').classList.toggle('resting', resting);
   const nr = Math.max(1, Math.ceil(B.total / ROUND)), r = Math.min(nr, Math.floor(elapsed / ROUND) + 1);
   setText($('bake-round'), `${resting && B.restKind === 'break' ? B.roundsDone : r} / ${nr}`);
@@ -3074,7 +3108,8 @@ function renderBake() {
   const pause = $('pause');
   setText(pause, B.restKind === 'break' ? 'Skip break' : B.restKind === 'pause' ? 'Resume' : B.pauses ? 'Pause · 2 min' : 'Pause used');
   pause.disabled = !resting && !B.pauses;
-  setText($('speed'), B.speed === 1 ? '1×' : '60×');
+  setText($('speed'), B.speed === 1 ? 'Real time · 1×' : 'Demo · 60×');
+  saveBake();
 }
 $('bake-goals').addEventListener('click', (e) => {
   if (e.target.closest('[data-add]')) { addBakeGoal(); return; }
@@ -3120,6 +3155,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 function finishBake() {
+  clearSavedBake();
   clearInterval(B.timer); B.timer = null; B.rest = 0; B.restKind = '';
   CARRY = B.goals.filter((g) => !g.done).map((g) => g.text);
   buzz([30, 80, 30, 80, 60]);

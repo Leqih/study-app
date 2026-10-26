@@ -879,6 +879,30 @@ $('preheat-go').addEventListener('click', () => startBake());
 // and nothing you do during a break or a pause counts as leaving.
 const ROUND = 1500, MID_BREAK = 300, PAUSE = 120;
 const B = { total: 0, left: 0, speed: 60, timer: null, last: 0, exits: 0, burnt: false, early: false, goals: [], awayAt: 0, awayTimer: null, rest: 0, restKind: '', pauses: 1, roundsDone: 0 };
+const SESSION_KEY = 'sweet-study-session-v1';
+function saveBake() {
+  if (!B.timer) return;
+  try {
+    const { timer, last, awayTimer, awayAt, ...state } = B;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ state, recipe: recipe.id, lock: P.lock, sounds: [...P.sounds], savedAt: Date.now() }));
+  } catch (_) { /* Storage may be unavailable in private browsing. */ }
+}
+function clearSavedBake() { try { localStorage.removeItem(SESSION_KEY); } catch (_) {} }
+async function restoreBake() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (_) { clearSavedBake(); return; }
+  if (!saved) return;
+  const state = saved.state;
+  if (!state || !recipeById(saved.recipe) || !Number.isFinite(state.total) || state.total <= 0 || !Number.isFinite(state.left) || state.left <= 0 || state.left > state.total || !Array.isArray(state.goals) || !state.goals.every(g => typeof g.text === 'string' && typeof g.done === 'boolean') || ![1, 60].includes(state.speed) || !Number.isFinite(state.rest) || state.rest < 0 || !Number.isInteger(state.roundsDone) || state.roundsDone < 0 || !LOCKS[saved.lock] || !Array.isArray(saved.sounds)) { clearSavedBake(); return; }
+  const resume = await ask({ title: 'Resume your bake?', text: 'Your timer and goals were saved. Time while this page was closed does not count as focus time.', no: 'Discard bake', yes: 'Resume' });
+  if (!resume) { clearSavedBake(); return; }
+  recipe = recipeById(saved.recipe); P.lock = saved.lock; P.sounds = new Set(saved.sounds);
+  startBake(state.total / 60, []);
+  Object.assign(B, state, { awayAt: 0, last: performance.now() });
+  renderBake();
+}
+window.addEventListener('pagehide', saveBake);
+setTimeout(restoreBake, 1600);
 function startBake(m = minutes(), goals = S.goals.map((g) => g.text)) {
   Object.assign(B, { total: m * 60, left: m * 60, exits: 0, burnt: false, early: false, goals: goals.map((text) => ({ text, done: false })), rest: 0, restKind: '', pauses: 1, roundsDone: 0 });
   const L = LOCKS[P.lock];
@@ -914,7 +938,10 @@ function tickBake() {
 }
 function renderBake() {
   const p = B.total ? 1 - B.left / B.total : 0, elapsed = B.total - B.left, resting = B.rest > 0;
-  setText($('clock'), mmss(resting ? B.rest : B.left));
+  const roundLeft = Math.min(B.left, Math.max(0, (B.roundsDone + 1) * ROUND - elapsed));
+  setText($('clock'), mmss(resting ? B.rest : roundLeft));
+  setText($('clock-label'), resting ? (B.restKind === 'pause' ? 'Pause remaining' : 'Break remaining') : 'This round remaining');
+  setText($('session-left'), `${mmss(B.left)} focus remaining overall · ring shows total progress`);
   $('clock').classList.toggle('resting', resting);
   const nr = Math.max(1, Math.ceil(B.total / ROUND)), r = Math.min(nr, Math.floor(elapsed / ROUND) + 1);
   setText($('bake-round'), `${resting && B.restKind === 'break' ? B.roundsDone : r} / ${nr}`);
@@ -940,7 +967,8 @@ function renderBake() {
   const pause = $('pause');
   setText(pause, B.restKind === 'break' ? 'Skip break' : B.restKind === 'pause' ? 'Resume' : B.pauses ? 'Pause · 2 min' : 'Pause used');
   pause.disabled = !resting && !B.pauses;
-  setText($('speed'), B.speed === 1 ? '1×' : '60×');
+  setText($('speed'), B.speed === 1 ? 'Real time · 1×' : 'Demo · 60×');
+  saveBake();
 }
 $('bake-goals').addEventListener('click', (e) => {
   if (e.target.closest('[data-add]')) { addBakeGoal(); return; }
@@ -986,6 +1014,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 function finishBake() {
+  clearSavedBake();
   clearInterval(B.timer); B.timer = null; B.rest = 0; B.restKind = '';
   CARRY = B.goals.filter((g) => !g.done).map((g) => g.text);
   buzz([30, 80, 30, 80, 60]);

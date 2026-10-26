@@ -20,6 +20,13 @@
         <div class="scroll">
           <div class="stack pad">
             <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
+            <div class="blk open arrive">
+              <div class="top">
+                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
+                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
+              </div>
+              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
+            </div>
             <div class="blk hello clip join arrive">
               <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
               <div class="today-stats">
@@ -32,13 +39,6 @@
             <div class="blk hero arrive">
               <div class="hd"><div><p class="k">Weekly goal</p><p class="kk" id="week-sum">Bake a little every day.</p></div><b id="week-pct">0%</b></div>
               <div class="cookies" id="ticks" aria-hidden="true"></div>
-            </div>
-            <div class="blk open arrive">
-              <div class="top">
-                <div class="g"><p class="kk">Today’s order</p><h3>Strawberry cupcake</h3><p class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>2 × 25 min · 5-min break</span></p></div>
-                <div class="plate-sm" aria-hidden="true"><span class="shape" data-shape="scallop" data-fill="#F3DDFC"></span><svg class="art" viewBox="0 0 200 172" data-art="cupcake"></svg></div>
-              </div>
-              <div class="acts"><button class="sq grow" type="button" data-go="start">Start baking</button><button class="sq soft" type="button" data-go="pick">Change</button></div>
             </div>
             <div class="pair arrive">
               <div class="blk col"><p class="k">Focus today</p><p class="kk" id="goal-of">Goal 120 min</p><div class="gauge" id="gauge"><svg id="gauge-arc" viewBox="0 0 140 76" aria-hidden="true"></svg><b><span id="today-min">0</span><small> min</small></b></div><p class="kk center" id="today-hint"></p></div>
@@ -206,7 +206,9 @@
             <svg class="segs" id="segs" viewBox="0 0 280 280" aria-hidden="true"></svg>
             <div class="core"><svg class="art" viewBox="0 0 200 172" data-art="cupcake" id="oven-food" role="img" aria-label="Your dessert baking"></svg></div>
           </div>
-          <p class="clock" id="clock">50:00</p>
+          <p class="bk-hint" id="clock-label">This round remaining</p>
+          <p class="clock" id="clock">25:00</p>
+          <p class="bk-hint" id="session-left"></p>
           <p class="bk-hint" id="bake-hint">Keep the door shut. Locking your screen is fine.</p>
           <div class="plan-bar" id="plan-shapes" aria-hidden="true"></div>
           <div class="bk-tools"><span class="chip white" id="bake-sound"></span><button class="chip white" type="button" id="leave">Leave the app (demo)</button></div>
