@@ -1,29 +1,32 @@
-/* Sweet Study — generated from tokens.json */
+/* Sweet Study v4 — generated from tokens.json */
 :root, [data-theme="light"] {
-  --bg: #faf3ea; --surface: #ffffff; --sunken: #f2eadf; --line: #e8ded2; --line-strong: #d6cabd;
-  --text: #10131a; --text-2: #5a5f6b; --text-3: #80848f; --on-dark: #ffffff;
-  --brand: #ff9ef2; --brand-strong: #b4219a; --brand-tint: #ffeffc;
-  --success: #14dfc6; --success-strong: #087f70; --success-tint: #e3faf6;
-  --info: #22bfff; --info-tint: #e6f7ff; --highlight: #ffe600; --highlight-tint: #fff9c2;
-  --danger: #d2245e; --scrim: rgba(16,19,26,0.32);
-  --pink-l: #ffc4f8; --sky-l: #a6e6ff; --mint-l: #9ff0e4; --lemon-l: #fff07a; --caramel: #de9f38;
+  --bg: #ebf6c9; --surface: #ffffff; --glass: rgba(255,255,255,0.62); --glass-edge: rgba(255,255,255,0.95); --sunken: #f2f2f4; --line: #ececf0; --line-strong: #d9d9df;
+  --text: #111113; --text-2: #64646c; --text-3: #9a9aa2; --on-dark: #ffffff;
+  --brand: #c349ee; --brand-strong: #8a1bb5; --brand-tint: #f5e4fd; --brand-soft: #e3a6f7;
+  --blue: #8ca7f4; --blue-tint: #e3e9fd; --blue-soft: #bccbf9; --mint-strong: #4a6ee0;
+  --success: #2ec4a5; --success-strong: #0b7a66; --highlight: #ffe15c;
+  --danger: #d2245e; --scrim: rgba(17,17,19,0.32);
+  --pink-l: #ffc4f8; --sky-l: #c9d5fa; --mint-l: #bccbf9; --lemon-l: #fff07a; --caramel: #de9f38;
 }
 :root {
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px;
-  --cut-s: 6px; --cut-m: 10px; --cut-l: 16px;
-  --h-l: 52px; --h-m: 40px; --h-s: 32px;
-  --fs-display: 34px; --fs-title1: 28px; --fs-title3: 20px; --fs-headline: 17px; --fs-body: 16px; --fs-callout: 15px; --fs-subhead: 14px; --fs-footnote: 13px; --fs-caption: 12px; --fs-overline: 11px; --fs-clock: 56px;
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, "SF Mono", monospace;
+  --r-s: 10px; --r-m: 16px; --r-l: 28px; --r-xl: 32px; --r-full: 999px; --r-block: 22px; --r-pill: 7px; --gap-block: 7px; --pink-plate: #f3ddfc; --mint-plate: #e3e9fd;
+  --shadow-glass: inset 0 1px 0 rgba(255,255,255,0.9), 0 14px 32px -18px rgba(150,40,200,0.35);
+  --shadow-float: 0 10px 30px -10px rgba(17,17,19,0.18), 0 0 0 1px #ececf0;
+  --h-l: 56px; --h-m: 42px; --h-s: 34px;
+  --ease: cubic-bezier(.22,1,.36,1); --spring: cubic-bezier(.34,1.56,.64,1);
+  --fs-hero: 40px; --fs-display: 36px; --fs-title1: 32px; --fs-title3: 22px; --fs-headline: 17px; --fs-body: 16px; --fs-subhead: 14px; --fs-footnote: 13px; --fs-caption: 12px; --fs-tiny: 10px; --fs-clock: 64px;
+  --font-sans: -apple-system, "SF Pro Text", system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
-.display { font-family: var(--font-sans); font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; }
-.title1 { font-family: var(--font-sans); font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em; }
-.title3 { font-family: var(--font-sans); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -0.01em; }
-.headline { font-family: var(--font-sans); font-size: 17px; line-height: 22px; font-weight: 600; }
+.hero { font-family: var(--font-sans); font-size: 40px; line-height: 42px; font-weight: 900; letter-spacing: -0.05em; }
+.display { font-family: var(--font-sans); font-size: 36px; line-height: 40px; font-weight: 900; letter-spacing: -0.04em; }
+.title1 { font-family: var(--font-sans); font-size: 32px; line-height: 34px; font-weight: 900; letter-spacing: -0.05em; }
+.title3 { font-family: var(--font-sans); font-size: 22px; line-height: 28px; font-weight: 900; letter-spacing: -0.03em; }
+.headline { font-family: var(--font-sans); font-size: 17px; line-height: 22px; font-weight: 800; }
 .body { font-family: var(--font-sans); font-size: 16px; line-height: 22px; font-weight: 400; }
-.callout { font-family: var(--font-sans); font-size: 15px; line-height: 20px; font-weight: 400; }
 .subhead { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 400; }
 .footnote { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 400; }
-.caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }
-.overline { font-family: var(--font-sans); font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.08em; }
-.clock { font-family: var(--font-mono); font-size: 56px; line-height: 64px; font-weight: 500; letter-spacing: -0.02em; }
+.caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 800; }
+.tiny { font-family: var(--font-mono); font-size: 10px; line-height: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.clock { font-family: var(--font-sans); font-size: 64px; line-height: 70px; font-weight: 900; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }

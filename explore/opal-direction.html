@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calm Dark Direction</title>
+<style>
+  /* One accent, three greys, two weights. The dessert is the only colourful thing on screen. */
+  :root {
+    --sys: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', sans-serif;
+    --bg: #0A0A0F; --card: #15151C; --card-2: #1D1D26; --edge: rgba(255,255,255,.06);
+    --t1: #F5F5F7; --t2: rgba(235,235,245,.6); --t3: rgba(235,235,245,.32);
+    --accent: #FF7AB8; --accent-2: #FFB38A; --ok: #6EE7B7;
+    --ease: cubic-bezier(.22, 1, .36, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9E8EC; font-family: var(--sys); -webkit-font-smoothing: antialiased; color: #1C1C1E; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+
+  .page { max-width: 1320px; margin: 0 auto; padding: 32px 16px 48px; }
+  .page > header h1 { font-size: 26px; font-weight: 700; }
+  .page > header p { margin-top: 6px; color: #55555C; font-size: 15px; line-height: 22px; max-width: 820px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 32px; justify-items: center; margin-top: 24px; }
+  .col { width: 390px; max-width: 100%; }
+  .label { margin-bottom: 12px; } .label b { display: block; font-size: 17px; } .label span { font-size: 14px; color: #55555C; }
+  .notes { margin: 32px auto 0; max-width: 900px; font-size: 14px; line-height: 22px; color: #3A3A40; background: #fff; border-radius: 20px; padding: 20px 24px; }
+  .notes h2 { font-size: 17px; margin-bottom: 8px; }
+  .notes td { padding: 8px 12px 8px 0; border-top: 1px solid #EEE; vertical-align: top; } .notes td:first-child { width: 22%; font-weight: 600; }
+  .notes table { width: 100%; border-collapse: collapse; }
+
+  .phone { width: 390px; max-width: 100%; height: 844px; border-radius: 52px; overflow: hidden; position: relative; background: var(--bg); color: var(--t1); box-shadow: 0 0 0 10px #000, 0 30px 60px -20px rgba(0,0,0,.45); }
+  .sb { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 36px; font-weight: 600; font-size: 16px; position: relative; z-index: 5; }
+  .sb .isl { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; margin-left: -60px; background: #000; border-radius: 20px; }
+  .sb svg { fill: var(--t1); }
+  .scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; padding: 50px 0 110px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  .art svg { display: block; width: 100%; height: 100%; }
+  .ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* the one glow on each screen, behind the dessert */
+  .glow { position: absolute; left: 50%; width: 340px; height: 340px; margin-left: -170px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,122,184,.38), rgba(255,179,138,.14) 55%, rgba(10,10,15,0) 100%); filter: blur(8px); pointer-events: none; animation: breathe 6s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.06); opacity: .8; } }
+  .float { animation: float 4s ease-in-out infinite; } @keyframes float { 50% { transform: translateY(-6px); } }
+
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px 0; }
+  .top .d { font-size: 13px; color: var(--t2); font-weight: 500; }
+  .top h1 { font-size: 28px; font-weight: 700; letter-spacing: -.01em; margin-top: 2px; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--card-2); display: grid; place-items: center; font-size: 14px; font-weight: 600; box-shadow: inset 0 0 0 1px var(--edge); }
+
+  .hero { position: relative; text-align: center; padding: 18px 20px 0; }
+  .hero .glow { top: 0; }
+  .hero .art { position: relative; width: 190px; height: 164px; margin: 18px auto 0; }
+  .eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: .02em; }
+  .hero h2 { font-size: 26px; font-weight: 700; letter-spacing: -.01em; margin-top: 14px; }
+  .hero .meta { font-size: 15px; color: var(--t2); margin-top: 4px; }
+  .primary { display: block; width: 100%; height: 54px; border-radius: 27px; background: var(--t1); color: #000; font-size: 17px; font-weight: 600; margin-top: 22px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+  .primary:active { transform: scale(.97); }
+  .ghost { display: block; margin: 12px auto 0; font-size: 15px; font-weight: 500; color: var(--t2); }
+
+  .sec { padding: 0 20px; margin-top: 28px; }
+  .sec-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .sec-h h3 { font-size: 17px; font-weight: 600; }
+  .sec-h span { font-size: 13px; color: var(--t2); }
+  .card { background: var(--card); border-radius: 20px; box-shadow: inset 0 0 0 1px var(--edge); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { padding: 16px; }
+  .stat .k { font-size: 13px; color: var(--t2); font-weight: 500; }
+  .stat .n { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .stat .n small { font-size: 15px; font-weight: 500; color: var(--t3); letter-spacing: 0; }
+  .stat .bar { height: 4px; border-radius: 2px; background: var(--card-2); margin-top: 12px; overflow: hidden; }
+  .stat .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 2px; animation: fill 1.4s .4s var(--ease) forwards; }
+  @keyframes fill { to { width: var(--w); } }
+  .stat .f { font-size: 13px; color: var(--t3); margin-top: 8px; }
+  .chart { padding: 16px 16px 12px; }
+  .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; height: 96px; align-items: end; }
+  .bars div { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; font-size: 11px; color: var(--t3); font-weight: 500; }
+  .bars i { width: 100%; max-width: 20px; border-radius: 6px; background: var(--card-2); }
+  .bars .on i { background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+  .bars .now { color: var(--t1); }
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+  .row + .row { box-shadow: inset 0 1px 0 var(--edge); }
+  .row .av { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; color: #000; }
+  .row .g { flex: 1; min-width: 0; }
+  .row .t { font-size: 15px; font-weight: 600; }
+  .row .s { font-size: 13px; color: var(--t2); margin-top: 1px; }
+  .pill { height: 32px; padding: 0 14px; border-radius: 16px; background: var(--card-2); font-size: 14px; font-weight: 600; }
+
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 86px; padding: 8px 16px 0; display: flex; background: rgba(10,10,15,.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 var(--edge); z-index: 6; }
+  .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; color: var(--t3); }
+  .tabbar .on { color: var(--t1); }
+
+  /* bake */
+  .bk { position: relative; text-align: center; padding: 60px 20px 0; height: 100%; }
+  .bk .glow { top: 120px; width: 380px; height: 380px; margin-left: -190px; }
+  .bk .tagline { font-size: 13px; color: var(--t2); font-weight: 500; }
+  .ring { position: relative; width: 260px; height: 260px; margin: 34px auto 0; }
+  .ring svg.r { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .ring .bg { stroke: var(--card-2); }
+  .ring .fg { stroke: url(#rg); stroke-dasharray: 785; stroke-dashoffset: 785; animation: ring 2s .3s var(--ease) forwards; }
+  @keyframes ring { to { stroke-dashoffset: 560; } }
+  .ring .art { position: absolute; left: 50%; top: 50%; width: 150px; height: 130px; margin: -70px 0 0 -75px; }
+  .clock { font-size: 64px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-top: 26px; line-height: 1; }
+  .clock-s { font-size: 15px; color: var(--t2); margin-top: 8px; }
+  .goal-list { margin: 26px 0 0; text-align: left; }
+  .goal { display: flex; align-items: center; gap: 12px; padding: 14px 16px; font-size: 15px; }
+  .goal + .goal { box-shadow: inset 0 1px 0 var(--edge); }
+  .goal .c { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--t3); flex-shrink: 0; display: grid; place-items: center; }
+  .goal.done .c { background: var(--t1); box-shadow: none; }
+  .goal.done span { color: var(--t3); text-decoration: line-through; }
+  .actions { position: absolute; left: 20px; right: 20px; bottom: 34px; display: flex; gap: 10px; }
+  .actions button { flex: 1; height: 54px; border-radius: 27px; font-size: 17px; font-weight: 600; }
+  .actions .sec2 { background: var(--card-2); color: var(--t1); }
+  .actions .pri { background: var(--t1); color: #000; }
+  .lock { position: absolute; left: 20px; right: 20px; top: 58px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--t2); }
+  .lock span { display: inline-flex; align-items: center; gap: 6px; }
+  .lock .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+
+  /* result */
+  .rs { position: relative; text-align: center; padding: 70px 20px 0; height: 100%; }
+  .rs .glow { top: 110px; }
+  .rs h1 { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin-top: 8px; }
+  .rs .sub { font-size: 15px; color: var(--t2); margin-top: 6px; }
+  .pedestal { position: relative; width: 220px; height: 210px; margin: 24px auto 0; }
+  .pedestal .art { position: absolute; left: 20px; top: 0; width: 180px; height: 156px; }
+  .pedestal::after { content: ""; position: absolute; left: 30px; right: 30px; bottom: 18px; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,255,255,.14), rgba(255,255,255,0)); }
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; text-align: center; }
+  .trio div + div { box-shadow: inset 1px 0 0 var(--edge); }
+  .trio b { display: block; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .trio span { font-size: 12px; color: var(--t2); }
+  .earned { margin-top: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; text-align: left; }
+  .earned .g { flex: 1; } .earned b { font-size: 15px; } .earned p { font-size: 13px; color: var(--t2); margin-top: 2px; }
+  .earned .badge { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #000; font-weight: 700; font-size: 13px; }
+
+  .in { opacity: 0; transform: translateY(10px); animation: in .7s var(--ease) forwards; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } .in { opacity: 1; transform: none; } }
+  @media (max-width: 440px) { .phone { height: 800px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Calm dark direction, benchmarked on Opal</h1>
+    <p>Dark ground, one glow per screen, the dessert as the only colourful thing, white numbers, a white capsule for the one main action, quiet grey cards. No stickers, badges, gradients on chrome or decorative type. Everything here is buildable with standard SwiftUI views.</p>
+  </header>
+  <div class="cols">
+
+    <section class="col">
+      <div class="label"><b>Home</b><span>One thing to do, two numbers, one list</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span class="ic"></span></div>
+        <div class="scroll">
+          <div class="top in"><div><p class="d">Saturday, 25 October</p><h1>Good morning, Leqi</h1></div><span class="avatar">L</span></div>
+          <div class="hero">
+            <div class="glow"></div>
+            <div class="art float in" data-art="cupcake" style="animation-delay:.1s"></div>
+            <p class="eyebrow in" style="animation-delay:.15s">TODAY’S ORDER</p>
+            <h2 class="in" style="animation-delay:.2s">Strawberry cupcake</h2>
+            <p class="meta in" style="animation-delay:.25s">2 × 25 min · Deep work · Standard lock</p>
+            <button class="primary in" style="animation-delay:.3s">Start baking</button>
+            <button class="ghost">Choose another recipe</button>
+          </div>
+          <div class="sec in" style="animation-delay:.4s">
+            <div class="stats">
+              <div class="card stat"><p class="k">Focus today</p><p class="n">0<small> / 120 min</small></p><div class="bar"><i style="--w:3%"></i></div></div>
+              <div class="card stat"><p class="k">Streak</p><p class="n">5<small> days</small></p><p class="f">Bake today to keep it</p></div>
+            </div>
+          </div>
+          <div class="sec in" style="animation-delay:.5s">
+            <div class="sec-h"><h3>This week</h3><span>3 h 0 min</span></div>
+            <div class="card chart"><div class="bars" id="bars"></div></div>
+          </div>
+          <div class="sec in" style="animation-delay:.6s">
+            <div class="sec-h"><h3>Baking now</h3><span>See all</span></div>
+            <div class="card" id="friends"></div>
+          </div>
+        </div>
+        <nav class="tabbar">
+          <button class="on"><svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.5 3.6 5.2"/></svg>Rooms</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Nearby</button>
+          <button><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Me</button>
+        </nav>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="label"><b>Baking</b><span>The timer, the dessert growing, your goals</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span class="ic"></span></div>
+        <div class="bk">
+          <div class="lock"><span><span class="dot"></span>Standard lock · 4 apps</span><span>Round 1 of 2</span></div>
+          <div class="glow"></div>
+          <div class="ring">
+            <svg class="r" viewBox="0 0 260 260"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7AB8"/><stop offset="1" stop-color="#FFB38A"/></linearGradient></defs><circle class="bg" cx="130" cy="130" r="125"/><circle class="fg" cx="130" cy="130" r="125"/></svg>
+            <div class="art float" data-art="cupcake"></div>
+          </div>
+          <p class="clock" id="clock">48:36</p>
+          <p class="clock-s">Strawberry cupcake · rising</p>
+          <div class="card goal-list" id="goals">
+            <button class="goal"><span class="c"></span><span>Review chapter 4 notes</span></button>
+            <button class="goal"><span class="c"></span><span>Write intro paragraph</span></button>
+          </div>
+        </div>
+        <div class="actions"><button class="sec2">Pause</button><button class="sec2" style="flex:.6;color:var(--t2)">End</button></div>
+      </div>
+    </section>
+
+    <section class="col">
+      <div class="label"><b>Out of the oven</b><span>The result, three numbers, what you earned</span></div>
+      <div class="phone">
+        <div class="sb"><span>9:41</span><span class="isl"></span><span class="ic"></span></div>
+        <div class="rs">
+          <div class="glow"></div>
+          <p class="eyebrow in">DING</p>
+          <h1 class="in" style="animation-delay:.05s">Golden perfect</h1>
+          <p class="sub in" style="animation-delay:.1s">The door stayed shut the whole time.</p>
+          <div class="pedestal in" style="animation-delay:.15s"><div class="art float" data-art="cupcake"></div></div>
+          <div class="card trio in" style="animation-delay:.25s;padding:14px 0"><div><b>50</b><span>minutes</span></div><div><b>0</b><span>exits</span></div><div><b>2/2</b><span>goals</span></div></div>
+          <div class="card earned in" style="animation-delay:.3s"><span class="badge">+7</span><div class="g"><b>7 toppings earned</b><p>Decorate it on your break</p></div><span style="color:var(--t3)">›</span></div>
+        </div>
+        <div class="actions"><button class="pri">Take a 5-min break</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <h2>Why this one can ship</h2>
+    <table>
+      <tr><td>One hero per screen</td><td>The dessert, with a soft glow behind it. Nothing else competes: no stickers, badges, tilted headings or decorative type.</td></tr>
+      <tr><td>One accent</td><td>Strawberry pink, used only as the glow, the progress fill, the eyebrow and the ring. Buttons are white or grey; cards are one grey with a hairline edge.</td></tr>
+      <tr><td>Clear hierarchy</td><td>Two weights only: 700 for titles and numbers, 400–600 for everything else. Secondary text is the same white at 60% and 32%.</td></tr>
+      <tr><td>Fewer modules</td><td>Home has four things: today's bake, two numbers, the week, friends. Mood picks, search and shop content move to their own tabs.</td></tr>
+      <tr><td>Native parts</td><td>Standard tab bar, lists, capsule buttons, a ring gauge. All of it maps to SwiftUI defaults; dark mode is the default, so there's one theme to build.</td></tr>
+      <tr><td>What it needs</td><td>Desserts redrawn once in a soft, lit style (one illustrator, one set) so they hold up as the only hero. The current flat art works as a stand-in.</td></tr>
+    </table>
+  </div>
+</div>
+<script>
+(async () => {
+  let ART = {};
+  try { ART = await (await fetch('../src/art.json')).json(); } catch (e) {}
+  document.querySelectorAll('[data-art]').forEach((el) => { el.innerHTML = ART[el.dataset.art] ? `<svg viewBox="0 0 200 172" aria-hidden="true">${ART[el.dataset.art]}</svg>` : ''; });
+  const SB = '<svg width="18" height="12" viewBox="0 0 19 12"><rect x="0" y="7.5" width="3.2" height="4.5" rx="1"/><rect x="5.2" y="5" width="3.2" height="7" rx="1"/><rect x="10.4" y="2.5" width="3.2" height="9.5" rx="1"/><rect x="15.6" y="0" width="3.2" height="12" rx="1"/></svg><svg width="26" height="13" viewBox="0 0 27 13" style="margin-left:6px"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="#F5F5F7" stroke-opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.5"/></svg>';
+  document.querySelectorAll('.sb .ic').forEach((el) => { el.innerHTML = SB; });
+  const W = [['M', 65], ['T', 25], ['W', 15], ['T', 25], ['F', 50], ['S', 0, 1], ['S', 0]];
+  document.getElementById('bars').innerHTML = W.map(([d, m, now]) => `<div class="${m ? 'on' : ''} ${now ? 'now' : ''}"><i style="height:${m ? Math.max(8, m / 65 * 70) : 4}px"></i>${now ? 'Today' : d}</div>`).join('');
+  const F = [['Mia', '#FFB3D9', 'Macaron', 18], ['Jun', '#A9DDFF', 'Shortcake', 42], ['Ava', '#A7F0D2', 'Cupcake', 31]];
+  document.getElementById('friends').innerHTML = F.map(([n, c, d, l]) => `<div class="row"><span class="av" style="background:${c}">${n[0]}</span><div class="g"><p class="t">${n}</p><p class="s">${d} · ${l} min left</p></div><button class="pill">Join</button></div>`).join('');
+  document.getElementById('goals').addEventListener('click', (e) => { const g = e.target.closest('.goal'); if (!g) return; g.classList.toggle('done'); g.querySelector('.c').innerHTML = g.classList.contains('done') ? '<svg width="11" height="9" viewBox="0 0 12 10"><path d="M1 5l3.5 3.5L11 1" fill="none" stroke="#000" stroke-width="2.4"/></svg>' : ''; });
+  let left = 48 * 60 + 36; setInterval(() => { left = Math.max(0, left - 1); document.getElementById('clock').textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`; }, 1000);
+})();
+</script>
+</body>
+</html>

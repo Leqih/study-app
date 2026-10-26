@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rooms options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root { --bg: #EBF6C9; --sky: #8CA7F4; --sky-d: #6F8DEB; --sky-t: #E3E9FD; --orchid: #C349EE; --orchid-t: #F3DDFC; --orchid-s: #8A1BB5; --matcha: #A9C24A; --matcha-t: #DDEB9E; --text: #111113; --t2: #64646C; --t3: #9A9AA2; --sunken: #F2F2F4; --line: #ECECF0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: #E6E4EA; color: var(--text); padding: 32px 24px 48px; font-feature-settings: 'cv11', 'ss03'; }
+button { font: inherit; border: 0; background: none; color: inherit; cursor: pointer; }
+h1.page { font-size: 26px; font-weight: 600; letter-spacing: -.02em; }
+p.lead { color: var(--t2); margin-top: 6px; font-size: 15px; max-width: 760px; }
+.grid { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 28px; }
+.opt { width: 360px; }
+.opt .tag { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.opt .tag i { font-style: normal; width: 26px; height: 26px; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center; font-size: 13px; }
+.opt h2 { font-size: 18px; font-weight: 600; margin-top: 8px; letter-spacing: -.01em; }
+.opt .why { font-size: 13px; color: var(--t2); margin-top: 4px; line-height: 18px; min-height: 54px; }
+.opt.rec .tag::after { content: "Recommended"; height: 22px; padding: 0 9px; border-radius: 11px; background: var(--orchid-t); color: var(--orchid-s); font-size: 11px; display: inline-flex; align-items: center; }
+/* the phone */
+.phone { margin-top: 14px; width: 360px; height: 760px; border-radius: 54px; background: #1A1A1D; padding: 10px; box-shadow: 0 30px 60px -30px rgba(17, 17, 19, .45); }
+.screen { position: relative; height: 100%; border-radius: 44px; background: var(--bg); overflow: hidden; }
+.sb { height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 6px 30px 0; font-size: 15px; font-weight: 600; }
+.sb .isl { width: 100px; height: 30px; border-radius: 16px; background: #000; }
+.body { padding: 4px 14px 0; height: calc(100% - 48px); overflow: hidden; }
+.sub { font-size: 13px; color: var(--t2); padding: 0 4px; }
+.title { font-size: 28px; font-weight: 600; letter-spacing: -.02em; padding: 0 4px; margin-top: 2px; }
+.blk { background: #fff; border-radius: 22px; padding: 14px; box-shadow: inset 0 0 0 1px rgba(17, 17, 19, .05); }
+.k { font-size: 15px; font-weight: 600; }
+.kk { font-size: 12px; color: var(--t2); }
+.row { display: flex; align-items: center; gap: 10px; }
+.grow { flex: 1; min-width: 0; }
+.btn { white-space: nowrap; height: 44px; border-radius: 22px; background: var(--text); color: #fff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+.btn:active { transform: scale(.96); }
+.btn.soft { background: var(--sunken); color: var(--text); }
+.btn.orchid { background: var(--orchid); }
+.sav { display: block; overflow: visible; }
+.fade { position: absolute; left: 0; right: 0; bottom: 0; height: 170px; background: linear-gradient(to bottom, rgba(235, 246, 201, 0), var(--bg) 70%); pointer-events: none; }
+.ghostcard { margin-top: 10px; height: 160px; border-radius: 26px; background: #fff; opacity: .55; display: flex; align-items: flex-start; padding: 16px; font-weight: 600; color: var(--t3); font-size: 18px; }
+.dock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 7px; align-items: center; }
+.dock .r { width: 42px; height: 42px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+.dock .r.b { background: var(--text); color: #fff; font-size: 22px; }
+.dock .seg { display: flex; background: var(--text); border-radius: 22px; padding: 3px; }
+.dock .seg span { height: 36px; padding: 0 12px; border-radius: 18px; display: flex; align-items: center; color: #fff; font-size: 13px; font-weight: 600; }
+.dock .seg span.on { background: var(--sky); color: var(--text); }
+
+/* A: today's timeline */
+.tl { margin-top: 12px; }
+.tl .hd { display: flex; justify-content: space-between; align-items: baseline; }
+.days { display: flex; gap: 6px; margin-top: 10px; }
+.days button { flex: 1; height: 44px; border-radius: 14px; background: var(--sunken); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--t2); line-height: 14px; }
+.days button b { font-size: 15px; color: var(--text); font-weight: 600; }
+.days button.on { background: var(--text); color: rgba(255,255,255,.7); }
+.days button.on b { color: #fff; }
+.lane-wrap { position: relative; margin-top: 12px; overflow-x: auto; scrollbar-width: none; }
+.lane-wrap::-webkit-scrollbar { display: none; }
+.lanes { position: relative; width: 640px; height: 176px; }
+.hours { position: absolute; left: 0; right: 0; top: 0; display: flex; }
+.hours span { width: 80px; font-size: 11px; color: var(--t3); border-left: 1px dashed var(--line); padding-left: 4px; height: 176px; }
+.now { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--orchid); border-radius: 1px; }
+.now::before { content: "Now"; position: absolute; bottom: 0; left: 5px; padding: 1px 5px; border-radius: 6px; background: var(--orchid-t); font-size: 10px; font-weight: 700; color: var(--orchid-s); }
+.ev { position: absolute; height: 40px; border-radius: 20px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 4px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .2s; }
+.ev .sav { width: 30px; height: 30px; flex-shrink: 0; }
+.ev small { font-weight: 500; opacity: .7; }
+.ev.sel { box-shadow: 0 0 0 2px var(--text); transform: translateY(-2px); }
+.ev.plan { border: 1.5px dashed var(--orchid); color: var(--orchid-s); background: rgba(255,255,255,.6); }
+.evcard { margin-top: 10px; background: var(--bg); border-radius: 18px; padding: 12px; }
+.evcard .acts { display: flex; gap: 8px; margin-top: 10px; }
+.faces { display: flex; }
+.faces .sav { width: 26px; height: 26px; margin-left: -5px; }
+.faces .sav:first-child { margin-left: 0; }
+
+/* B: the jar */
+.jarblk { margin-top: 12px; text-align: left; }
+.jarwrap { position: relative; display: flex; gap: 14px; align-items: flex-end; margin-top: 10px; }
+.jar { position: relative; width: 150px; height: 190px; flex-shrink: 0; }
+.jar svg.glass { position: absolute; inset: 0; }
+.jar .fill { position: absolute; left: 14px; right: 14px; bottom: 12px; height: 132px; border-radius: 0 0 30px 30px; overflow: hidden; }
+.jar .fill .sav { position: absolute; width: 22px; height: 22px; }
+.jar .fill .mine { filter: drop-shadow(0 0 0 #000); }
+.jstats .big { font-size: 40px; font-weight: 600; letter-spacing: -.02em; line-height: 44px; }
+.jstats .big small { font-size: 16px; color: var(--t2); font-weight: 500; }
+.jbar { height: 8px; border-radius: 4px; background: var(--sunken); margin-top: 8px; overflow: hidden; }
+.jbar i { display: block; height: 100%; width: 72%; background: var(--orchid); border-radius: 4px; }
+.mepill { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; height: 30px; padding: 0 10px 0 4px; border-radius: 15px; background: var(--orchid-t); color: var(--orchid-s); font-size: 12px; font-weight: 600; }
+.mepill .sav { width: 22px; height: 22px; }
+.contrib { display: flex; gap: 8px; margin-top: 12px; }
+.contrib div { flex: 1; background: var(--sunken); border-radius: 14px; padding: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.contrib .sav { width: 24px; height: 24px; }
+.contrib b { display: block; font-size: 14px; }
+
+/* C: host a table */
+.host { margin-top: 12px; }
+.host .opts { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.host .lbl { font-size: 12px; font-weight: 600; color: var(--t2); margin-bottom: 6px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { height: 32px; padding: 0 12px; border-radius: 16px; background: var(--sunken); font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.chips button.on { background: var(--text); color: #fff; }
+.chips svg.art { width: 22px; height: 19px; }
+.invite { position: relative; margin-top: 12px; background: #fff; border-radius: 18px; padding: 14px; display: flex; gap: 12px; box-shadow: inset 0 0 0 1px rgba(17,17,19,.06); }
+.invite::before, .invite::after { content: ""; position: absolute; top: 50%; width: 16px; height: 16px; margin-top: -8px; border-radius: 50%; background: var(--bg); }
+.invite::before { left: -8px; } .invite::after { right: -8px; }
+.qr { width: 78px; height: 78px; flex-shrink: 0; display: grid; grid-template-columns: repeat(9, 1fr); gap: 1px; padding: 4px; background: #fff; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
+.qr i { border-radius: 1.5px; }
+.seats { display: flex; gap: 4px; margin-top: 8px; }
+.seats .sav { width: 26px; height: 26px; }
+.seats .dash { width: 24px; height: 24px; border-radius: 50%; border: 1.5px dashed var(--orchid); }
+
+/* D: the dial */
+.dialblk { margin-top: 12px; text-align: center; }
+.dial { position: relative; width: 300px; height: 160px; margin: 6px auto 0; touch-action: none; cursor: grab; user-select: none; }
+.dial svg { position: absolute; inset: 0; overflow: visible; }
+.dial .val { position: absolute; left: 0; right: 0; top: 70px; text-align: center; }
+.dial .val b { font-size: 46px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.dial .val small { font-size: 15px; color: var(--t2); font-weight: 500; margin-left: 4px; }
+.dial .hint { position: absolute; left: 0; right: 0; top: 124px; font-size: 12px; color: var(--t3); }
+.match { margin-top: 6px; text-align: left; background: var(--bg); border-radius: 18px; padding: 12px; }
+.match.swap { animation: swap .38s cubic-bezier(.22,1,.36,1); }
+@keyframes swap { from { transform: translateX(26px); opacity: 0; } }
+.match .acts { display: flex; gap: 8px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1 class="page">Rooms: four options for the top block</h1>
+<p class="lead">Each phone shows the top of the Rooms tab with the new block; the room cards and the rest of the page sit below as they are now. A, C and D can be tried: tap the events in A, the chips in C, and drag the dial in D.</p>
+
+<div class="grid">
+  <!-- A -->
+  <section class="opt rec">
+    <span class="tag"><i>A</i>Today’s baking schedule</span>
+    <h2>Plan when, and with whom</h2>
+    <p class="why">Bakes your friends and rooms have planned sit on today’s timeline as their shapes. Tap one to join it, or tap an empty slot to plan your own and invite people.</p>
+    <div class="phone"><div class="screen">
+      <div class="sb"><span>9:41</span><span class="isl"></span><span>●●●</span></div>
+      <div class="body">
+        <p class="sub">Bake alongside other people</p><p class="title">Study rooms</p>
+        <div class="blk tl">
+          <div class="hd"><span class="k">Today’s bakes</span><span class="kk">5 planned · 2 live</span></div>
+          <div class="days" id="a-days"></div>
+          <div class="lane-wrap" id="a-wrap"><div class="lanes" id="a-lanes"></div></div>
+          <div class="evcard" id="a-card"></div>
+        </div>
+        <div class="ghostcard">Quiet library…</div>
+      </div>
+      <div class="fade"></div>
+      <div class="dock"><span class="r">◎</span><span class="seg"><span>Today</span><span class="on">Rooms</span><span>Nearby</span></span><span class="r b">+</span></div>
+    </div></div>
+  </section>
+
+  <!-- B -->
+  <section class="opt">
+    <span class="tag"><i>B</i>The room’s shared jar</span>
+    <h2>Fill it together this week</h2>
+    <p class="why">Every dessert anyone in the room bakes drops into the jar as their shape. Yours have a dark edge. The whole room works toward one number.</p>
+    <div class="phone"><div class="screen">
+      <div class="sb"><span>9:41</span><span class="isl"></span><span>●●●</span></div>
+      <div class="body">
+        <p class="sub">Bake alongside other people</p><p class="title">Study rooms</p>
+        <div class="blk jarblk">
+          <div class="row"><span class="k grow">Quiet library jar</span><span class="kk">Ends Sunday</span></div>
+          <div class="jarwrap">
+            <div class="jar"><svg class="glass" viewBox="0 0 150 190"><rect x="34" y="4" width="82" height="16" rx="6" fill="#111113"/><path d="M28 22 H122 Q140 22 140 42 V160 Q140 184 116 184 H34 Q10 184 10 160 V42 Q10 22 28 22Z" fill="#F7F9FE" stroke="#D9DEEC" stroke-width="2"/></svg><div class="fill" id="b-fill"></div></div>
+            <div class="jstats grow"><p class="big">143<small> / 200</small></p><p class="kk">desserts this week</p><div class="jbar"><i></i></div><span class="mepill" id="b-me"></span></div>
+          </div>
+          <div class="contrib" id="b-top"></div>
+          <button class="btn orchid" style="margin-top:12px">Bake one for the jar · 25 min</button>
+        </div>
+        <div class="ghostcard">Quiet library…</div>
+      </div>
+      <div class="fade"></div>
+      <div class="dock"><span class="r">◎</span><span class="seg"><span>Today</span><span class="on">Rooms</span><span>Nearby</span></span><span class="r b">+</span></div>
+    </div></div>
+  </section>
+
+  <!-- C -->
+  <section class="opt">
+    <span class="tag"><i>C</i>Host a table</span>
+    <h2>Bring your classmates in</h2>
+    <p class="why">Set up a private table in three taps, and it prints an invite with a code your friends scan or tap. Empty stools fill as they arrive.</p>
+    <div class="phone"><div class="screen">
+      <div class="sb"><span>9:41</span><span class="isl"></span><span>●●●</span></div>
+      <div class="body">
+        <p class="sub">Bake alongside other people</p><p class="title">Study rooms</p>
+        <div class="blk host">
+          <div class="row"><span class="k grow">Host a table</span><span class="kk">Private · up to 6</span></div>
+          <div class="opts">
+            <div><p class="lbl">Dessert</p><div class="chips" id="c-dessert"></div></div>
+            <div><p class="lbl">Length</p><div class="chips" id="c-len"></div></div>
+            <div><p class="lbl">Starts</p><div class="chips" id="c-when"></div></div>
+          </div>
+          <div class="invite" id="c-invite"></div>
+          <div class="row" style="gap:8px;margin-top:12px"><button class="btn soft" style="width:auto;padding:0 16px">Copy link</button><button class="btn">Send invite</button></div>
+        </div>
+      </div>
+      <div class="fade"></div>
+      <div class="dock"><span class="r">◎</span><span class="seg"><span>Today</span><span class="on">Rooms</span><span>Nearby</span></span><span class="r b">+</span></div>
+    </div></div>
+  </section>
+
+  <!-- D -->
+  <section class="opt">
+    <span class="tag"><i>D</i>Time dial quick match</span>
+    <h2>Drag to how long you have</h2>
+    <p class="why">The same quick match, without the form: drag the dial and the best room for that length slides in below. One tap saves a seat.</p>
+    <div class="phone"><div class="screen">
+      <div class="sb"><span>9:41</span><span class="isl"></span><span>●●●</span></div>
+      <div class="body">
+        <p class="sub">Bake alongside other people</p><p class="title">Study rooms</p>
+        <div class="blk dialblk">
+          <div class="row"><span class="k grow" style="text-align:left">How long do you have?</span><span class="kk">61 baking now</span></div>
+          <div class="dial" id="d-dial"><svg viewBox="0 0 300 160" id="d-svg"></svg><div class="val"><b id="d-val">50</b><small>min</small></div><p class="hint">Drag the knob</p></div>
+          <div class="match" id="d-match"></div>
+        </div>
+        <div class="ghostcard">Quiet library…</div>
+      </div>
+      <div class="fade"></div>
+      <div class="dock"><span class="r">◎</span><span class="seg"><span>Today</span><span class="on">Rooms</span><span>Nearby</span></span><span class="r b">+</span></div>
+    </div></div>
+  </section>
+</div>
+
+<script>
+// ---------- the app's shapes: rounded, solid colour, white edge ----------
+const polar = (f, n = 120) => 'M' + Array.from({ length: n }, (_, i) => { const t = i / n * 2 * Math.PI, r = f(t); return `${(50 + r * Math.cos(t)).toFixed(2)} ${(50 + r * Math.sin(t)).toFixed(2)}`; }).join(' L') + 'Z';
+const starPts = (n, ro, ri) => 'M' + Array.from({ length: n * 2 }, (_, i) => { const a = -Math.PI / 2 + i / (n * 2) * 2 * Math.PI, r = i % 2 ? ri : ro; return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`; }).join(' L') + 'Z';
+const ringAt = (n, r, d) => Array.from({ length: n }, (_, i) => { const a = i / n * 2 * Math.PI; return `<circle cx="${(50 + r * Math.cos(a)).toFixed(1)}" cy="${(50 + r * Math.sin(a)).toFixed(1)}" r="${d}"/>`; }).join('');
+const petals = (n, off, rx, ry, rot = 0) => Array.from({ length: n }, (_, i) => `<ellipse cx="50" cy="${50 - off}" rx="${rx}" ry="${ry}" transform="rotate(${rot + i * 360 / n} 50 50)"/>`).join('');
+const S = {
+  wavy: () => `<path d="${polar((t) => 38 + 6 * Math.sin(7 * t))}"/>`,
+  asterisk: (w) => [0, 45, 90, 135].map((d) => `<line x1="10" y1="50" x2="90" y2="50" stroke-width="${15 + w}" transform="rotate(${d} 50 50)" fill="none"/>`).join(''),
+  daisy: () => `${petals(4, 24, 9, 22, 45)}${ringAt(4, 26, 16)}<circle cx="50" cy="50" r="8" fill="#fff" stroke="none"/>`,
+  tulip: () => '<path d="M14 12 H38 Q50 30 62 12 H86 V54 A36 36 0 0 1 14 54 Z"/>',
+  heart: () => '<path d="M50 86 C20 66 8 48 12 32 C16 16 38 12 50 28 C62 12 84 16 88 32 C92 48 80 66 50 86Z"/>',
+  hexagram: () => `<path d="${starPts(6, 46, 26)}"/>`,
+  cog: () => `<path d="${polar((t) => 39 + 6 * Math.tanh(3 * Math.sin(10 * t)))}"/>`,
+  flower8: () => Array.from({ length: 8 }, (_, i) => { const a = i / 8 * 2 * Math.PI - Math.PI / 2; return `<circle cx="${(50 + 30 * Math.cos(a)).toFixed(2)}" cy="${(50 + 30 * Math.sin(a)).toFixed(2)}" r="17"/>`; }).join('') + '<circle cx="50" cy="50" r="30"/>',
+  scallop: () => `<path d="${polar((t) => 41 + 4 * Math.abs(Math.cos(6 * t)))}"/>`,
+  star5: () => `<path d="${starPts(5, 46, 22)}"/>`,
+  dots: () => [20, 50, 80].map((y) => [20, 50, 80].map((x) => `<circle cx="${x}" cy="${y}" r="10"/>`).join('')).join(''),
+  sparkle: () => '<path d="M50 4 Q56 44 96 50 Q56 56 50 96 Q44 56 4 50 Q44 44 50 4Z"/>',
+};
+const shape = (k, c, edge = '#fff', ew = 17) => { const g = S[k], j = 'stroke-linejoin="round" stroke-linecap="round"'; return `<svg class="sav" viewBox="-8 -8 116 116" aria-hidden="true"><g fill="${edge}" stroke="${edge}" stroke-width="${ew}" ${j}>${g(10)}</g><g fill="${c}" stroke="${c}" stroke-width="7" ${j}>${g(0)}</g></svg>`; };
+const P = { Mia: ['wavy', '#C349EE'], Jun: ['asterisk', '#8CA7F4'], Ava: ['daisy', '#A9C24A'], Sam: ['tulip', '#E3A6F7'], Lin: ['heart', '#C349EE'], Ivy: ['hexagram', '#8CA7F4'], Ben: ['cog', '#A9C24A'], You: ['flower8', '#111113'] };
+const me = (n) => shape(...P[n]);
+const $ = (id) => document.getElementById(id);
+
+// ---------- A: today's schedule ----------
+const DAYS = [['Today', 26], ['Mon', 27], ['Tue', 28], ['Wed', 29], ['Thu', 30]];
+$('a-days').innerHTML = DAYS.map(([d, n], i) => `<button class="${i ? '' : 'on'}"><b>${n}</b>${d}</button>`).join('');
+// hours from 14:00, 80 px an hour
+const EV = [
+  { who: 'Mia', label: 'Calculus', at: 14.4, len: 50, lane: 0, bg: '#F3DDFC', live: true, with: ['Mia', 'Lin'] },
+  { who: 'Jun', label: 'Exam sprint', at: 15.2, len: 100, lane: 1, bg: '#E3E9FD', live: true, with: ['Jun', 'Ivy', 'Sam'] },
+  { who: 'Ava', label: 'Japanese', at: 16.5, len: 50, lane: 2, bg: '#EBF6C9', with: ['Ava'] },
+  { who: 'Sam', label: 'Reading', at: 17.6, len: 25, lane: 0, bg: '#FBE4F7', with: ['Sam', 'Ben'] },
+  { who: 'Ivy', label: 'Night owls', at: 19.0, len: 75, lane: 1, bg: '#E3E9FD', with: ['Ivy', 'Jun'] },
+  { plan: true, label: 'Plan a bake', at: 18.2, len: 50, lane: 2 },
+];
+const NOW = 14.85;
+let aSel = 1;
+function drawA() {
+  $('a-lanes').innerHTML = `<div class="hours">${Array.from({ length: 8 }, (_, i) => `<span>${14 + i}:00</span>`).join('')}</div><span class="now" style="left:${(NOW - 14) * 80}px"></span>`
+    + EV.map((e, i) => `<button class="ev ${e.plan ? 'plan' : ''} ${i === aSel ? 'sel' : ''}" data-i="${i}" style="left:${(e.at - 14) * 80}px;top:${22 + e.lane * 50}px;width:${Math.max(112, e.len / 60 * 80)}px;background:${e.plan ? '' : e.bg}">${e.plan ? '<span style="padding-left:8px">＋ Plan a bake</span>' : `${me(e.who)}<span>${e.label} <small>${e.len}m</small></span>`}</button>`).join('');
+  const e = EV[aSel], h = Math.floor(e.at), m = Math.round((e.at - h) * 60);
+  $('a-card').innerHTML = e.plan
+    ? `<div class="row"><div class="grow"><b class="k">Plan a bake at 18:15</b><p class="kk">Pick who to invite; they get a reminder 10 min before</p></div></div><div class="acts"><button class="btn soft" style="width:auto;padding:0 14px">Change time</button><button class="btn">Invite friends</button></div>`
+    : `<div class="row"><div class="faces">${e.with.map(me).join('')}</div><div class="grow"><b class="k">${e.label}</b><p class="kk">${e.live ? `<b style="color:#8A1BB5">Live</b> · started ${h}:${String(m).padStart(2, '0')}` : `Starts ${h}:${String(m).padStart(2, '0')}`} · ${e.len} min · ${e.with.length} going</p></div></div><div class="acts"><button class="btn soft" style="width:auto;padding:0 14px">Remind me</button><button class="btn">${e.live ? 'Join now' : 'I’m in'}</button></div>`;
+}
+$('a-lanes').addEventListener('click', (ev) => { const b = ev.target.closest('[data-i]'); if (b) { aSel = +b.dataset.i; drawA(); } });
+drawA(); $('a-wrap').scrollLeft = 20;
+
+// ---------- B: the jar ----------
+const crowd = ['Mia', 'Jun', 'Ava', 'Sam', 'Lin', 'Ivy', 'Ben'];
+let jar = '';
+for (let i = 0, y = 0; y < 6; y++) for (let x = 0; x < 5; x++, i++) {
+  const mine = [3, 9, 16, 21, 27].includes(i), n = mine ? 'You' : crowd[(i * 3 + y) % crowd.length];
+  const [k, c] = P[n];
+  // shapes pile up in rows, each a little tilted; yours carry a dark edge
+  jar += `<span style="position:absolute;width:22px;height:22px;left:${4 + x * 22 + (y % 2) * 8}px;bottom:${2 + y * 21}px;transform:rotate(${(i * 37) % 50 - 25}deg)">${shape(k, c, mine ? '#111113' : '#fff', mine ? 22 : 14)}</span>`;
+}
+$('b-fill').innerHTML = jar;
+$('b-me').innerHTML = `${me('You')}You added 5 this week`;
+$('b-top').innerHTML = [['Jun', 31], ['Mia', 24], ['Ava', 19]].map(([n, k]) => `<div>${me(n)}<span><b>${k}</b>${n}</span></div>`).join('');
+
+// ---------- C: host a table ----------
+const ART = {
+  macaron: '<rect x="30" y="104" width="140" height="36" rx="18" fill="#E48ED6"/><rect x="40" y="82" width="120" height="18" rx="9" fill="#FFF3FA"/><path d="M30 78 C30 33 170 33 170 78 C170 85 30 85 30 78 Z" fill="#F2A3E7"/>',
+  cupcake: '<path d="M46 98 H154 L141 158 C138 165 62 165 59 158 Z" fill="#8CA7F4"/><path d="M36 100 C28 84 46 72 62 76 C60 58 88 50 100 60 C112 48 142 56 140 74 C158 72 172 88 164 100 C150 108 50 108 36 100 Z" fill="#F4ACE9"/><circle cx="102" cy="35" r="11" fill="#C349EE"/>',
+  latte: '<path d="M50 78 H150 L144 128 C140 147 60 147 56 128 Z" fill="#8CA7F4"/><ellipse cx="100" cy="79" rx="43" ry="9.5" fill="#B9825A"/>',
+};
+const cState = { d: 'cupcake', l: 50, w: '19:00' };
+function drawC() {
+  $('c-dessert').innerHTML = [['cupcake', 'Cupcake'], ['macaron', 'Macaron'], ['latte', 'Latte']].map(([k, n]) => `<button class="${cState.d === k ? 'on' : ''}" data-d="${k}"><svg class="art" viewBox="0 0 200 172">${ART[k]}</svg>${n}</button>`).join('');
+  $('c-len').innerHTML = [25, 50, 75].map((l) => `<button class="${cState.l === l ? 'on' : ''}" data-l="${l}">${l} min</button>`).join('');
+  $('c-when').innerHTML = ['Now', '19:00', '20:30'].map((w) => `<button class="${cState.w === w ? 'on' : ''}" data-w="${w}">${w}</button>`).join('');
+  const seed = cState.d.length * 7 + cState.l;
+  $('c-invite').innerHTML = `<span class="qr">${Array.from({ length: 81 }, (_, i) => `<i style="background:${((i * seed) % 7 < 3 || [0, 1, 2, 9, 18, 6, 7, 8, 17, 26, 54, 63, 72, 55, 56].includes(i)) ? '#111113' : 'transparent'}"></i>`).join('')}</span>
+    <div class="grow"><p class="kk" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600">Invite · table 4F2K</p><b class="k" style="display:block;margin-top:2px">Leqi’s ${cState.d} table</b><p class="kk">${cState.w === 'Now' ? 'Starting now' : `Today ${cState.w}`} · ${cState.l} min · no chat</p><div class="seats">${me('You')}<span class="dash"></span><span class="dash"></span><span class="dash"></span></div></div>`;
+}
+document.querySelector('.host').addEventListener('click', (e) => { const b = e.target.closest('[data-d],[data-l],[data-w]'); if (!b) return; if (b.dataset.d) cState.d = b.dataset.d; if (b.dataset.l) cState.l = +b.dataset.l; if (b.dataset.w) cState.w = b.dataset.w; drawC(); });
+drawC();
+
+// ---------- D: the dial ----------
+const ROOMS = [['Night owls', 25, '06:12', 11, ['Ivy', 'Jun', 'Ben']], ['Quiet library', 25, '12:38', 13, ['Mia', 'Lin', 'Sam']], ['Exam sprint', 50, '03:05', 37, ['Jun', 'Ava', 'Sam']], ['Long haul', 90, '08:40', 9, ['Ava', 'Ben']]];
+let dVal = 50, lastRoom = '';
+function drawD() {
+  const cx = 150, cy = 150, r = 120, a0 = Math.PI, frac = (dVal - 15) / 75, ang = a0 + frac * Math.PI;
+  const pt = (a, rr = r) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+  const ticks = Array.from({ length: 16 }, (_, i) => { const a = a0 + i / 15 * Math.PI, [x1, y1] = pt(a, 132), [x2, y2] = pt(a, i % 3 ? 138 : 142); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${a <= ang + .01 ? '#111113' : '#D9D9DF'}" stroke-width="2.5" stroke-linecap="round"/>`; }).join('');
+  const [kx, ky] = pt(ang), [ex, ey] = pt(ang);
+  $('d-svg').innerHTML = `<path d="M${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="#F2F2F4" stroke-width="18" stroke-linecap="round"/>
+    <path d="M${cx - r} ${cy} A ${r} ${r} 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="#C349EE" stroke-width="18" stroke-linecap="round"/>${ticks}
+    ${[15, 25, 50, 75, 90].map((m) => { const a = a0 + (m - 15) / 75 * Math.PI, [x, y] = pt(a, 98); return `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="11" font-weight="600" fill="#9A9AA2">${m}</text>`; }).join('')}
+    <circle cx="${kx}" cy="${ky}" r="16" fill="#fff" stroke="#111113" stroke-width="3"/><circle cx="${kx}" cy="${ky}" r="5" fill="#111113"/>`;
+  $('d-val').textContent = dVal;
+  const room = ROOMS.filter((x) => x[1] <= dVal).sort((a, b) => b[1] - a[1] || a[2].localeCompare(b[2]))[0] || ROOMS[0];
+  if (room[0] !== lastRoom) {
+    lastRoom = room[0];
+    const m = $('d-match');
+    m.innerHTML = `<div class="row"><div class="faces">${room[4].map(me).join('')}</div><div class="grow"><b class="k">${room[0]}</b><p class="kk">Next round in <b style="color:#111113">${room[2]}</b> · ${room[3]} baking · ${Math.max(1, Math.floor(dVal / room[1]))} × ${room[1]} min</p></div></div><div class="acts"><button class="btn orchid">Save me a seat</button><button class="btn soft" style="width:auto;padding:0 14px">Start now</button></div>`;
+    m.classList.remove('swap'); void m.offsetWidth; m.classList.add('swap');
+  }
+}
+const dial = $('d-dial');
+const setFrom = (e) => { const b = dial.getBoundingClientRect(), x = e.clientX - b.left - 150 * b.width / 300, y = e.clientY - b.top - 150 * b.height / 160; let a = Math.atan2(y, x); if (a > 0) a = x < 0 ? Math.PI : 0; const f = (a + Math.PI) / Math.PI; dVal = Math.round((15 + Math.max(0, Math.min(1, f)) * 75) / 5) * 5; drawD(); };
+dial.addEventListener('pointerdown', (e) => { dial.setPointerCapture(e.pointerId); setFrom(e); });
+dial.addEventListener('pointermove', (e) => { if (e.buttons) setFrom(e); });
+drawD();
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 Two kinds of passing feedback: a banner for something that happened outside you (a friend, the oven), and a toast confirming what you just did.
 
-**Markup.** Banner: `<div class="banner cut">` with a 40px leading tile, then `<p class="b-app">SWEET STUDY · NOW</p>`, a `b-t` title and a `b-b` line. Toast: `<div class="toast cut"><b>Lead</b><span>detail</span></div>`.
+**Markup.** Banner: `<div class="banner rounded">` with a 40px leading tile, then `<p class="b-app">SWEET STUDY · now</p>`, a `b-t` title and a `b-b` line. Toast: `<div class="toast rounded"><b>Lead</b><span>detail</span></div>`, a black capsule whose lead is pink.
 
 **Rules.**
-- Banners drop in from under the status bar and leave after about 4 s or on tap; one at a time. Respect the notification switches in Settings.
-- Toasts confirm a result in a few words; the lead in `highlight` is the number or outcome (“50 min · spot on”).
-- Neither carries a decision. Anything that needs an answer is an alert with two buttons.
+- Banners float in from under the status bar with `shadow-float`, push the screen down while shown, and leave after about 4 s or on tap; one at a time.
+- Toasts confirm a result in a few words on one line.
+- Neither carries a decision. Anything that needs an answer is an alert with two capsule buttons.
