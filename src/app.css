@@ -1212,15 +1212,16 @@ button.pill { position: relative; }
 #s-rooms .sch-ev.going::before { content: '✓'; margin-right: 4px; }
 #s-rooms .scene .tbl::before { display: none; }
 
-/* A daily collection, drawn with flat dishes and actual completed sessions. */
-.dessert-dashboard { padding: 14px 18px 10px; }
-.dessert-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.dessert-heading h2 { margin-top: 2px; font-size: 23px; line-height: 1.15; letter-spacing: -.04em; font-weight: 600; }
-.dessert-table { display: flex; flex-wrap: nowrap; overflow-x: auto; align-items: flex-end; gap: 8px; height: 76px; padding: 4px 0; scrollbar-width: thin; }
-.table-dessert { flex: 0 0 60px; height: 66px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; transform-origin: 50% 85%; }
-.dessert-art { width: calc(var(--dessert-size) * .6); display: block; position: relative; }
+/* Compact daily shelf: quiet metrics beside full-size desserts. */
+.dessert-dashboard { display: grid; grid-template-columns: 90px minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px 14px; }
+.dessert-heading { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.dessert-heading .kk { font-size: 11px; }
+.dessert-heading h2 { margin-top: 3px; font-size: 20px; line-height: 1.15; letter-spacing: -.04em; font-weight: 600; }
+.dessert-table { display: flex; flex-wrap: nowrap; overflow-x: auto; align-items: flex-end; gap: 4px; height: 88px; padding: 0; scrollbar-width: thin; }
+.table-dessert { flex: 0 0 84px; height: 86px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; transform-origin: 50% 85%; }
+.dessert-art { width: calc(68px + (var(--dessert-size) - 54px) * .35); display: block; position: relative; }
 .dessert-art svg { width: 100%; display: block; position: relative; z-index: 1; }
 .dessert-art::before { content: ''; position: absolute; width: 108%; height: 32%; bottom: 0; left: -4%; background: #f3edfa; border-radius: 50%; }
-.dessert-minutes { font-size: 11px; color: var(--text-2); }
-.empty-plate { width: 76px; height: 23px; margin: auto; flex-shrink: 0; border-radius: 50%; background: #f3edfa; align-self: center; }
-.dessert-note { font-size: 11px; color: var(--text-2); text-align: center; min-height: 16px; }
+.dessert-minutes { font-size: 10px; color: var(--text-2); }
+.empty-plate { width: 92px; height: 25px; margin: auto; flex-shrink: 0; border-radius: 50%; background: #f3edfa; align-self: center; }
+.dessert-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
