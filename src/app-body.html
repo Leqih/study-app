@@ -20,28 +20,28 @@
         <div class="scroll">
           <div class="stack pad">
             <div class="blk brandbar arrive"><span class="logo">Sweet Study</span><span class="pill pink"><span class="mini" data-shape="star" data-fill="#C349EE"></span><span><span id="streak-n">5</span>-day streak</span></span></div>
-            <section class="blk dessert-dashboard arrive" aria-label="Today's dessert collection">
-              <div class="dessert-heading"><div><p class="kk">Today’s table</p><h2 id="dessert-total">0 min</h2></div><span id="dessert-count" class="kk">0 bakes</span></div>
-              <div id="dessert-table" class="dessert-table"></div>
-              <p id="dessert-note" class="dessert-note">A quiet table, for now.</p>
-            </section>
             <div class="blk hello clip join arrive">
               <p>Leqi, <span id="hello-sub">ready to bake?</span></p>
               <div class="today-stats">
-                <div><b id="ts-score">–</b><small>Focus score</small></div>
+                <div><b id="ts-score">–</b><small id="ts-score-l">Focus score</small></div>
                 <div><b id="ts-free">0m</b><small>Phone-free</small></div>
                 <div><b id="ts-exits">0</b><small>Exits</small></div>
               </div>
             </div>
-            <div class="seam" aria-hidden="true"><span class="today-ck" id="today-ck"></span><span class="face" data-shape="smile"></span></div>
+            <div class="seam"><svg class="notch" viewBox="0 0 114.59 105.5" width="114.59" height="105.5" aria-hidden="true"><path d="M2.00 47.00A14 14 0 0 0 15.35 37.22A44 44 0 0 1 99.24 37.22A14 14 0 0 0 112.59 47.00L112.59 50.50L2.00 50.50Z"/><path d="M2.00 54.00A14 14 0 0 1 15.35 63.78A44 44 0 0 0 99.24 63.78A14 14 0 0 1 112.59 54.00L112.59 50.50L2.00 50.50Z"/></svg><button class="today-btn" id="today-btn" type="button" aria-label="Today’s cookie"><span class="ck-hop"><span class="ck-body"><span class="today-ck" id="today-ck"></span><span class="face" id="today-face"></span></span></span><span class="ck-tip" id="ck-tip" aria-hidden="true"></span></button><div class="today-bub" id="today-bub" hidden></div><div class="ck-say" id="ck-say" hidden></div></div>
             <div class="blk hero arrive">
               <div class="hd"><div><p class="k">Weekly goal</p><p class="kk" id="week-sum">Bake a little every day.</p></div><b id="week-pct">0%</b></div>
-              <div class="cookies" id="ticks" aria-hidden="true"></div>
+              <div class="cookies" id="ticks"></div>
             </div>
             <div class="pair arrive">
               <div class="blk col"><p class="k">Focus today</p><p class="kk" id="goal-of">Goal 120 min</p><div class="gauge" id="gauge"><svg id="gauge-arc" viewBox="0 0 140 76" aria-hidden="true"></svg><b><span id="today-min">0</span><small> min</small></b></div><p class="kk center" id="today-hint"></p></div>
-              <button class="blk col" type="button" data-tab="rooms"><p class="k"><i class="live-dot" aria-hidden="true"></i>Baking now</p><p class="kk">In Quiet library</p><span class="faces-sh" id="friends"></span><p class="num"><span id="friends-n">3</span><small> friends</small></p></button>
+              <div class="blk col join-card" id="join-card"></div>
             </div>
+            <section class="blk dessert-dashboard arrive" aria-label="Today's dessert collection">
+              <div class="dessert-heading"><div><p class="kk">Today’s table</p><h2 id="dessert-total">0 min</h2></div></div>
+              <div id="dessert-table" class="dessert-table"></div>
+              <p id="dessert-note" class="dessert-note">A quiet table, for now.</p>
+            </section>
             <button class="blk recent arrive" type="button" data-tab="case" id="recent" aria-label="Recently baked, open the dessert case"></button>
           </div>
           <p class="hint" id="streak-hint" hidden></p>
@@ -52,18 +52,18 @@
       <!-- ================= TAB: ROOMS ================= -->
       <section class="screen" id="s-rooms" aria-label="Study rooms">
         <div class="scroll">
-          <div class="large"><div><p class="sub">Bake alongside other people</p><h1>Study rooms</h1></div></div>
+          <div class="large"><div><h1>Study rooms</h1></div></div>
           <!-- two circles: Friends (people you added, wherever they are) and Explore (open tables, by place) -->
-          <div class="rm-tabs" id="rm-tabs" role="tablist" aria-label="Who to study with"><button type="button" role="tab" data-rtab="friends" aria-selected="true">Friends</button><button type="button" role="tab" data-rtab="explore" aria-selected="false">Explore</button></div>
+          <div class="rm-tabs" id="rm-tabs" role="tablist" aria-label="Who to study with" data-on="friends"><button type="button" role="tab" data-rtab="friends" aria-selected="true">Friends</button><button type="button" role="tab" data-rtab="explore" aria-selected="false">Explore</button><svg class="rm-line" viewBox="0 0 80 9" preserveAspectRatio="none" aria-hidden="true"><path d="M1.5 5Q6 0 11 5T21 5T31 5T41 5T51 5T61 5T71 5T78.5 5" fill="none" stroke-width="2.6" stroke-linecap="round" pathLength="100"/></svg></div>
           <div class="rm-pane" id="pane-friends" role="tabpanel">
           <div class="pad rm-pad"><div class="blk sched" id="live-hero"></div></div>
           <div class="pad"><div class="stack">
-            <div class="blk"><div class="ach"><p class="k"><i class="live-dot" aria-hidden="true"></i>Friends baking now</p><span class="kk" id="friends-count"></span></div><div id="friends-all"></div></div>
+            <div class="blk"><div class="ach"><p class="k"><i class="live-dot" aria-hidden="true"></i>Friends baking now</p></div><div id="friends-all"></div></div>
             <div class="blk"><div class="ach"><p class="k">Focus board</p><div class="case-mode lead-mode" id="lead-mode" role="group" aria-label="Period"><button type="button" data-p="today" aria-pressed="false">Today</button><button type="button" data-p="week" aria-pressed="true">Week</button></div></div><div class="lead" id="leaderboard"></div></div>
           </div></div>
           </div>
           <div class="rm-pane" id="pane-explore" role="tabpanel" hidden>
-          <div class="room-section-label"><div><h2>Open tables</h2><p class="explore-sub">Study next to people you don’t know yet</p></div>
+          <div class="room-section-label"><h2>Open tables</h2>
             <button class="scope-btn" id="scope-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Where to look"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="scope-name">NYU</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
             <div class="scope-menu" id="scope-menu" role="menu" hidden></div>
           </div>
@@ -71,9 +71,8 @@
           <div class="rm-rail" id="rooms"></div>
           <div class="rm-dots" id="room-dots" aria-hidden="true"></div>
           <div class="pad"><div class="blk local">
-            <div class="ach"><p class="k" id="local-title">Top at NYU</p><span class="kk" id="local-sub"></span></div>
+            <div class="ach"><p class="k" id="local-title">Top at NYU</p></div>
             <div id="local-board"></div>
-            <p class="lb-note">People you haven’t added show only a first initial.</p>
           </div></div>
           </div>
           <div class="tab-pad"></div>
@@ -83,7 +82,7 @@
       <!-- ================= TAB: CASE ================= -->
       <section class="screen" id="s-case" aria-label="Dessert case">
         <div class="scroll">
-          <div class="large"><div><p class="sub" id="case-sub">Everything you’ve baked</p><h1>Dessert case</h1></div><div class="case-mode" id="case-mode" role="group" aria-label="Layout"><button type="button" data-mode="grid" aria-pressed="true">Grid</button><button type="button" data-mode="board" aria-pressed="false">Display</button></div></div>
+          <div class="large"><div><h1>Dessert case</h1></div><div class="case-mode" id="case-mode" role="group" aria-label="Layout"><button type="button" data-mode="grid" aria-pressed="true">Grid</button><button type="button" data-mode="board" aria-pressed="false">Display</button></div></div>
           <div class="section" id="grid-wrap"><div class="case-grid" id="case-grid"></div></div>
           <div class="section" id="board-wrap" hidden><div class="board" id="board"></div><div class="board-tools" id="board-tools"></div><div class="board-cap"><b>Leqi’s case</b><span id="board-sub"></span></div></div>
           <div class="tab-pad"></div>
@@ -93,7 +92,7 @@
       <!-- ================= TAB: NEARBY ================= -->
       <section class="screen" id="s-nearby" aria-label="Nearby">
         <div class="scroll">
-          <div class="large"><div><p class="sub">Order the real thing after you bake</p><h1>Nearby</h1></div></div>
+          <div class="large"><div><h1>Nearby</h1></div></div>
           <div class="map rounded" id="map" aria-hidden="true"></div>
           <div class="section"><div class="list rounded" id="shops"></div></div>
           <div class="tab-pad"></div>
@@ -104,7 +103,7 @@
       <section class="screen" id="s-me" aria-label="Me">
         <div class="scroll">
           <div class="large"><div><h1>Me</h1></div></div>
-          <div class="me-head"><button class="me-shape" type="button" data-go="my-shape" aria-label="Choose your shape"><span class="avatar l" data-me></span><i class="edit" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></i></button><div><p class="t-title3">Leqi</p><p class="t-subhead muted">Baker since September · tap your shape to change it</p></div></div>
+          <div class="me-head"><button class="me-shape" type="button" data-go="my-shape" aria-label="Choose your shape"><span class="avatar l" data-me></span><i class="edit" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></i></button><div><p class="t-title3">Leqi</p></div></div>
           <div class="section">
             <div class="stats">
               <div class="stat rounded"><b id="me-bakes">6</b><span>this week</span></div>
@@ -114,11 +113,11 @@
           </div>
           <div class="section">
             <div class="list rounded">
-              <button class="row" type="button" data-tab="case"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><span class="grow"><span class="t">Dessert case</span><span class="s" id="me-case">Everything you’ve baked</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-go="report"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="grow"><span class="t">October report</span><span class="s">Your month as a receipt</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-go="settings"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow"><span class="t">Default focus lock</span><span class="s" id="me-lock">Standard · 180°</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-go="settings"><span class="tile info rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></span><span class="grow"><span class="t">Settings</span><span class="s">Notifications, haptics, sounds</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
-              <button class="row" type="button" data-go="friends"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span><span class="s" id="me-friends">4 friends</span></span><span class="badge-n" id="me-req" hidden></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-tab="case"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><span class="grow"><span class="t">Dessert case</span></span><span class="v" id="me-case"></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="report"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></svg></span><span class="grow"><span class="t">October report</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="settings"><span class="tile brand rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="grow"><span class="t">Default focus lock</span></span><span class="v" id="me-lock">Standard</span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="settings"><span class="tile info rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l11-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></span><span class="grow"><span class="t">Settings</span></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+              <button class="row" type="button" data-go="friends"><span class="tile success rounded"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"/><path d="M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 3.5a4 4 0 0 1 0 7.5M21 20v-1a5 5 0 0 0-3-4.5"/></svg></span><span class="grow"><span class="t">Friends</span></span><span class="v" id="me-friends">4</span><span class="badge-n" id="me-req" hidden></span><svg class="chev" width="10" height="16" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
             </div>
           </div>
           <div class="tab-pad"></div>
@@ -201,7 +200,7 @@
             <div class="chips" id="sounds"></div>
           </div>
           <div class="section">
-            <div class="list rounded"><div class="row"><span class="faces" id="together-faces"></span><span class="grow"><span class="t">Bake with Mia and Jun</span><span class="s">They’ll see your oven in Quiet library</span></span><button class="switch rounded" role="switch" aria-checked="true" id="together" aria-label="Bake together"></button></div></div>
+            <div class="list rounded"><div class="row"><span class="faces" id="together-faces"></span><span class="grow"><span class="t">Bake with Mia and Jun</span></span><button class="switch rounded" role="switch" aria-checked="true" id="together" aria-label="Bake together"></button></div></div>
           </div>
           <div class="spacer"></div>
         </div>

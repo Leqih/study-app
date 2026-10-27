@@ -328,7 +328,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
           mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat; }
 .blk.join::before { left: 26px; } .blk.join::after { right: 26px; }
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; position: relative; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; position: relative; }
 .pair::after { content: ""; position: absolute; left: 50%; top: 50%; width: 21px; height: 30px; margin: -15px 0 0 -10.5px; background: var(--surface);
   -webkit-mask: radial-gradient(circle 8px at 50% 0, #0000 97%, #000) top / 100% 51% no-repeat, radial-gradient(circle 8px at 50% 100%, #0000 97%, #000) bottom / 100% 51% no-repeat;
           mask: radial-gradient(circle 8px at 50% 0, #0000 97%, #000) top / 100% 51% no-repeat, radial-gradient(circle 8px at 50% 100%, #0000 97%, #000) bottom / 100% 51% no-repeat; }
@@ -350,15 +350,18 @@ ul { list-style: none; margin: 0; padding: 0; }
 /* today's cookie sits on the seam between the greeting and the week: both blocks have a round bite taken out
    around it (8 px of page showing), and it lines up with today's cookie, the last one in the tray below */
 .seam { position: relative; height: 0; margin-top: -7px; z-index: 3; }
-.seam .today-ck { position: absolute; right: 2px; top: 3.5px; width: 72px; height: 72px; transform: translateY(-50%); pointer-events: none; }
-.seam .face { position: absolute; right: 21px; top: 3.5px; width: 34px; height: 34px; transform: translateY(-50%); }
+.today-btn { position: absolute; right: 48px; top: 3.5px; width: 72px; height: 72px; translate: 0 -50%; border-radius: 50%; }
+.seam .today-ck { position: absolute; inset: 0; pointer-events: none; }
+.seam .face { position: absolute; left: 0; top: 0; width: 72px; height: 72px; pointer-events: none; }
+.seam .face svg { overflow: visible; }
 .seam .face svg { display: block; width: 100%; height: 100%; }
-.seam .face circle:first-child { display: none; }
-#s-home .blk.hello { -webkit-mask: radial-gradient(circle 44px at calc(100% - 38px) calc(100% + 3.5px), #0000 97%, #000); mask: radial-gradient(circle 44px at calc(100% - 38px) calc(100% + 3.5px), #0000 97%, #000); }
-#s-home .blk.hero { -webkit-mask: radial-gradient(circle 44px at calc(100% - 38px) -3.5px, #0000 97%, #000); mask: radial-gradient(circle 44px at calc(100% - 38px) -3.5px, #0000 97%, #000); }
+.today-bub { position: absolute; right: 0; bottom: 46px; z-index: 4; display: flex; align-items: center; gap: 10px; padding: 9px 15px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; transform-origin: 85% 100%; }
+.today-bub[hidden] { display: none; }
+.today-bub small { font-weight: 500; color: rgba(255, 255, 255, .6); font-size: 12px; }
+.today-bub .tb { display: block; width: 52px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .22); overflow: hidden; }
+.today-bub .tb i { display: block; height: 100%; border-radius: 3px; background: #fff; }
+.crumb { position: absolute; z-index: 40; width: 8px; height: 8px; border-radius: 3px; pointer-events: none; }
 .today-ck svg { display: block; width: 100%; height: 100%; }
-.today-ck .e { fill: #E3E9FD; }
-.today-ck .f { fill: #8CA7F4; transition: y .8s var(--ease), height .8s var(--ease); }
 .today-stats { position: relative; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 22px; margin-top: 12px; padding-right: 104px; }
 .today-stats b { display: block; font-size: 22px; font-weight: 600; line-height: 26px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .today-stats small { display: block; font-size: 12px; line-height: 16px; color: var(--text-2); }
@@ -378,12 +381,12 @@ ul { list-style: none; margin: 0; padding: 0; }
 .hero .hd { display: flex; flex-direction: row-reverse; justify-content: flex-end; align-items: center; gap: 14px; padding-right: 90px; }
 .hero .hd b { font-size: 44px; font-weight: 600; line-height: 44px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .cookies { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
-.cookies span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cookies > * { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .cookies svg { width: 100%; max-width: 32px; aspect-ratio: 1; display: block; }
 .cookies .e { fill: rgba(255, 255, 255, .32); }
 .cookies .f { fill: #fff; transition: y .8s var(--ease), height .8s var(--ease); }
-.cookies .now .f { fill: var(--brand); }
-.cookies .now .e { fill: rgba(195, 73, 238, .3); }
+.cookies .now .f { fill: var(--today, var(--brand)); }
+.cookies .now .e { fill: var(--today, var(--brand)); }
 .cookies .ahead .e { fill: rgba(255, 255, 255, .18); }
 .cookies small { font-size: 11px; line-height: 14px; font-weight: 600; color: #fff; }
 .cookies .now small { color: #fff; font-weight: 600; }
@@ -707,7 +710,7 @@ button.pill { position: relative; }
 
 /* nearby */
 .map {
-  --c: var(--r-l); height: 168px; margin: var(--sp-4) var(--sp-5) 0; position: relative; overflow: hidden;
+  --c: var(--r-l); height: 300px; margin: var(--sp-4) var(--sp-5) 0; position: relative; overflow: hidden;
   background: linear-gradient(90deg, transparent 47%, var(--surface) 47% 53%, transparent 53%), linear-gradient(0deg, transparent 58%, var(--surface) 58% 64%, transparent 64%), linear-gradient(120deg, var(--blue-tint) 0 30%, #F4FAFE 30% 70%, var(--brand-tint) 70%);
 }
 .pin { position: absolute; width: 30px; height: 36px; margin: -36px 0 0 -15px; }
@@ -1214,9 +1217,12 @@ button.pill { position: relative; }
 #s-rooms .rm-join { border-radius: 14px; font-size: 14px; min-height: 44px; height: 44px; margin-top: 14px; }
 #s-rooms .room-section-label { padding: 24px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
 /* Friends / Explore: one segmented control under the title */
-.rm-tabs { display: flex; gap: 2px; margin: 12px 20px 0; padding: 3px; border-radius: 999px; background: #fff; }
-.rm-tabs button { flex: 1; display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--text-2); transition: background .2s, color .2s; }
-.rm-tabs button[aria-selected="true"] { background: var(--text); color: #fff; }
+/* the Friends / Explore switch: two words, the chosen one dark with a wavy line of frosting under it */
+.rm-tabs { position: relative; display: flex; gap: 24px; margin: 10px 20px 0; padding: 0 2px; }
+.rm-tabs button { position: relative; padding: 6px 0 14px; font-size: 18px; font-weight: 600; letter-spacing: -.01em; color: var(--text-3); transition: color .25s; }
+.rm-tabs button[aria-selected="true"] { color: var(--text); }
+.rm-line { position: absolute; left: 0; bottom: 0; width: 60px; height: 9px; overflow: visible; pointer-events: none; transition: translate .5s var(--spring), width .5s var(--spring); }
+.rm-line path { stroke: var(--brand); stroke-dasharray: 100; }
 #s-rooms .rm-pane > .pad.rm-pad { padding-top: 12px; }
 #s-rooms #pane-explore .room-section-label { padding-top: 18px; }
 #s-rooms .explore-sub { margin: 2px 0 0; font-size: 13px; color: var(--text-2); }
@@ -1361,7 +1367,7 @@ button.lb-row { width: 100%; text-align: left; }
 .pcol .who[data-n]:not([data-n=""]) { cursor: pointer; }
 
 /* a person's sheet: a hero in their colour with a scalloped hem, their face in a chef's hat inside the bake ring,
-   then three paper stickers, each a little askew with a hard paper shadow (no blur) */
+   then three paper stickers, each a little askew, flat (no shadows) */
 .ph { --tint: #E9E9EF; position: relative; margin: 4px -6px 6px; padding: 22px 16px 30px; border-radius: 26px 26px 0 0; text-align: center;
   background: color-mix(in srgb, var(--tint) 55%, #fff);
   -webkit-mask: radial-gradient(10px at 50% 100%, #0000 98%, #000) 50% 0 / 20px 100% repeat-x, linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat;
@@ -1373,13 +1379,13 @@ button.lb-row { width: 100%; text-align: left; }
 .ph-ring .bob { position: relative; display: block; width: 100%; height: 100%; animation: bob 3.2s ease-in-out infinite, sit .55s var(--spring) both; }
 .ph-ring .avatar { width: 100%; height: 100%; box-shadow: none; }
 .ph-ring .toque { width: 42px; height: 34px; top: -22px; margin-left: -21px; transform: rotate(-8deg); }
-.ph-pill { position: absolute; left: 50%; bottom: -6px; translate: -50% 0; z-index: 2; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--text); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; white-space: nowrap; box-shadow: 0 0 0 3px color-mix(in srgb, var(--tint) 55%, #fff); }
+.ph-pill { position: absolute; left: 50%; bottom: -6px; translate: -50% 0; z-index: 2; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--text); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; white-space: nowrap; }
 .ph-pill b { font-size: 14px; font-variant-numeric: tabular-nums; }
 .ph h3 { position: relative; margin-top: 16px; font-size: 26px; line-height: 30px; }
 .ph p { position: relative; font-size: var(--fs-subhead); color: var(--text-2); margin-top: 2px; }
 .stks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 2px; }
 .stk { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 12px 12px 11px; border-radius: 18px; background: var(--bgc); rotate: var(--r);
-  box-shadow: 0 3px 0 rgba(17, 17, 19, .08), inset 0 0 0 2px #fff; animation: popin .45s var(--spring) both; }
+  animation: popin .45s var(--spring) both; }
 .stk:nth-child(2) { animation-delay: .06s; } .stk:nth-child(3) { animation-delay: .12s; }
 .stk .ic { width: 30px; height: 30px; display: flex; margin-bottom: 6px; }
 .stk .ic svg { width: 100%; height: 100%; }
@@ -1416,3 +1422,88 @@ button.lb-row { width: 100%; text-align: left; }
 .stk .tclock { font-variant-numeric: tabular-nums; }
 .stk .rbar { display: block; width: 100%; height: 4px; margin-top: 6px; border-radius: 2px; background: rgba(17, 17, 19, .08); overflow: hidden; }
 .stk .rbar i { display: block; height: 100%; border-radius: 2px; background: var(--text); }
+
+/* a person's hero: a doily behind the face, sprinkles at the edges, then their line and their tags as little paper chips */
+.ph.person { --spr: color-mix(in srgb, var(--tint), #111113 14%); --arc: color-mix(in srgb, var(--tint), #111113 38%); padding-bottom: 15px; }
+.ph.person::before { display: none; }
+.ph-bg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.ph.person p { max-width: 280px; margin: 4px auto 0; line-height: 20px; }
+.ph-tags { position: relative; height: 28px; margin: 18px -10px 0; }
+.ph-tag { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 7px; border-radius: 14px; background: #fff; color: var(--text); font-size: 12px; font-weight: 600; white-space: nowrap; transform-origin: 50% 100%; }
+.ph-tag svg { width: 15px; height: 15px; flex-shrink: 0; }
+.ph-tag:focus-visible { outline-offset: 1px; }
+.ph.person .ph-ring { width: 112px; height: 112px; padding: 10px; }
+.ph.person .ph-ring .avatar { padding: 0; }
+.ph.person .ph-pill { bottom: -8px; }
+.ph p:empty { display: none; }
+
+/* a row's value sits on the right, on the same line as its label */
+.row .v { flex-shrink: 0; font-size: var(--fs-subhead); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.row .v:empty { display: none; }
+
+/* today's cookie: each mood has its own idle loop */
+.ck-hop, .ck-body { position: absolute; inset: 0; display: block; }
+.today-btn[data-mood="smile"] .ck-body { animation: ck-breathe 3s ease-in-out infinite; }
+.today-btn[data-mood="joy"] .ck-body { animation: ck-bounce .9s cubic-bezier(.3,0,.5,1) infinite; }
+.today-btn[data-mood="worried"] .ck-body { animation: ck-shiver .32s linear infinite; }
+.today-btn[data-mood="sleepy"] .ck-body { animation: ck-breathe 4.2s ease-in-out infinite; }
+.today-btn .drop { animation: ck-drop 2.2s ease-in infinite; }
+.today-btn .spark { transform-box: fill-box; transform-origin: center; animation: ck-spark 1.3s ease-in-out infinite; }
+.today-btn .spark:nth-of-type(2) { animation-delay: -.45s; } .today-btn .spark:nth-of-type(3) { animation-delay: -.9s; }
+.today-btn .qm { animation: ck-bob 1.2s ease-in-out infinite; }
+@keyframes ck-bob { 50% { transform: translateY(-4px) rotate(8deg); } }
+@keyframes ck-breathe { 50% { transform: scale(1.04, .965) translateY(1px); } }
+@keyframes ck-bounce { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-6px) scale(.97, 1.03); } 80% { transform: translateY(0) scale(1.05, .95); } }
+@keyframes ck-shiver { 25% { transform: translateX(-1.2px); } 75% { transform: translateX(1.2px); } }
+@keyframes ck-drop { 0% { transform: translateY(-3px) scale(.6); opacity: 0; } 18% { transform: none; opacity: 1; } 78% { opacity: 1; } 100% { transform: translateY(13px); opacity: 0; } }
+@keyframes ck-spark { 50% { transform: scale(.35) rotate(45deg); opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .today-btn .ck-body, .today-btn .drop, .today-btn .spark { animation: none; } }
+.ck-tip { position: absolute; right: -14px; top: -20px; width: 40px; height: 40px; padding: 7px; border-radius: 50%; background: #fff; opacity: 0; pointer-events: none; }
+.ck-tip svg { display: block; width: 100%; height: 100%; }
+.ck-puff { position: absolute; left: 52px; top: 6px; pointer-events: none; font-size: 22px; font-weight: 800; color: #8A1BB5; }
+.ck-puff.focus { width: 8px; height: 8px; border-radius: 50%; background: #fff; left: 36px; top: 2px; }
+
+/* the idle speech bubble: dark, a tail down to the cookie */
+.ck-say { position: absolute; right: 0; bottom: 52px; z-index: 4; padding: 9px 15px; border-radius: 16px; background: var(--text); color: #fff; font-size: 14px; font-weight: 600; white-space: nowrap; pointer-events: none; transform-origin: 85% 100%; }
+.ck-say[hidden] { display: none; }
+.ck-say::after { content: ""; position: absolute; right: 77px; bottom: -7px; border: 8px solid transparent; border-bottom: 0; border-top-color: var(--text); border-width: 8px 7px 0; }
+
+/* Home: a greyed score before the first bake, one friend to join, and the week tray's cookies as buttons that open their day */
+.today-stats b.muted { color: var(--text-3); }
+.cookies button { background: none; border: 0; padding: 0; margin: 0; color: inherit; font: inherit; cursor: pointer; }
+.cookies button svg { transition: transform .3s var(--spring); }
+.cookies button:active svg { transform: scale(.88); }
+.join-card .k { margin-bottom: 0; }
+.jc-who { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-width: 0; }
+.jc-who .avatar { width: 44px; height: 44px; flex-shrink: 0; }
+.jc-who .grow { min-width: 0; }
+.jc-who b { display: block; font-size: 16px; font-weight: 600; line-height: 20px; }
+.jc-who .grow > span { display: block; font-size: 12px; line-height: 16px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jc-btn { margin-top: auto; width: 100%; }
+.join-card .jc-who + .jc-btn { margin-top: auto; }
+.ds { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 8px 0 4px; }
+.ds-shape svg { display: block; width: 84px; height: 84px; }
+.ds-min { font-size: 15px; color: var(--text-2); }
+.ds-min b { font-size: 44px; line-height: 48px; font-weight: 600; letter-spacing: -.03em; color: var(--text); font-variant-numeric: tabular-nums; }
+.ds-bar { display: block; width: 170px; height: 8px; border-radius: 4px; background: var(--sunken); overflow: hidden; }
+.ds-bar i { display: block; height: 100%; border-radius: 4px; }
+.ds-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; min-height: 56px; }
+.ds-d { display: flex; flex-direction: column; align-items: center; width: 58px; }
+.ds-d svg { display: block; width: 50px; height: 43px; }
+.ds-d small { font-size: 12px; color: var(--text-2); }
+.ds-none { font-size: 14px; color: var(--text-2); align-self: center; }
+
+.frame.empty { border-radius: 50%; border: 2px dashed var(--line-strong, rgba(17, 17, 19, .15)); }
+button.frame { padding: 0; background: none; }
+
+/* the cookie's bubbles are narrow and wrap, and sit in the free space right of the greeting, so they never cover the three numbers below it */
+.today-bub, .ck-say { right: 8px; bottom: 64px; max-width: 124px; white-space: normal; border-radius: 16px; line-height: 17px; font-size: 13px; }
+.ck-say { padding: 8px 12px; }
+.today-bub { flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 12px; }
+.today-bub .tb { width: 100%; }
+.ck-say::after { right: 69px; }
+
+/* the notch round today's cookie: a page-coloured vector shape between the two cards (a disc plus a rounded fillet at each card edge),
+   so the cards stay plain rounded boxes and no mask rows can leave a faint line. Its centre is 84 px from the right. */
+.notch { position: absolute; right: 26.70px; top: -47px; pointer-events: none; overflow: visible; }
+.notch path { fill: var(--bg); }

@@ -94,22 +94,22 @@ function openRoom(i) {
 
 /* ---------- settings page ---------- */
 function renderSettings() {
-  const sw = (k, label, sub) => `<div class="row"><span class="grow"><span class="t">${label}</span><span class="s">${sub}</span></span><button class="switch rounded" type="button" role="switch" aria-checked="${PREFS[k]}" data-pref="${k}" aria-label="${label}"></button></div>`;
+  const sw = (k, label) => `<div class="row"><span class="grow"><span class="t">${label}</span></span><button class="switch rounded" type="button" role="switch" aria-checked="${PREFS[k]}" data-pref="${k}" aria-label="${label}"></button></div>`;
   setHTML($('settings-body'), `
     <div class="section"><div class="section-h"><h2>Default focus lock</h2></div><div class="list rounded">${LOCKS.map((l, i) => `<button class="row" type="button" data-lock="${i}"><span class="grow"><span class="t">${l.name} · ${l.t}°</span><span class="s">${l.d}</span></span><span class="check rounded" aria-checked="${i === P.lock}">${i === P.lock ? ICON.tick : ''}</span></button>`).join('')}</div></div>
     <div class="section"><div class="section-h"><h2>Daily rhythm</h2></div><div class="list rounded">
-      <div class="row"><span class="grow"><span class="t">Daily focus goal</span><span class="s">Minutes a day, shown on Home</span></span><div class="stepper"><button type="button" data-goal="-30" aria-label="30 min less">−</button><span>${PREFS.goal}</span><button type="button" data-goal="30" aria-label="30 min more">+</button></div></div>
-      ${sw('restDay', 'One rest day a week', 'A day off doesn’t break your streak')}</div></div>
-    <div class="section"><div class="section-h"><h2>Notifications</h2></div><div class="list rounded">${sw('notifyJoin', 'A friend joins your oven', 'Shown as a banner while you bake')}${sw('notifyDone', 'Your bake is ready', 'Also in the Dynamic Island')}${sw('remind', 'Daily reminder', 'Weekdays at 7 pm')}</div></div>
-    <div class="section"><div class="section-h"><h2>Feel</h2></div><div class="list rounded">${sw('haptics', 'Haptics', 'Taps when flour lands and eggs crack')}</div></div>
-    <div class="section"><div class="list rounded"><button class="row" type="button" data-go="intro"><span class="grow"><span class="t">Show the intro again</span><span class="s">Three pages on how baking works</span></span>${ICON.chev}</button><div class="row"><span class="grow"><span class="t">Sweet Study</span><span class="s">Version 1.0 · concept demo</span></span></div></div></div><div class="spacer"></div>`);
+      <div class="row"><span class="grow"><span class="t">Daily focus goal</span></span><div class="stepper"><button type="button" data-goal="-30" aria-label="30 min less">−</button><span>${PREFS.goal}</span><button type="button" data-goal="30" aria-label="30 min more">+</button></div></div>
+      ${sw('restDay', 'One rest day a week')}</div></div>
+    <div class="section"><div class="section-h"><h2>Notifications</h2></div><div class="list rounded">${sw('notifyJoin', 'A friend joins your oven')}${sw('notifyDone', 'Your bake is ready')}${sw('remind', 'Daily reminder')}</div></div>
+    <div class="section"><div class="section-h"><h2>Feel</h2></div><div class="list rounded">${sw('haptics', 'Haptics')}</div></div>
+    <div class="section"><div class="list rounded"><button class="row" type="button" data-go="intro"><span class="grow"><span class="t">Show the intro again</span></span>${ICON.chev}</button><div class="row"><span class="grow"><span class="t">Sweet Study</span></span><span class="v">1.0</span></div></div></div><div class="spacer"></div>`);
 }
 $('settings-body').addEventListener('click', (e) => {
   const s = e.target.closest('[data-pref]'); if (s) { PREFS[s.dataset.pref] = !PREFS[s.dataset.pref]; buzz(8); renderSettings(); renderTabs(); return; }
   const d = e.target.closest('[data-goal]'); if (d) { PREFS.goal = clamp(PREFS.goal + +d.dataset.goal, 30, 300); buzz(8); renderSettings(); renderTabs(); return; }
   const l = e.target.closest('[data-lock]'); if (l) { P.lock = +l.dataset.lock; buzz(8); renderSettings(); renderMe(); }
 });
-function renderMe() { setText($('me-lock'), `${LOCKS[P.lock].name} · ${LOCKS[P.lock].t}°`); }
+function renderMe() { setText($('me-lock'), LOCKS[P.lock].name); }
 
 /* ---------- monthly report: the month as a receipt, stamped with a cupcake-liner badge ---------- */
 // October before today is fixed demo data; anything baked today is added on top
@@ -179,7 +179,7 @@ let metNow = null; // the strangers you just shared a table with, offered on the
 const isFriend = (n) => FRIENDS.some((f) => f.n === n);
 function addFriend(n) { if (isFriend(n)) return; const [c, subj] = PROFILE[n] || ['#F2F2F4', 'Studying']; FRIENDS.push({ n, c, d: 'Strawberry macaron', left: 25, subj }); }
 function friendsChanged() {
-  setText($('me-friends'), `${FRIENDS.length} ${FRIENDS.length === 1 ? 'friend' : 'friends'}`);
+  setText($('me-friends'), String(FRIENDS.length));
   $('me-req').hidden = !REQS.length; setText($('me-req'), String(REQS.length));
   renderTabs(); if (!$('s-friends').hidden) renderFriendsPage();
   if ($('r-met').innerHTML) renderMet();
@@ -193,7 +193,6 @@ function renderFriendsPage() {
   setHTML($('friends-body'), `
     <div class="section"><div class="invite rounded">
       <p class="t">Invite a classmate</p>
-      <p class="s">Friends see each other’s plans, names and what you’re working on. It only works once you both say yes.</p>
       <div class="link-row"><span class="url" id="invite-url">sweetstudy.app/i/leqi</span><button class="btn soft small rounded" type="button" data-fr="copy">Copy</button></div>
       <button class="btn rounded" type="button" data-fr="share">Share invite</button>
     </div></div>
@@ -208,8 +207,8 @@ function renderFriendsPage() {
 $('friends-body').addEventListener('input', (e) => { if (e.target.id === 'fr-search') renderFriendsPage(); });
 // after a bake at an open table: the people you sat with, by initial, each with Add
 function renderMet() {
-  setHTML($('r-met'), metNow && metNow.people.length ? `<div class="met rounded"><p class="k">You studied with</p><p class="s">${metNow.room} · ask to be friends to see their names and plans next time</p>
-    <div class="fr-list">${metNow.people.map((n) => `<div class="row">${face(n)}<span class="grow"><span class="t">${isFriend(n) ? n : `${n[0]}.`}</span><span class="s">${PROFILE[n] ? 'Same table, same round' : ''}</span></span>${addBtn(n)}</div>`).join('')}</div></div>` : '');
+  setHTML($('r-met'), metNow && metNow.people.length ? `<div class="met rounded"><p class="k">You studied with</p><p class="s">${metNow.room}</p>
+    <div class="fr-list">${metNow.people.map((n) => `<div class="row">${face(n)}<span class="grow"><span class="t">${isFriend(n) ? n : `${n[0]}.`}</span></span>${addBtn(n)}</div>`).join('')}</div></div>` : '');
 }
 $('app').addEventListener('click', (e) => {
   const b = e.target.closest('[data-fr]'); if (!b) return;

@@ -38,7 +38,6 @@ const LOCAL = {
 function renderLocal() {
   const L = LOCAL[RF.scope], best = L.top[0][1], label = SCOPES.find(([k]) => k === RF.scope)[1];
   setText($('local-title'), RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`);
-  setText($('local-sub'), `This week · ${L.of.toLocaleString('en-US')} bakers`);
   setHTML($('local-board'), L.top.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('') + `<div class="lb-gap" aria-hidden="true">···</div>` + lbRow(L.me, 'Leqi', myHours.week || 0, best)
     + `<button class="lb-all" type="button" data-lb-all aria-haspopup="dialog">See the top 20${ICON.chev}</button>`);
 }
@@ -60,7 +59,7 @@ function localSheet() {
     const h = inTop && k < L.me ? last - (last - top) * (k - 5) / (L.me - 5) : (inTop ? top : last) * Math.pow(.96, k - (inTop ? L.me : 5));
     all.push([pool[p++], +h.toFixed(1)]);
   }
-  showSheet(`<div class="ls-head"><h3>${RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`}</h3><p>This week · ${L.of.toLocaleString('en-US')} bakers · tap anyone to see more</p></div>
+  showSheet(`<div class="ls-head"><h3>${RF.scope === 'world' ? 'Top everywhere' : `Top at ${label}`}</h3></div>
     <div class="ls-list" id="local-all">${all.map(([n, h], k) => lbRow(k + 1, n, h, best)).join('')}${inTop ? '' : `<div class="lb-gap" aria-hidden="true">···</div>${lbRow(L.me, 'Leqi', mine, best)}`}</div>`, localSheet);
 }
 const ROOM_TYPES = ['All', 'Exams', 'Coursework', 'Language', 'Writing', 'Deep work', 'Admin', 'Job hunt', 'Reading'];
@@ -121,6 +120,23 @@ const SHAPES = {
   ...Object.fromEntries([['flower6', 6, 28, 20], ['flower8', 8, 30, 17], ['flower12', 12, 34, 14]].map(([k, n, dist, pr]) => [k, () =>
     Array.from({ length: n }, (_, i) => { const a = (i / n) * 2 * Math.PI - Math.PI / 2; return `<circle cx="${(50 + dist * Math.cos(a)).toFixed(2)}" cy="${(50 + dist * Math.sin(a)).toFixed(2)}" r="${pr}"/>`; }).join('') + `<circle cx="50" cy="50" r="${dist}"/>`])),
 };
+// Baking now on Home: the friends who are baking right now, as faces. Tap one for their sheet (cheer, or join their bake); Rooms is where you browse everyone
+function renderJoinCard() {
+  const el = $('join-card'), live = FRIENDS.filter((f) => f.left > 0), more = live.length - 3;
+  if (!FRIENDS.length) { setHTML(el, '<p class="k">Baking now</p><button class="btn soft small rounded jc-btn" type="button" data-go="invite">Invite a friend</button>'); return; }
+  if (!live.length) { setHTML(el, '<p class="k">Baking now</p><span class="faces-sh">' + '<span class="frame empty"></span>'.repeat(3) + '</span><p class="num">None<small> yet</small></p>'); return; }
+  setHTML(el, `<p class="k"><i class="live-dot" aria-hidden="true"></i>Baking now</p>
+    <span class="faces-sh">${live.slice(0, 3).map((f) => `<button class="frame pat" type="button" data-f="${f.n}" aria-haspopup="dialog" aria-label="${f.n}, ${f.left} minutes left">${face(f.n)}</button>`).join('')}${more > 0 ? `<button class="frame more" type="button" data-tab="rooms" aria-label="${more} more in Rooms"><span>+${more}</span></button>` : ''}</span>
+    <p class="num">${live.length}<small> baking</small></p>`);
+}
+$('join-card').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { buzz(6); friendSheet(b.dataset.f); } });
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+let TRAY = [], TRAY_SHARE = 43;
+// every weekday has its own shape from the avatar library and its own colour, Sunday first: today's cookie wears today's, and the week tray shows each day's own
+// demo: ?day=0 (Sunday) to ?day=6 shows that weekday's shape
+const DOW = (() => { const d = new URLSearchParams(location.search).get('day'); return d !== null && d !== '' && +d >= 0 && +d <= 6 ? Math.floor(+d) : new Date().getDay(); })();
+// [library shape, colour, how far out from the centre a face still fits inside it (measured, in the shape's 100-unit box)]
+const DAY_LOOK = [['flower6', '#BCCBF9', 42.5], ['clover', '#BDE8A6', 32.5], ['wavy', '#FFE98A', 35], ['pillow', '#FFC4F8', 35], ['cog', '#FFD0A8', 36], ['scallop', '#E3B8FA', 44.5], ['petal8', '#A9E6DA', 30.5]];
 const shape = (k, fill) => `<svg class="sh" viewBox="0 0 100 100" aria-hidden="true"><g fill="${fill}">${SHAPES[k]()}</g></svg>`;
 const SMILE = '<svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="20" fill="#8CA7F4"/><circle cx="15" cy="17" r="2.4" fill="#111113"/><circle cx="27" cy="17" r="2.4" fill="#111113"/><path d="M13 25c2.4 3.4 13.6 3.4 16 0" fill="none" stroke="#111113" stroke-width="2.4" stroke-linecap="round"/></svg>';
 document.querySelectorAll('[data-shape]').forEach((el) => { el.innerHTML = el.dataset.shape === 'smile' ? SMILE : shape(el.dataset.shape, el.dataset.fill); });
@@ -330,10 +346,10 @@ function roomCard(r, i, c = i) {
   // friends by face and name; everyone else only as a count
   const fr = r.f.filter((n) => FRIENDS.some((f) => f.n === n));
   const names = fr.length === 1 ? fr[0] : fr.length === 2 ? `${fr[0]} & ${fr[1]}` : `${fr[0]}, ${fr[1]} +${fr.length - 2}`;
-  const crowd = fr.length ? `<span class="rm-fr">${fr.slice(0, 3).map((n) => face(n)).join('')}<b>${names}</b></span><br>+${r.k - fr.length} others · ${r.len}-min rounds`
-    : `<b>${r.k}</b> bakers · no friends yet<br>${r.len}-min rounds`;
+  const crowd = fr.length ? `<span class="rm-fr">${fr.slice(0, 3).map((n) => face(n)).join('')}<b>${names}</b></span><br>+${r.k - fr.length} others`
+    : `<b>${r.k}</b> bakers`;
   return `<div class="rm-slot" style="--room-color:${ROOM_BG[c % 3]};--deep:${ROOM_DEEP[c % 3]}"><div class="rm-card" data-card="${i}" role="button" tabindex="0" aria-haspopup="dialog" aria-label="${r.n}, ${r.k} baking">
-    <div class="rm-head"><div><h3>${r.n}</h3><p class="rm-s">${r.s}</p></div><span class="cnt"><b>${r.k}</b> here · ${AT_LABEL[r.at]} · ${r.type}</span></div>
+    <div class="rm-head"><div><h3>${r.n}</h3></div><span class="cnt"><b>${r.k}</b> here</span></div>
     ${roomTable(r, i, c)}
     <div class="rm-round"><div><p class="lbl">Round ends in</p><p class="tclock">${mmss(r.left)}</p></div><p class="sm">${crowd}</p></div>
     <span class="rbar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>
@@ -371,10 +387,20 @@ try { if (localStorage.getItem(RTAB_KEY) === 'explore') rtab = 'explore'; } catc
 function showRoomsTab(t, animate) {
   rtab = t; try { localStorage.setItem(RTAB_KEY, t); } catch (_) {}
   $('rm-tabs').querySelectorAll('[data-rtab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rtab === t)));
+  const tabs = $('rm-tabs'); tabs.dataset.on = t;
+  placeRoomLine(animate);
   $('pane-friends').hidden = t !== 'friends'; $('pane-explore').hidden = t !== 'explore';
   scopeMenu(false);
   if (t === 'explore') { layoutRooms(); if (animate) stagger($('rooms')); }
   else if (animate) { stagger($('friends-all').querySelector('.bubbles')); stagger($('leaderboard')); }
+}
+// the switch is two words with a wavy line of frosting under the chosen one; switching slides the line across and pipes it again
+function placeRoomLine(animate) {
+  const tabs = $('rm-tabs'), b = tabs.querySelector('[aria-selected="true"]'), line = tabs.querySelector('.rm-line'), path = line.querySelector('path');
+  if (!b.offsetWidth) return; // Rooms isn't on screen yet; placed again when it is
+  line.style.width = `${b.offsetWidth}px`; line.style.translate = `${b.offsetLeft}px 0`;
+  if (!animate || reduced) return;
+  path.animate([{ strokeDashoffset: 100 }, { strokeDashoffset: 100, offset: .2 }, { strokeDashoffset: 0 }], { duration: 560, easing: 'ease-out' });
 }
 $('rm-tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-rtab]'); if (!b || b.dataset.rtab === rtab) return; buzz(6); showRoomsTab(b.dataset.rtab, true); });
 showRoomsTab(rtab);
@@ -396,15 +422,15 @@ function roomSheet(i) {
   sheetRoom = i; const k = Math.max(c, 0) % 3;
   // the hero is the card's own awning and table, bigger: the dessert on its stand, who's sitting, and your empty seat
   showSheet(`<div class="rs">
-    <div class="ph rs-hero" style="--tint:${ROOM_BG[k]};--deep:${ROOM_DEEP[k]}"><div class="rs-top"><span class="rs-at">${PIN}${AT_LABEL[r.at]} · ${r.type}</span><span class="rs-live"><i></i><b>${r.k}</b> here</span></div>
+    <div class="ph rs-hero" style="--tint:${ROOM_BG[k]};--deep:${ROOM_DEEP[k]}"><div class="rs-top"><span class="rs-live"><i></i><b>${r.k}</b> here</span></div>
       <h3>${r.n}</h3><p>${r.s} · ${LOCKS[P.lock].name} lock</p>${roomTable(r, i, k)}</div>
     <div class="stks">${sticker(CLOCK, `<span class="tclock">${mmss(r.left)}</span>`, `left this round<span class="rbar"><i style="width:${((1 - r.left / (r.len * 60)) * 100).toFixed(1)}%"></i></span>`, 0)}${sticker(PEOPLE, fr.length ? `${fr.length} ${fr.length === 1 ? 'friend' : 'friends'}` : 'No friends yet', fr.length ? `${r.k - fr.length} others` : `${r.k} bakers`, 1)}${sticker(TOQUE_IC, `${r.len} min`, 'per round', 2)}</div>
     <p class="mh">At the table</p>${fr.map((n) => `<button class="mrow" type="button" data-person="${n}">${face(n)}<span class="grow"><b>${n}</b><span>${subj(n)}</span></span><span class="tag brand">Friend</span></button>`).join('')}
-    <div class="mrow others"><span class="faces">${others.map((n) => face(n)).join('')}</span><span class="grow"><b>${r.k - fr.length} ${fr.length ? 'others' : 'bakers'}</b><span>Names show once you add each other</span></span></div></div>
+    <div class="mrow others"><span class="faces">${others.map((n) => face(n)).join('')}</span><span class="grow"><b>${r.k - fr.length} ${fr.length ? 'others' : 'bakers'}</b></span></div></div>
     <div class="acts"><button class="btn soft rounded" type="button" data-go="room" data-i="${i}">Open the room</button><button class="btn rounded" type="button" data-sheet-seat="${i}">${who ? `Join ${who.n} · ${who.left} min` : `Take a seat · ${Math.ceil(r.left / 60)} min`}</button></div>`, () => roomSheet(i));
 }
-// a person's sheet opens on a hero in their colour with a scalloped hem: their face in a chef's hat, bobbing,
-// inside a ring that fills as their bake goes; the details below are paper stickers, each a little askew
+// a person's sheet opens on a hero in their colour with a scalloped hem: their face, gently bobbing,
+// inside a thin ring that fills as their bake goes; the details below are paper stickers, each a little askew
 const HEART = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
 const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.4 7-12a7 7 0 0 0-14 0c0 5.6 7 12 7 12z" fill="#BCCBF9"/><circle cx="12" cy="10" r="2.6" fill="#fff"/></svg>';
 const CLOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#DDEB9E"/><path d="M12 7v5l3.4 2" fill="none" stroke="#111113" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -412,25 +438,106 @@ const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 5
 const PEOPLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4" fill="#E3A6F7"/><path d="M2 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5z" fill="#E3A6F7"/><circle cx="17" cy="9" r="3" fill="#BCCBF9"/><path d="M14.5 14.2c.8-.3 1.6-.4 2.5-.4 3 0 5 2 5 5.2h-5" fill="#BCCBF9"/></svg>';
 const TOQUE_IC = '<svg viewBox="0 0 30 26" aria-hidden="true"><path d="M8 23v-6a5 5 0 0 1-1.6-9.7A6 6 0 0 1 15 5a6 6 0 0 1 8.6 2.3A5 5 0 0 1 22 17v6z" fill="#fff" stroke="#C9CBD6" stroke-width="1.4"/><path d="M8 19h14v4H8z" fill="#ECD77F"/></svg>';
 const CHEERS = {};
-function personHero(n, tint, p, pill, title, sub) {
-  const ring = p == null ? '' : `<svg class="ph-arc" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5"/><circle cx="50" cy="50" r="46" fill="none" stroke="#111113" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>`;
-  return `<div class="ph" style="--tint:${tint}"><span class="ph-ring">${ring}<span class="bob">${toque()}${face(n)}</span>${pill ? `<span class="ph-pill">${pill}</span>` : ''}</span><h3>${title}</h3><p>${sub}</p></div>`;
+// what people say about themselves: a line, and tags for school, rhythm, streak and favourite dessert
+const BIO = {
+  Mia: ['Math major. Coffee first, proofs second.', [['cap', 'NYU Math'], ['moon', 'Night owl'], ['flame', '12 days'], ['heart', 'Macarons']]],
+  Jun: ['Writing a thesis on city parks.', [['cap', 'NYU Urban'], ['sun', 'Early bird'], ['flame', '30 days'], ['heart', 'Shortcake']]],
+  Ava: ['Off to Tokyo next spring.', [['cap', 'Parsons'], ['globe', 'Japanese'], ['flame', '5 days'], ['heart', 'Cupcakes']]],
+  Sam: ['Two books a week, notes on all of them.', [['cap', 'NYU English'], ['moon', 'Night owl'], ['heart', 'Lattes']]],
+  Noa: ['Pre-med. Flashcards everywhere.', [['cap', 'NYU Chem'], ['sun', 'Early bird'], ['flame', '21 days']]],
+  Kai: ['Designing things that help people focus.', [['cap', 'Pratt'], ['moon', 'Night owl'], ['heart', 'Macarons']]],
+  Lin: ['Piano by day, theory by night.', [['cap', 'Juilliard'], ['moon', 'Night owl']]],
+  Ivy: ['Essays, one paragraph at a time.', [['cap', 'NYU History'], ['sun', 'Early bird']]],
+  Ben: ['Learning SQL for a data job.', [['globe', 'Career switch'], ['flame', '9 days']]],
+};
+const TAG_IC = {
+  cap: '<path d="M2 9l10-5 10 5-10 5z" fill="#8CA7F4"/><path d="M6 11.5V16c3.5 2.4 8.5 2.4 12 0v-4.5L12 14.5z" fill="#BCCBF9"/>',
+  moon: '<path d="M20 15.5A8.5 8.5 0 0 1 8.5 4a8.5 8.5 0 1 0 11.5 11.5z" fill="#8CA7F4"/>',
+  sun: '<circle cx="12" cy="12" r="5" fill="#F5C542"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="#F5C542" stroke-width="2" stroke-linecap="round"/>',
+  flame: '<path d="M12 22c-4 0-7-2.8-7-6.6 0-3.4 2.6-5.3 3.6-8.4.6 1.6 1.6 2.6 2.6 3 .2-3.4 1.8-6.2 4.3-8 0 4 4.5 6.4 4.5 12.5 0 4.4-3.4 7.5-8 7.5z" fill="#FF8A5B"/><path d="M12 22c-1.9 0-3.2-1.3-3.2-3 0-2 1.6-3 2.2-4.8 1.6 1.3 4.2 2.6 4.2 5 0 1.7-1.3 2.8-3.2 2.8z" fill="#FFD36B"/>',
+  heart: '<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z" fill="#E36BC0"/>',
+  globe: '<circle cx="12" cy="12" r="9.5" fill="#9ED7B0"/><path d="M2.5 12h19M12 2.5c3 3 3 16 0 19M12 2.5c-3 3-3 16 0 19" fill="none" stroke="#fff" stroke-width="1.6"/>',
+};
+const tagChips = (tags) => tags.length ? `<div class="ph-tags">${tags.map(([k, t]) => `<button class="ph-tag" type="button"><svg viewBox="0 0 24 24" aria-hidden="true">${TAG_IC[k]}</svg>${t}</button>`).join('')}</div>` : '';
+// the tags fall in and all land on the hem in one row; when they're too wide they crowd together,
+// each one's empty right end tucked under the next, so none is left hanging in the air
+function pileTags(box) {
+  const tags = [...box.children], W = box.clientWidth, w = tags.map((t) => t.offsetWidth), sum = w.reduce((a, b) => a + b, 0);
+  const gap = tags.length > 1 ? Math.min(8, (W - sum) / (tags.length - 1)) : 0; // goes negative when they have to overlap
+  let x = Math.max(0, (W - sum - gap * (tags.length - 1)) / 2);
+  tags.forEach((t, k) => {
+    const r = [-3, 2.5, -2, 3.5][k % 4] * (gap < 0 ? 1.4 : 1);
+    t.style.left = `${x}px`; t.style.top = '0px'; t.style.zIndex = k + 1; t.dataset.r = r; t.style.transform = `rotate(${r}deg)`;
+    x += w[k] + gap;
+  });
+  return tags.map((t, i) => i);
+}
+// one fall: from above the hero with a spin, a hard land, two small bounces, settling on its angle
+function dropTag(t, delay) {
+  if (reduced) return;
+  const r = +t.dataset.r, from = -(t.offsetTop + 120), spin = (Math.random() < .5 ? -1 : 1) * (30 + Math.random() * 40);
+  t.animate([
+    { transform: `translateY(${from}px) rotate(${r + spin}deg)`, easing: 'cubic-bezier(.45,0,.9,.5)' },
+    { transform: `translateY(0) rotate(${r - spin * .08}deg)`, offset: .55, easing: 'cubic-bezier(.2,.6,.4,1)' },
+    { transform: `translateY(-16px) rotate(${r + spin * .04}deg)`, offset: .72, easing: 'cubic-bezier(.6,0,.9,.5)' },
+    { transform: `translateY(0) rotate(${r}deg)`, offset: .86, easing: 'cubic-bezier(.2,.6,.4,1)' },
+    { transform: `translateY(-4px) rotate(${r}deg)`, offset: .93 },
+    { transform: `translateY(0) rotate(${r}deg)` },
+  ], { duration: 900, delay, fill: 'backwards' });
+}
+// tapping a tag: it hops where it is, flips a little and lands back on its angle; the tags beside it get nudged as it lands
+function hopTag(t) {
+  if (reduced) return;
+  const r = +t.dataset.r, s = Math.random() < .5 ? -1 : 1;
+  t.getAnimations().forEach((a) => a.cancel());
+  t.animate([
+    { transform: `translateY(0) rotate(${r}deg)`, easing: 'cubic-bezier(.2,.7,.4,1)' },
+    { transform: `translateY(-24px) rotate(${r + s * 14}deg)`, offset: .4, easing: 'cubic-bezier(.6,0,.9,.5)' },
+    { transform: `translateY(0) rotate(${r - s * 3}deg)`, offset: .7, easing: 'cubic-bezier(.2,.6,.4,1)' },
+    { transform: `translateY(-4px) rotate(${r}deg)`, offset: .85 },
+    { transform: `translateY(0) rotate(${r}deg)` },
+  ], { duration: 560 });
+  [t.previousElementSibling, t.nextElementSibling].forEach((n, k) => {
+    if (!n) return; const nr = +n.dataset.r, d = k ? 3 : -3;
+    n.animate([{ transform: `rotate(${nr}deg)` }, { transform: `translateX(${d}px) rotate(${nr + d * .8}deg)` }, { transform: `rotate(${nr}deg)` }], { duration: 300, delay: 380, easing: 'ease-out' });
+  });
+}
+function dropTags(root) {
+  const box = root.querySelector('.ph-tags'); if (!box) return;
+  const order = pileTags(box);
+  order.forEach((i, k) => dropTag(box.children[i], 260 + k * 110));
+}
+// the backdrop: candy sprinkles scattered round the edges, placed the same way for each person every time
+function phBackdrop(n) {
+  let s = [...n].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) >>> 0;
+  const rnd = () => (s = (s * 1103515245 + 12345) >>> 0) / 4294967296;
+  const sp = []; let tries = 0;
+  while (sp.length < 22 && tries++ < 200) {
+    const x = rnd() * 360, y = rnd() * 330; if (x > 70 && x < 290 && y < 300) continue; // keep the middle clear for the face, name and tags
+    sp.push(`<rect x="${(x - 7).toFixed(0)}" y="${(y - 2.5).toFixed(0)}" width="14" height="5" rx="2.5" transform="rotate(${(rnd() * 180).toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)})" style="fill:${['#fff', 'var(--spr)', '#fff', '#FFE38A'][sp.length % 4]}"/>`);
+  }
+  return `<svg class="ph-bg" viewBox="0 0 360 330" preserveAspectRatio="xMidYMin slice" aria-hidden="true">${sp.join('')}</svg>`;
+}
+function personHero(n, tint, p, pill, title, sub, tags = []) {
+  const ring = p == null ? '' : `<svg class="ph-arc" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3.5"/><circle cx="50" cy="50" r="47" fill="none" style="stroke:var(--arc)" stroke-width="3.5" stroke-linecap="round" pathLength="100" stroke-dasharray="${p} 100" transform="rotate(-90 50 50)"/></svg>`;
+  return `<div class="ph person" style="--tint:${tint}">${phBackdrop(n)}<span class="ph-ring">${ring}<span class="bob">${face(n)}</span>${pill ? `<span class="ph-pill">${pill}</span>` : ''}</span><h3>${title}</h3><p>${sub}</p>${tagChips(tags)}</div>`;
 }
 const sticker = (icon, big, small, k) => `<span class="stk" style="--r:${[-3, 2.5, -1.5][k]}deg;--bgc:${['#FCEBFE', '#ECF0FE', '#F4F9DE'][k]}"><span class="ic">${icon}</span><b>${big}</b><small>${small}</small></span>`;
-// a friend: what they're on, how far along, where, then cheer or join
+// a friend: who they are, what they're on, how far along, where, then cheer or join
 function friendSheet(n) {
   const f = FRIENDS.find((x) => x.n === n); if (!f) return;
   const p = Math.round((1 - f.left / (LEN[f.d] || 50)) * 100), room = ROOMS.find((r) => r.f.includes(f.n)), wk = (LEAD.week.find(([x]) => x === n) || [])[1] || 0;
   const dish = (RECIPES.find((r) => r.name === f.d) || recipeById('macaron')).id, ch = CHEERS[n] || 0;
-  showSheet(`${personHero(n, f.c, p, `<b>${f.left}</b>m left`, n, esc(f.subj || f.d))}
-    <div class="stks">${sticker(art(dish), f.d.replace('Strawberry ', ''), 'in the oven', 0)}${sticker(PIN, room ? room.n : 'Solo', room ? `${room.k} at the table` : 'baking alone', 1)}${sticker(CLOCK, `${wk.toFixed(1)}h`, 'this week', 2)}</div>
+  const [bio, tags] = BIO[n] || ['', []];
+  showSheet(`${personHero(n, f.c, p, `<b>${f.left}</b>m left`, n, esc(bio || f.subj || f.d), tags)}
+    <div class="stks">${sticker(art(dish), esc(f.subj || f.d), f.d.replace('Strawberry ', '').toLowerCase(), 0)}${sticker(PIN, room ? room.n : 'Solo', room ? `${room.k} at the table` : 'baking alone', 1)}${sticker(CLOCK, `${wk.toFixed(1)}h`, 'this week', 2)}</div>
     <div class="acts ps-acts"><button class="cheer" type="button" data-cheer="${n}" aria-label="Cheer ${n}">${HEART}<span>${ch ? `× ${ch}` : 'Cheer'}</span></button><button class="btn rounded" type="button" data-go="join" data-who="${n}">Join · ${f.left} min</button></div>`);
+  dropTags($('shop-body'));
 }
 // someone you haven't added: an initial, where they rank, and a way to ask
 function strangerSheet(n, rank, h, where) {
-  showSheet(`${personHero(n, '#E9E9EF', null, '', `${n[0]}.`, `Bakes ${where}`)}
+  showSheet(`${personHero(n, '#E9E9EF', null, '', `${n[0]}.`, '')}
     <div class="stks">${sticker(STAR, `#${rank}`, where.replace(/^(at|in) /, ''), 0)}${sticker(CLOCK, `${h.toFixed(1)}h`, 'this week', 1)}${sticker(HEART, 'Not yet', 'friends', 2)}</div>
-    <p class="ps-note">Their name, plans and what they’re working on show once you both agree to be friends.</p>
     <div class="acts">${SENT.has(n) ? '<button class="btn soft rounded" type="button" disabled>Requested · waiting for them</button>' : `<button class="btn rounded" type="button" data-fr="add" data-n="${n}">Ask to be friends</button>`}</div>`, () => strangerSheet(n, rank, h, where));
 }
 const personSheet = (n, rank, h, where) => n === 'Leqi' ? null : FRIENDS.some((f) => f.n === n) ? friendSheet(n) : strangerSheet(n, rank, h, where);
@@ -438,6 +545,7 @@ $('shop-body').addEventListener('click', (e) => {
   const s = e.target.closest('[data-sheet-seat]'), p = e.target.closest('[data-person]'), c = e.target.closest('[data-cheer]'), g = e.target.closest('[data-go="join"], [data-go="room"]');
   if (s) { closeSheet('sheet-shop'); const b = $('rooms').querySelector(`[data-seat="${s.dataset.sheetSeat}"]`); b.scrollIntoView({ block: 'nearest', inline: 'center' }); setTimeout(() => b.click(), 380); }
   else if (p) personSheet(p.dataset.person);
+  else if (e.target.closest('.ph-tag')) { buzz(6); hopTag(e.target.closest('.ph-tag')); }
   else if (e.target.closest('[data-lb]')) { const [n, rank, h] = JSON.parse(e.target.closest('[data-lb]').dataset.lb); personSheet(n, rank, h, WHERE[RF.scope]); }
   else if (c) {
     const n = c.dataset.cheer; CHEERS[n] = (CHEERS[n] || 0) + 1; buzz([8, 20, 8]);
@@ -620,7 +728,7 @@ function drawSched(scrollToNow) {
   const keepX = $('sch-wrap')?.scrollLeft || 0, list = SCHED[SCH.day], live = list.filter(isLive).length;
   const dayName = SCH.day ? new Date(Date.now() + SCH.day * 864e5).toLocaleDateString('en-US', { weekday: 'long' }) : 'Today';
   // the schedule is yours and your friends' plans, wherever they are; open tables by place are further down
-  setHTML($('live-hero'), `<div class="ach"><p class="k">${dayName}’s plans</p><span class="kk">You and friends · ${list.length} planned${live ? ` · ${live} live` : ''}</span></div>
+  setHTML($('live-hero'), `<div class="ach"><p class="k">${dayName}’s plans</p></div>
     <div class="sch-days">${schedDays()}</div><div class="sch-wrap" id="sch-wrap"><div class="sch-lanes">${schedLanes()}</div></div><div class="sch-card" id="sch-card" style="background:${cardTint()}">${schedCard()}</div>`);
   // keep the timeline where it was, unless we're arriving or switching day
   // another day opens on its first bake (or the free slot), not on an empty morning
@@ -699,7 +807,7 @@ $('local-board').addEventListener('click', (e) => {
 });
 // arriving on Rooms: the live count counts up, cards and rows arrive, numbers and bars fill
 function playRooms() {
-  drawSched(true);
+  placeRoomLine(); drawSched(true);
   layoutRooms(); stagger($('rooms'));
   stagger($('friends-all').querySelector('.bubbles')); stagger($('leaderboard'));
   $('leaderboard').querySelectorAll('.pcol .blockp').forEach((i) => { const h = i.style.height; i.style.transition = 'none'; i.style.height = '0'; void i.offsetWidth; i.style.transition = ''; i.style.height = h; });
@@ -718,8 +826,7 @@ function tableDay() { const d = new Date(); return `${d.getFullYear()}-${d.getMo
 function renderDessertTable() {
   const today = tableBakes.filter(x => x.day === tableDay());
   const mins = today.reduce((n, x) => n + x.minutes, 0);
-  setText($('dessert-total'), mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`);
-  setText($('dessert-count'), `${today.length} ${today.length === 1 ? 'bake' : 'bakes'}`);
+  setText($('dessert-total'), `${today.length} ${today.length === 1 ? 'bake' : 'bakes'}`);
   setText($('dessert-note'), today.length ? 'A little collection of your day.' : 'A quiet table, for now.');
   setHTML($('dessert-table'), today.length ? today.map((x, i) => `<button type="button" class="table-dessert" data-bake="${i}" style="--dessert-size:${Math.round(54 + 46 * Math.min(x.minutes, 90) / 90)}px" aria-label="${esc(recipeById(x.recipe).name)}, ${x.minutes} minutes"><span class="dessert-art">${art(x.recipe)}</span><span class="dessert-minutes">${x.minutes}m</span></button>`).join('') : '<span class="empty-plate" aria-hidden="true"></span>');
 }
@@ -742,20 +849,17 @@ function renderTabs() {
   // Home: friends baking now, each face inside its own flat shape
   const frames = [['flower6', '#E3A6F7'], ['star', '#8CA7F4'], ['scallop', '#DDEB9E']];
   const more = FRIENDS.length - 3;
-  setHTML($('friends'), (FRIENDS.slice(0, 3).map((f) => `<span class="frame pat">${face(f.n)}</span>`).join('') + (more > 0 ? `<span class="frame more"><span>+${more}</span></span>` : '')) || `<span class="frame">${shape('flower6', '#F2F2F4')}<span>+</span></span>`);
-  roll($('friends-n'), FRIENDS.length);
+  renderJoinCard();
   const last = CASE[0];
   // the last dessert: what it was and how it came out, the whole block opens the case
   setHTML($('recent'), last ? `<span class="badge">${shape('star', '#8CA7F4')}${art(last.r, 'class="art"')}</span><span class="g"><span class="kk">Recently baked · ${last.when}</span><b>${recipeById(last.r).name}</b></span><span class="pill mint">${last.min} min</span>${ICON.chev}`
     : '<span class="g"><span class="kk">Recently baked</span><b>Your first dessert shows up here</b></span>');
-  setText($('me-case'), CASE.length ? `${CASE.length} desserts so far` : 'Nothing baked yet');
+  setText($('me-case'), CASE.length ? String(CASE.length) : '');
   setHTML($('friends-all'), FRIENDS.length ? `<div class="bubbles">${FRIENDS.map(friendBubble).join('')}</div>` : inviteRow('Nobody here yet. Invite a classmate.'));
-  setText($('friends-count'), FRIENDS.length ? `${FRIENDS.length} in the oven` : '');
   renderRooms();
   setHTML($('case-grid'), CASE.length ? CASE.map((c, i) => `<button type="button" data-go="case" data-i="${i}" class="case-item rounded ${c.isNew ? 'new' : ''}"><div class="art">${art(c.r)}</div><p class="t">${recipeById(c.r).name}</p><p class="s">${c.when} · ${c.min} min · ${c.tops} toppings</p><span><span class="tag hi rounded">${c.grade}</span></span></button>`).join('')
     : `<div class="empty-card rounded">${art('cupcake')}<p class="t">Your first dessert lands here</p><p class="s">Every bake you finish is kept in the case, burnt ones too.</p></div>`);
-  setText($('case-sub'), CASE.length ? `${CASE.length} desserts · ${(CASE.reduce((a, c) => a + c.min, 0) / 60).toFixed(1)} h of focus` : 'Nothing baked yet');
-  setHTML($('shops'), SHOPS.map((s, i) => `<button class="row" type="button" data-go="shop" data-i="${i}"><span class="tile rounded" style="background:${s.c}">${art(s.menu[0][0], 'class="art"')}</span><span class="grow"><span class="t">${s.n}</span><span class="s">${s.d} · ${s.walk}</span></span><span class="tag hi rounded">${s.off}</span>${ICON.chev}</button>`).join(''));
+  setHTML($('shops'), SHOPS.map((s, i) => `<button class="row" type="button" data-go="shop" data-i="${i}"><span class="tile rounded" style="background:${s.c}">${art(s.menu[0][0], 'class="art"')}</span><span class="grow"><span class="t">${s.n}</span><span class="s">${s.walk}</span></span><span class="tag hi rounded">${s.off}</span>${ICON.chev}</button>`).join(''));
   setHTML($('map'), `<span class="pin me" style="left:48%;top:56%"></span>` + SHOPS.map((s, i) => `<span class="pin" style="left:${s.x}%;top:${s.y}%"><svg viewBox="0 0 30 36" width="30" height="36"><polygon points="4,0 26,0 30,4 30,22 15,36 0,22 0,4" fill="#10131A"/><polygon points="9,7 21,7 23,9 23,17 21,19 9,19 7,17 7,9" fill="${s.c}"/></svg></span>`).join(''));
   // the week as minutes per day; every number on Home and Me is summed from it
   // each bake is [recipe, minutes]; today's come from the case, so a joined 18-minute bake counts as 18
@@ -774,10 +878,12 @@ function renderTabs() {
   roll($('week-pct'), pct, (v) => `${Math.round(v)}%`);
   const ti = WEEK.findIndex((d) => d[2]), share = weekGoal * 60 / 7;
   const last7 = [...WEEK.slice(ti + 1).map((d) => [d[0], []]), ...WEEK.slice(0, ti + 1)];
+  TRAY = last7; TRAY_SHARE = Math.round(share);
+  $('ticks').style.setProperty('--today', DAY_LOOK[DOW][1]); // today's tray cookie wears today's colour, like the big one
   setHTML($('ticks'), last7.map((d, i) => {
     const f = Math.min(1, mins(d[1]) / share), h = (f * 100).toFixed(1), id = `ck${i}`;
-    return `<span class="${i === 6 ? 'now' : ''}${f >= 1 ? ' full' : ''}"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}">${SHAPES.flower6()}</clipPath></defs>`
-      + `<g clip-path="url(#${id})"><rect width="100" height="100" class="e"/><rect y="${100 - h}" width="100" height="${h}" class="f"/></g></svg><small>${d[0]}</small></span>`;
+    return `<button type="button" class="${i === 6 ? 'now' : ''}${f >= 1 ? ' full' : ''}" data-i="${i}" aria-haspopup="dialog" aria-label="${DAY_NAMES[(DOW - (6 - i) + 14) % 7]}, ${mins(d[1])} minutes"><svg viewBox="0 0 100 100"><defs><clipPath id="${id}">${AV_SHAPES[DAY_LOOK[(DOW - (6 - i) + 14) % 7][0]](0)}</clipPath></defs>`
+      + `<g clip-path="url(#${id})"><rect width="100" height="100" class="e"/><rect y="${100 - h}" width="100" height="${h}" class="f"/></g></svg><small>${d[0]}</small></button>`;
   }).join(''));
   // today: focus against a daily goal, and the streak of days with at least one bake
   const todayMin = mins(today), goal = PREFS.goal;
@@ -793,17 +899,317 @@ function renderTabs() {
   // today in three numbers, like a daily focus report: score weighted by minutes, minutes with the phone down, times you left
   const todayBakes = CASE.filter((c) => c.when === 'Just now');
   const scored = todayBakes.reduce((a, c) => [a[0] + (c.score ?? 100) * c.min, a[1] + c.min], [0, 0]);
-  if (scored[1]) roll($('ts-score'), Math.round(scored[0] / scored[1])); else setText($('ts-score'), '–');
+  // before today's first bake the score slot shows your average so far, greyed, instead of a dash
+  const allScored = CASE.reduce((a, c) => [a[0] + (c.score ?? 100) * c.min, a[1] + c.min], [0, 0]), sc = $('ts-score');
+  if (scored[1]) { roll(sc, Math.round(scored[0] / scored[1])); sc.classList.remove('muted'); setText($('ts-score-l'), 'Focus score'); }
+  else if (allScored[1]) { setText(sc, String(Math.round(allScored[0] / allScored[1]))); sc.classList.add('muted'); setText($('ts-score-l'), 'Your average'); }
+  else { setText(sc, '–'); sc.classList.add('muted'); setText($('ts-score-l'), 'First bake sets it'); }
   roll($('ts-free'), todayMin, (v) => { v = Math.round(v); return v >= 60 ? `${Math.floor(v / 60)}h ${v % 60}m` : `${v}m`; });
   setText($('ts-exits'), String(todayBakes.reduce((a, c) => a + (c.exits || 0), 0)));
   // today's cookie, large: the same shape as today's cookie in the week tray below, sitting right over the neck that joins them
-  const tf = Math.min(1, todayMin / share), th = (tf * 100).toFixed(1);
-  setHTML($('today-ck'), `<svg viewBox="0 0 100 100"><defs><clipPath id="ck-today">${SHAPES.flower6()}</clipPath></defs><g clip-path="url(#ck-today)"><rect width="100" height="100" class="e"/><rect y="${100 - th}" width="100" height="${th}" class="f"/></g></svg>`);
+  const tf = Math.min(1, todayMin / share);
+  setCookieMood(cookieMood(tf, todayMin, streak));
+  TODAY = { min: todayMin, of: Math.round(share) };
+  const [dShape, dColour] = DAY_LOOK[DOW];
+  // the body is the library shape in a flat colour, its corners rounded the same way the avatars' are
+  setHTML($('today-ck'), `<svg viewBox="-4 -4 108 108"><g fill="${dColour}" stroke="${dColour}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">${AV_SHAPES[dShape](0)}</g></svg>`);
 }
+
+// tap a cookie in the week tray: that day's shape, its minutes against the daily share, and the desserts it made
+function daySheet(i) {
+  const d = TRAY[i], dow = (DOW - (6 - i) + 14) % 7, [shp, col] = DAY_LOOK[dow], total = d[1].reduce((a, b) => a + b[1], 0), pct = Math.min(100, Math.round(total / Math.max(1, TRAY_SHARE) * 100));
+  showSheet(`<div class="ds"><span class="ds-shape"><svg viewBox="-4 -4 108 108" aria-hidden="true"><g fill="${col}" stroke="${col}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">${AV_SHAPES[shp](0)}</g></svg></span>
+    <h3>${i === 6 ? 'Today' : DAY_NAMES[dow]}</h3>
+    <p class="ds-min"><b>${total}</b> min</p>
+    <span class="ds-bar"><i style="width:${pct}%;background:${col}"></i></span>
+    <div class="ds-row">${d[1].length ? d[1].map(([r, m]) => `<span class="ds-d">${art(r)}<small>${m}m</small></span>`).join('') : '<span class="ds-none">No bakes</span>'}</div></div>`);
+}
+$('ticks').addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b) return; buzz(6); daySheet(+b.dataset.i); });
+// with nothing baked yet the + in the menu hops now and then
+function hopPlus() {
+  const b = document.querySelector('#tabbar [data-go="pick"]'); if (!b || reduced) return;
+  b.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-11px) scale(1.06)', offset: .35, easing: 'ease-in' }, { transform: 'translateY(0) scale(1.04, .94)', offset: .65 }, { transform: 'translateY(-3px)', offset: .82 }, { transform: 'translateY(0)' }], { duration: 640 });
+}
+
+/* today's cookie is the character: the flower is its body, and the face is bloub's.
+   The face system below is ported from bloub (https://github.com/jeremy-prt/bloub), MIT licensed:
+
+   MIT License. Copyright (c) 2026 Jérémy Perret.
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
+   (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge,
+   publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+   subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or
+   substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   The face is two capsules painted on a sphere: a head orientation (yaw, pitch, roll) sets where the eyes sit and how they foreshorten,
+   and each eye has its own width, height, tilt and openness. Sixteen resting expressions are just sixteen sets of those numbers.
+   Life is a deterministic gaze drift and a blink schedule, both pure functions of time. Changing expression glides on an ease-out, and
+   the constants are the ones measured off the reference, so they are left as they are. */
+const BL_TAU = Math.PI * 2, BL_clamp = (v, lo = 0, hi = 1) => (v < lo ? lo : v > hi ? hi : v), BL_lerp = (a, b, t) => a + (b - a) * t;
+const BL_easeOutQuint = (t) => 1 - (1 - t) ** 5;
+function BL_loopNoise(t, period, seed = 0) {
+  const p = (t / period) * BL_TAU;
+  return 0.55 * Math.sin(p + seed) + 0.3 * Math.sin(2 * p + seed * 1.7 + 1.1) + 0.15 * Math.sin(3 * p + seed * 2.3 + 2.4);
+}
+function BL_rng(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6d2b79f5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const BL_EYE_SPLIT = 15.46, BL_EYE_W = 0.186, BL_EYE_H = 0.412, BL_REST_GAZE = { yaw: 28.49, pitch: 28.62, roll: -13 };
+const BL_deg = (d) => (d * Math.PI) / 180;
+function BL_spin(u, v, angle) {
+  const c = Math.cos(angle), s = Math.sin(angle);
+  return [[u[0] * c + v[0] * s, u[1] * c + v[1] * s, u[2] * c + v[2] * s], [v[0] * c - u[0] * s, v[1] * c - u[1] * s, v[2] * c - u[2] * s]];
+}
+// where the two eyes sit on the sphere for a head orientation; index 0 is the inner eye, 1 the outer
+function BL_eyePoses(gaze, scale, split = BL_EYE_SPLIT) {
+  let f = [0, 0, 1], right = [1, 0, 0], down = [0, 1, 0];
+  [f, right] = BL_spin(f, right, BL_deg(gaze.yaw));
+  [down, f] = BL_spin(down, f, BL_deg(gaze.pitch));
+  [right, down] = BL_spin(right, down, BL_deg(gaze.roll));
+  const build = (side) => { const [ef, er] = BL_spin(f, right, BL_deg(split * side)); return { x: ef[0] * scale, y: ef[1] * scale, a: er[0], b: er[1], c: down[0], d: down[1], depth: ef[2] }; };
+  return [build(-1), build(1)];
+}
+// blinks: a pre-drawn schedule, 1.9 to 4.6 s apart, now and then a double
+const BL_BLINKS = (() => {
+  const rng = BL_rng(0x5eed), out = []; let t = 1.4;
+  while (t < 900) { out.push(t); t += 1.9 + rng() * 2.7; if (rng() < 0.18) { out.push(t); t += 0.24; } }
+  return out;
+})();
+function BL_blinkLid(t) {
+  for (let i = 0; i < BL_BLINKS.length; i++) {
+    const start = BL_BLINKS[i]; if (t < start) break;
+    const k = (t - start) / 0.18;
+    if (k >= 0 && k <= 1) return k < 0.45 ? 1 - k / 0.45 : (k - 0.45) / 0.55;
+  }
+  return 1;
+}
+const BL_blinkScale = (lid) => 0.06 + 0.94 * BL_clamp(lid);
+function BL_life(t, wander = 1) {
+  return { dYaw: (BL_loopNoise(t, 11.3, 0.4) * 5.5 + BL_loopNoise(t, 3.7, 2.1) * 1.6) * wander, dPitch: (BL_loopNoise(t, 9.1, 1.3) * 4.2 + BL_loopNoise(t, 4.3, 0.7) * 1.3) * wander, dRoll: BL_loopNoise(t, 13.7, 3.2) * 2.2 * wander, lid: BL_blinkLid(t) };
+}
+function BL_capsule(w, h) {
+  const hw = Math.max(w, 0.01) / 2, hh = Math.max(h, 0.01) / 2, r = Math.min(hw, hh), f = (v) => Math.round(v * 100) / 100;
+  return `M${f(-hw)} ${f(-hh + r)}A${f(r)} ${f(r)} 0 0 1 ${f(-hw + r)} ${f(-hh)}L${f(hw - r)} ${f(-hh)}A${f(r)} ${f(r)} 0 0 1 ${f(hw)} ${f(-hh + r)}L${f(hw)} ${f(hh - r)}A${f(r)} ${f(r)} 0 0 1 ${f(hw - r)} ${f(hh)}L${f(-hw + r)} ${f(hh)}A${f(r)} ${f(r)} 0 0 1 ${f(-hw)} ${f(hh - r)}Z`;
+}
+// the sixteen resting expressions: head orientation, eye spacing, and each eye's width, height, tilt (degrees, mirrored for the other eye) and openness
+const BL_eye = (w, h, tilt = 0, open = 1) => ({ w, h, tilt, open });
+const BL_pair = (w, h, tilt = 0, open = 1) => [BL_eye(w, h, tilt, open), BL_eye(w, h, -tilt, open)];
+const BL_EXPR = {
+  neutre: { gaze: { ...BL_REST_GAZE }, split: BL_EYE_SPLIT, eyes: [BL_eye(BL_EYE_W, BL_EYE_H), BL_eye(BL_EYE_W, BL_EYE_H)] },
+  attentif: { gaze: { yaw: 4, pitch: 5, roll: -4 }, split: 16, eyes: BL_pair(0.21, 0.44) },
+  surpris: { gaze: { yaw: 3, pitch: -3, roll: 0 }, split: 19, eyes: BL_pair(0.45, 0.47) },
+  excite: { gaze: { yaw: 6, pitch: -14, roll: 0 }, split: 19.5, eyes: BL_pair(0.4, 0.56, -10) },
+  heureux: { gaze: { yaw: 5, pitch: 9, roll: 0 }, split: 17, eyes: BL_pair(0.27, 0.17, 14) },
+  hilare: { gaze: { yaw: 4, pitch: 14, roll: 0 }, split: 18, eyes: BL_pair(0.34, 0.13, 20) },
+  colere: { gaze: { yaw: 3, pitch: 7, roll: 0 }, split: 17, eyes: BL_pair(0.34, 0.15, 30) },
+  triste: { gaze: { yaw: 3, pitch: -13, roll: 0 }, split: 16, eyes: BL_pair(0.22, 0.4, -28) },
+  effraye: { gaze: { yaw: 2, pitch: -20, roll: 0 }, split: 20.5, eyes: BL_pair(0.4, 0.6) },
+  mefiant: { gaze: { yaw: 12, pitch: 6, roll: -6 }, split: 16, eyes: [BL_eye(0.21, 0.4), BL_eye(0.22, 0.15)] },
+  confus: { gaze: { yaw: -14, pitch: 3, roll: 8 }, split: 16.5, eyes: [BL_eye(0.2, 0.44, -18), BL_eye(0.28, 0.17, 14)] },
+  curieux: { gaze: { yaw: 16, pitch: -9, roll: -15 }, split: 16.5, eyes: [BL_eye(0.24, 0.46, -8), BL_eye(0.2, 0.38, -8)] },
+  fier: { gaze: { yaw: 5, pitch: 17, roll: 0 }, split: 17, eyes: BL_pair(0.3, 0.15, 18) },
+  timide: { gaze: { yaw: -19, pitch: -14, roll: -7 }, split: 14, eyes: BL_pair(0.17, 0.3) },
+  blase: { gaze: { yaw: -22, pitch: 2, roll: 0 }, split: 16, eyes: BL_pair(0.3, 0.12) },
+  somnolent: { gaze: { yaw: 6, pitch: -9, roll: -3 }, split: 16, eyes: BL_pair(0.2, 0.42, 0, 0.42) },
+};
+// English names, so ?mood=happy works as well as ?mood=heureux
+const BL_NAMES = { calm: 'neutre', focused: 'attentif', surprised: 'surpris', excited: 'excite', happy: 'heureux', laughing: 'hilare', angry: 'colere', sad: 'triste', scared: 'effraye', suspicious: 'mefiant', confused: 'confus', curious: 'curieux', proud: 'fier', shy: 'timide', bored: 'blase', sleepy: 'somnolent' };
+// the six states of today, as expressions
+const CK_EXPR = { sleepy: 'somnolent', curious: 'curieux', smile: 'heureux', focus: 'attentif', joy: 'hilare', worried: 'effraye' };
+const BL_blendExpr = (a, b, t) => ({
+  gaze: { yaw: BL_lerp(a.gaze.yaw, b.gaze.yaw, t), pitch: BL_lerp(a.gaze.pitch, b.gaze.pitch, t), roll: BL_lerp(a.gaze.roll, b.gaze.roll, t) },
+  split: BL_lerp(a.split, b.split, t),
+  eyes: [0, 1].map((i) => ({ w: BL_lerp(a.eyes[i].w, b.eyes[i].w, t), h: BL_lerp(a.eyes[i].h, b.eyes[i].h, t), tilt: BL_lerp(a.eyes[i].tilt || 0, b.eyes[i].tilt || 0, t), open: BL_lerp(a.eyes[i].open, b.eyes[i].open, t) })),
+});
+// small props that make a mood easier to read, drawn big on purpose
+const spk = (x, y, r, c = '#FFC21A') => `<path class="spark" d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${c}"/>`;
+const SWEAT = '<path class="drop" d="M27 -30C33 -21 35 -16 33 -12C31 -7 23 -7 21 -12C19 -16 21 -21 27 -30Z" fill="#6FBFFF"/><path d="M24 -14q1 3 4 3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>';
+const CK_ACC = {
+  hilare: spk(27, -26, 10) + spk(-29, -15, 6.5, '#FF8FC8') + spk(31, -4, 5),
+  excite: spk(27, -26, 10) + spk(-29, -15, 6.5, '#FF8FC8'),
+  effraye: SWEAT, triste: SWEAT, timide: SWEAT,
+  curieux: '<text class="qm" x="21" y="-17" font-size="26" font-weight="800" fill="#6A4DFF" font-family="inherit">?</text>',
+  confus: '<text class="qm" x="21" y="-17" font-size="26" font-weight="800" fill="#6A4DFF" font-family="inherit">?</text>',
+};
+const CK_TIP = {
+  curious: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#E3E9FD"/><path d="M12 7v5l3.4 2" fill="none" stroke="#2F4FC0" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  worried: '<svg viewBox="0 0 24 24"><path d="M12 22c-4 0-7-2.8-7-6.6 0-3.4 2.6-5.3 3.6-8.4.6 1.6 1.6 2.6 2.6 3 .2-3.4 1.8-6.2 4.3-8 0 4 4.5 6.4 4.5 12.5 0 4.4-3.4 7.5-8 7.5z" fill="#FF8A5B"/><path d="M12 22c-1.9 0-3.2-1.3-3.2-3 0-2 1.6-3 2.2-4.8 1.6 1.3 4.2 2.6 4.2 5 0 1.7-1.3 2.8-3.2 2.8z" fill="#FFD36B"/></svg>',
+  joy: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z" fill="#F5C542"/></svg>',
+};
+// which mood today is in
+function cookieMood(tf, todayMin, streak) {
+  if (B.timer && B.left > 0) return 'focus';
+  if (tf >= 1) return 'joy';
+  const soon = (SCHED[0] || []).some((e) => e.with?.includes('Leqi') && e.at > nowH() && (e.at - nowH()) * 60 <= 60);
+  if (soon) return 'curious';
+  if (!todayMin) return new Date().getHours() >= 20 && streak > 0 ? 'worried' : 'sleepy';
+  return 'smile';
+}
+// the face's live state
+const EYE = { prev: BL_EXPR.somnolent, cur: BL_EXPR.somnolent, id: 'somnolent', since: -9, base: 'somnolent', react: null, mood: 'sleepy', blinkAt: -9, fy: 0, fp: 0, ty: 0, tp: 0, lookAt: 0 };
+// demo: ?mood=happy (or any of the 16 names, or sleepy / curious / smile / focus / worried / joy) shows that face whatever today holds
+const MOOD_DEMO = new URLSearchParams(location.search).get('mood');
+const demoExpr = (m) => (BL_EXPR[m] ? m : BL_NAMES[m] || CK_EXPR[m] || null);
+// glide to another expression from wherever the face is now, with a blink to cover the change
+function glideTo(id, t) {
+  if (id === EYE.id) return;
+  const k = BL_easeOutQuint(BL_clamp((t - EYE.since) / 0.55));
+  EYE.prev = k < 1 ? BL_blendExpr(EYE.prev, EYE.cur, k) : EYE.cur; EYE.cur = BL_EXPR[id]; EYE.id = id; EYE.since = t; EYE.blinkAt = t;
+}
+function setCookieMood(mood) {
+  const want = demoExpr(MOOD_DEMO) || CK_EXPR[mood];
+  const fc = $('today-face'); if (fc.dataset.mood === mood + want) return;
+  const first = !fc.firstChild;
+  if (first) fc.innerHTML = '<svg viewBox="-36 -36 72 72" aria-hidden="true"><path class="eye"/><path class="eye"/><g class="acc"></g></svg>';
+  fc.dataset.mood = mood + want; $('today-btn').dataset.mood = mood; EYE.mood = mood; EYE.base = want;
+  fc.querySelector('.acc').innerHTML = CK_ACC[want] || '';
+  $('ck-tip').innerHTML = CK_TIP[mood] || '';
+  if (first) { EYE.prev = EYE.cur = BL_EXPR[want]; EYE.id = want; }
+  // a change of mood starts with a quick squash, like drawing a breath
+  else if (!reduced) fc.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.1, .86)', offset: .35 }, { transform: 'scale(.98, 1.04)', offset: .7 }, { transform: 'scale(1)' }], { duration: 420, easing: 'ease-out' });
+  drawFace(performance.now());
+}
+// a reaction laid over the mood for a moment (a tap makes it surprised), then back
+const reactFace = (id, ms) => { EYE.react = { id, until: performance.now() + ms }; };
+function drawFace(now) {
+  const svg = $('today-face').firstChild; if (!svg) return;
+  const t = now / 1000;
+  glideTo(EYE.react && now < EYE.react.until ? EYE.react.id : EYE.base, t);
+  const E = BL_blendExpr(EYE.prev, EYE.cur, BL_easeOutQuint(BL_clamp((t - EYE.since) / 0.55)));
+  const life = BL_life(t, EYE.mood === 'sleepy' ? .5 : 1);
+  // it looks about on its own: a quick turn to somewhere, a hold, now and then back to the middle (a sleepy face hardly moves)
+  if (now > EYE.lookAt) {
+    const sleepy = EYE.mood === 'sleepy';
+    EYE.lookAt = now + (EYE.mood === 'curious' ? 800 : 1500) + Math.random() * (EYE.mood === 'curious' ? 1200 : 2600);
+    if (Math.random() < .28) { EYE.ty = 0; EYE.tp = 0; } else { EYE.ty = (Math.random() * 2 - 1) * (sleepy ? 6 : 28); EYE.tp = (Math.random() * 2 - 1) * (sleepy ? 4 : 20); }
+  }
+  EYE.fy += (EYE.ty - EYE.fy) * .2; EYE.fp += (EYE.tp - EYE.fp) * .2;
+  const gaze = { yaw: E.gaze.yaw + life.dYaw + EYE.fy, pitch: E.gaze.pitch + life.dPitch + EYE.fp, roll: E.gaze.roll + life.dRoll };
+  // a blink on top of the schedule whenever the expression changes
+  const forced = BL_clamp((t - EYE.blinkAt) / 0.2), lid = Math.min(life.lid, forced < 1 ? Math.abs(forced * 2 - 1) : 1);
+  const R = DAY_LOOK[DOW][2] * 0.6667 * 0.92, poses = BL_eyePoses(gaze, R, E.split), f = (v) => Math.round(v * 100) / 100;
+  svg.querySelectorAll('.eye').forEach((el, i) => {
+    const e = poses[i], cfg = E.eyes[i];
+    if (e.depth <= 0.02) { el.setAttribute('opacity', 0); return; }
+    // the eye's own tilt is composed with the sphere's tangent frame, then a blink squashes it vertically on screen
+    const phi = (cfg.tilt * Math.PI) / 180, cp = Math.cos(phi), sp = Math.sin(phi);
+    const ax = e.a * cp + e.c * sp, ay = e.b * cp + e.d * sp, cx = -e.a * sp + e.c * cp, cy = -e.b * sp + e.d * cp, k = BL_blinkScale(Math.min(lid, cfg.open));
+    el.setAttribute('d', BL_capsule(cfg.w * R, cfg.h * R));
+    el.setAttribute('transform', `matrix(${f(ax)},${f(ay * k)},${f(cx)},${f(cy * k)},${f(e.x)},${f(e.y)})`);
+    el.setAttribute('fill', '#1B1D2A'); el.setAttribute('opacity', f(BL_clamp(e.depth / 0.12)));
+  });
+}
+(function faceLoop(now) {
+  if (tab === 'home' && !stack.length && !document.hidden) drawFace(now);
+  requestAnimationFrame(faceLoop);
+})(performance.now());
+// arriving on Home it wakes: a blink, then the eyes open
+function wakeFace() {
+  EYE.blinkAt = performance.now() / 1000;
+  if (!reduced) $('today-btn').querySelector('.ck-hop').animate([{ transform: 'scale(.55) rotate(-14deg)', opacity: 0 }, { transform: 'scale(1.12) rotate(4deg)', opacity: 1, offset: .55 }, { transform: 'scale(.97)', offset: .8 }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.3,1.3,.5,1)' });
+}
+let TODAY = { min: 0, of: 0 }, bubTimer = null, ckTapped = false, ckTick = 0;
+// the idle clock: blinks, floating z's or steam, and the hop with its icon
+setInterval(() => {
+  if (tab !== 'home' || stack.length || reduced) return;
+  ckTick++;
+  const f = $('today-face'), mood = f.dataset.mood;
+  if (mood === 'sleepy' && ckTick % 2 === 0) {
+    const z = document.createElement('span'); z.className = `ck-puff ${mood}`; z.textContent = mood === 'sleepy' ? 'z' : '';
+    $('today-btn').appendChild(z);
+    z.animate([{ opacity: 0, transform: 'translate(0,0) scale(.6)' }, { opacity: 1, offset: .25 }, { opacity: 0, transform: `translate(${mood === 'sleepy' ? 16 : 4}px, -34px) scale(1.25)` }], { duration: 2200, easing: 'ease-out' }).onfinish = () => z.remove();
+  }
+  if (ckTick % 17 === 4) ckSay();
+  if (ckTick % 11 === 7 && TODAY.min === 0) hopPlus();
+  // the hop: often until you've tapped it once, then now and then
+  if (ckTick % (ckTapped ? 24 : 7) === 0) {
+    $('today-btn').querySelector('.ck-hop').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-12px) rotate(-7deg)', offset: .35, easing: 'ease-in' }, { transform: 'translateY(0) scale(1.06,.92)', offset: .65 }, { transform: 'translateY(-3px)', offset: .82 }, { transform: 'translateY(0)' }], { duration: 640 });
+    const tip = $('ck-tip');
+    if (tip.innerHTML) tip.animate([{ opacity: 0, transform: 'translate(0,6px) scale(.5)' }, { opacity: 1, transform: 'translate(0,0) scale(1)', offset: .2 }, { opacity: 1, transform: 'translate(0,-4px) scale(1)', offset: .8 }, { opacity: 0, transform: 'translate(0,-8px) scale(.8)' }], { duration: 2000, easing: 'ease-out' });
+  }
+}, 800);
+// every so often, while Home is quiet, it says something short about what you can do
+// every face has its own words, keyed by the expression it is showing. What it says when it is quiet:
+const CK_SAY = {
+  neutre: ['Hello there', 'Ready when you are'],
+  attentif: ['Door stays shut', 'Almost there'],
+  surpris: ['Whoa, already?', 'Did you see that?'],
+  excite: ['A new bake?!', 'Friends are baking!'],
+  heureux: ['Nice start!', 'One more round?', 'Friends are baking now'],
+  hilare: ['Today’s goal done!', 'You’ve earned a rest'],
+  colere: ['No phones allowed!', 'Distractions: out!'],
+  triste: ['I missed you today', 'Nothing baked yet…'],
+  effraye: ['Bake today to keep your streak', 'Even 25 min counts'],
+  mefiant: ['Was that a notification?', 'Hmm, are you sure?'],
+  confus: ['Where did today go?', 'Which dessert today?'],
+  curieux: ['Your bake starts soon', 'Get ready in Rooms'],
+  fier: ['Look at your streak!', 'Best week so far'],
+  timide: ['Not sure where to start?', 'A short bake is fine'],
+  blase: ['Same old day…', 'Surprise me with a bake'],
+  somnolent: ['Nothing baked yet', 'Press + when you’re ready', 'Plan a bake in Rooms'],
+};
+// and what it says when you poke it: [words, the face it makes while it says them]
+const CK_TAP = {
+  neutre: [['Hi!', 'heureux'], ['Need something?', 'curieux']],
+  attentif: [['Shh, focus time', 'attentif'], ['Door’s still shut', 'mefiant'], ['Keep going!', 'fier']],
+  surpris: [['Whoa!', 'surpris'], ['Again?!', 'excite']],
+  excite: [['Let’s bake!', 'excite'], ['So excited!', 'hilare']],
+  heureux: [['Hehe, that tickles', 'hilare'], ['You’re doing great', 'fier'], ['I like this table', 'heureux'], ['Poke!', 'surpris']],
+  hilare: [['Yay!', 'excite'], ['Best day ever!', 'hilare'], ['Do it again!', 'excite'], ['We did it!', 'fier']],
+  colere: [['Grr, no phones!', 'colere'], ['Stay focused!', 'attentif']],
+  triste: [['I missed you…', 'triste'], ['Bake with me?', 'timide']],
+  effraye: [['Please bake today…', 'triste'], ['My streak!', 'effraye'], ['Just 25 minutes?', 'timide'], ['Don’t leave me hanging', 'triste']],
+  mefiant: [['Hmm, suspicious…', 'mefiant'], ['Is that your phone?', 'colere']],
+  confus: [['Huh?', 'confus'], ['What day is it?', 'curieux']],
+  curieux: [['Ooh, what’s next?', 'curieux'], ['Is it time yet?', 'attentif'], ['I heard a timer!', 'surpris'], ['Peek-a-boo!', 'excite']],
+  fier: [['Look at me!', 'fier'], ['Top baker!', 'hilare']],
+  timide: [['Oh! Hi…', 'timide'], ['Just a short one?', 'heureux']],
+  blase: [['Meh.', 'blase'], ['Wake me for dessert', 'somnolent']],
+  somnolent: [['Zzz… five more minutes', 'somnolent'], ['Hey, I’m sleeping!', 'surpris'], ['Mm? Is it morning?', 'confus'], ['Just a little nap…', 'somnolent']],
+};
+let tapN = 0, tapPick = 0;
+let sayN = 0, sayTimer = null;
+function ckSay() {
+  const bub = $('today-bub'), el = $('ck-say'), lines = CK_SAY[EYE.base]; if (!lines || !bub.hidden) return;
+  el.textContent = lines[sayN++ % lines.length]; el.hidden = false;
+  if (!reduced) el.animate([{ opacity: 0, transform: 'translateY(6px) scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.3,1.4,.5,1)' });
+  clearTimeout(sayTimer); sayTimer = setTimeout(() => { if (reduced) { el.hidden = true; return; } el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220 }).onfinish = () => { el.hidden = true; }; }, 3600);
+}
+$('today-btn').addEventListener('click', () => {
+  const b = $('today-btn'), bub = $('today-bub'); buzz([6, 30, 6]); ckTapped = true; $('ck-say').hidden = true;
+  // squeeze shut, then pop wide open, then settle back into the mood
+  if (!reduced) {
+    b.animate([{ scale: '1 1', rotate: '0deg' }, { scale: '1.12 .86', rotate: '-6deg', offset: .25 }, { scale: '.92 1.1', rotate: '5deg', offset: .5 }, { scale: '1.04 .97', rotate: '-2deg', offset: .75 }, { scale: '1 1', rotate: '0deg' }], { duration: 520, easing: 'ease-out' });
+    const app = $('app').getBoundingClientRect(), k = APP_W / app.width, r = b.getBoundingClientRect(), cx = (r.left + r.width / 2 - app.left) * k, cy = (r.top + r.height / 2 - app.top) * k;
+    for (let i = 0; i < 9; i++) {
+      const c = document.createElement('span'); c.className = 'crumb'; c.style.left = `${cx - 4}px`; c.style.top = `${cy - 4}px`; c.style.background = ['#8CA7F4', '#E3E9FD', '#F5C542', '#FFC4F8'][i % 4]; $('app').appendChild(c);
+      const a = Math.PI * (1.05 + Math.random() * .9), d = 40 + Math.random() * 40;
+      c.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d + 30}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }], { duration: 650 + Math.random() * 250, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => c.remove();
+    }
+  }
+  const done = TODAY.min >= TODAY.of;
+  // tapping it never starts a bake (that's the + in the menu): it answers in character, and every third tap shows how today is going
+  tapN++;
+  const lines = CK_TAP[EYE.base] || CK_TAP.heureux;
+  if (tapN % 3 === 0) {
+    bub.innerHTML = `<span>${TODAY.min}<small> / ${TODAY.of} min today</small></span><span class="tb"><i style="width:${Math.min(100, Math.round(TODAY.min / Math.max(1, TODAY.of) * 100))}%"></i></span>`;
+    reactFace(done ? 'hilare' : 'heureux', 2000);
+  } else {
+    const [txt, face] = lines[tapPick++ % lines.length];
+    bub.innerHTML = `<span>${txt}</span>`; reactFace(face, 2000);
+  }
+  bub.hidden = false; if (!reduced) bub.animate([{ opacity: 0, scale: .6 }, { opacity: 1, scale: 1 }], { duration: 300, easing: 'cubic-bezier(.3,1.5,.5,1)' });
+  clearTimeout(bubTimer); bubTimer = setTimeout(() => { bub.hidden = true; }, 3200);
+});
 
 // arriving on Home: the greeting comes into focus, numbers count up from zero and every cookie fills from empty
 function playHome() {
-  rewind($('ts-free'), $('ts-score'), $('week-pct'), $('today-min'), $('friends-n'));
+  wakeFace();
+  rewind($('ts-free'), $('ts-score'), $('week-pct'), $('today-min'));
   renderTabs();
   blurIn(document.querySelector('#s-home .hello p'));
   if (reduced) return;
