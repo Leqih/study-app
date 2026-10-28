@@ -1,19 +1,23 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../../vendor/three/RoundedBoxGeometry.js';
+import { atmosphere } from './atmosphere.js?v=detail-v3';
+import { buildFurniture } from './furniture.js?v=detail-v3';
 import { OrbitControls } from '../../vendor/three/OrbitControls.js';
 const host=document.querySelector('#viewport');
+let renderNeeded=true;
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){const el=document.querySelector('#error');el.hidden=false;el.textContent='This room needs WebGL. Please open it in a browser with hardware acceleration enabled.';throw e}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;host.append(renderer.domElement);
 const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-5,5,4,-4,.1,100),controls=new OrbitControls(camera,renderer.domElement);
-controls.enableDamping=true;controls.minZoom=.65;controls.maxZoom=1.8;controls.maxPolarAngle=Math.PI*.48;controls.minPolarAngle=.25;controls.enablePan=false;controls.target.set(0,.7,0);
+controls.enableDamping=true;controls.minZoom=.65;controls.maxZoom=2.8;controls.maxPolarAngle=Math.PI*.48;controls.minPolarAngle=.25;controls.enablePan=false;controls.target.set(0,.7,0);
 function view(){camera.position.set(9,8,11);camera.zoom=1;camera.updateProjectionMatrix();controls.target.set(0,.7,0);controls.update()}view();
-scene.add(new THREE.HemisphereLight(0xfff5e3,0xb2a18e,1.35));const sun=new THREE.DirectionalLight(0xffedd0,1.9);sun.position.set(2,9,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-6;sun.shadow.camera.right=6;sun.shadow.camera.top=6;sun.shadow.camera.bottom=-6;sun.shadow.normalBias=.035;scene.add(sun);
-const ramp=new THREE.DataTexture(new Uint8Array([140,200,245]),3,1,THREE.RedFormat);ramp.minFilter=THREE.NearestFilter;ramp.magFilter=THREE.NearestFilter;ramp.generateMipmaps=false;ramp.needsUpdate=true;
+const ambient=new THREE.HemisphereLight(0xd9f9ff,0xa5a7cf,1.65);scene.add(ambient);const sun=new THREE.DirectionalLight(0xfff0d8,2.0);sun.position.set(2,9,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-6;sun.shadow.camera.right=6;sun.shadow.camera.top=6;sun.shadow.camera.bottom=-6;sun.shadow.normalBias=.025;sun.shadow.bias=-.0002;sun.shadow.radius=3;scene.add(sun);
+const rim=new THREE.DirectionalLight(0x78e7ff,1.35);rim.position.set(-4,5,-3);scene.add(rim);renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
+const ramp=new THREE.DataTexture(new Uint8Array([155,210,250]),3,1,THREE.RedFormat);ramp.minFilter=THREE.NearestFilter;ramp.magFilter=THREE.NearestFilter;ramp.generateMipmaps=false;ramp.needsUpdate=true;
 const mat=(c)=>new THREE.MeshToonMaterial({color:c,gradientMap:ramp});const materials={wall:mat('#ffedce'),wood:mat('#c78e62'),floor:mat('#d9ac7c'),sofa:mat('#b6c476'),cushion:mat('#faf4d9'),rug:mat('#f2c69c'),white:mat('#fff9e9'),green:mat('#76916b'),dark:mat('#5c7259'),metal:mat('#ae956c'),glass:mat('#a6cad0')};
-const silhouetteMaterial=new THREE.MeshBasicMaterial({color:0x916247,side:THREE.BackSide});
-function silhouette(mesh){const edge=new THREE.Mesh(mesh.geometry,silhouetteMaterial);edge.scale.setScalar(1.025);mesh.add(edge);}
-const ink=new THREE.LineBasicMaterial({color:0x906548,transparent:true,opacity:.42});
+const silhouetteMaterial=new THREE.MeshBasicMaterial({color:0x9d8c83,side:THREE.BackSide});
+function silhouette(mesh){const edge=new THREE.Mesh(mesh.geometry,silhouetteMaterial);edge.scale.setScalar(1.012);mesh.add(edge);}
+const ink=new THREE.LineBasicMaterial({color:0x906548,transparent:true,opacity:.19});
 function box(g,w,h,d,x,y,z,m){const radius=Math.min(w,h,d,.18)*.22;const geom=new RoundedBoxGeometry(w,h,d,2,radius);const o=new THREE.Mesh(geom,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);const edges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w-.02,h-.02,d-.02)),ink);o.add(edges);return o}
 function ball(g,r,x,y,z,m,scale=[1,1,1]){const o=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),m);o.position.set(x,y,z);o.scale.set(...scale);silhouette(o);o.castShadow=true;g.add(o);return o}
 function cyl(g,rt,rb,h,x,y,z,m){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,40),m);o.position.set(x,y,z);silhouette(o);o.castShadow=true;o.receiveShadow=true;g.add(o);return o}
@@ -33,7 +37,13 @@ const coral=mat('#e9a18c'),pink=mat('#f3c7b2'),gold=mat('#d5b571');
 box(shell,6.14,.13,.22,0,2.94,-2.5,materials.wood);box(shell,.22,.13,5.1,-3,2.94,0,materials.wood);
 box(shell,.16,3.05,.16,3,1.44,-2.5,materials.wood);box(shell,.16,3.05,.16,-3,1.44,2.5,materials.wood);
 box(shell,2.55,.09,.09,.65,2.83,-2.08,materials.wood);
-for(const x of [-.57,1.87]){for(let i=0;i<4;i++)box(shell,.105,1.75,.14,x+i*.055,1.91,-2.07, i%2?coral:pink);ball(shell,.09,x,2.83,-2.08,materials.wood);box(shell,.28,.07,.2,x+.08,1.6,-2.02,gold);}
+for(const x of [-.57,1.87]){
+ const geom=new THREE.PlaneGeometry(.35,1.76,24,20),positions=geom.attributes.position;
+ for(let i=0;i<positions.count;i++){const u=positions.getX(i),y=positions.getY(i);positions.setZ(i,Math.cos(u*75)*.032+.03*Math.sin(y*3));positions.setX(i,u*(.78+.22*Math.abs(y)/.88));}geom.computeVertexNormals();coral.side=THREE.DoubleSide;
+ const curtain=new THREE.Mesh(geom,coral);curtain.position.set(x+.08,1.93,-2.05);curtain.castShadow=true;shell.add(curtain);
+ ball(shell,.07,x,2.83,-2.08,materials.wood);box(shell,.3,.05,.08,x+.08,1.62,-1.995,gold);
+ for(let i=0;i<5;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(.035,.008,6,12),gold);ring.rotation.y=Math.PI/2;ring.position.set(x-.055+i*.065,2.8,-2.08);shell.add(ring);}
+}
 // Decorative shelves, books, mirror and a little wall clock.
 box(shell,.62,.1,1.25,-2.66,2.18,-1.65,materials.wood);
 for(let i=0;i<3;i++)box(shell,.27,.42,.12,-2.62,2.43,-2+i*.16,[coral,materials.sofa,materials.white][i]);
@@ -41,16 +51,13 @@ const clock=cyl(shell,.23,.23,.08,-2.85,2.62,-1.56,materials.white);clock.rotati
 box(shell,.1,.15,.018,-2.78,2.67,-1.56,materials.wood);box(shell,.1,.018,.1,-2.78,2.6,-1.52,materials.wood);
 box(shell,.08,1.3,.7,-2.88,1.55,.4,materials.wood);box(shell,.1,1.15,.56,-2.82,1.55,.4,materials.glass);
 for(let i=0;i<7;i++)ball(shell,.11,-2.43,2.15-i*.13,-1.3+Math.sin(i)*.08,materials.green,[.6,1,.9]);
-piece('bed','Sunday bed',.65,-.8,g=>{for(const x of [-.72,.72])for(const z of [-.95,.95])box(g,.12,.3,.12,x,.17,z,materials.wood);box(g,1.85,.25,2.4,0,.35,0,materials.wood);box(g,1.95,.85,.16,0,.82,-1.15,materials.wood);for(const x of [-.94,.94])box(g,.13,1.08,.17,x,.7,-1.15,gold);box(g,1.85,.28,2.3,0,.6,0,materials.white);box(g,1.87,.08,1.35,0,.77,.43,materials.sofa);box(g,1.9,.3,.08,0,.65,1.12,materials.sofa);for(const x of [-.44,.44]){const cushion=box(g,.72,.2,.48,x,.83,-.75,materials.white);cushion.rotation.y=x*.15;}});
-piece('table','Tea table',.2,1.5,g=>{for(const [x,z] of [[-.36,-.25],[.36,-.25],[0,.35]])cyl(g,.07,.06,.42,x,.21,z,materials.wood);cyl(g,.6,.6,.13,0,.48,0,materials.wood);cyl(g,.56,.56,.035,0,.56,0,mat('#bc7c59'));box(g,.3,.045,.23,.05,.6,0,gold);box(g,.27,.018,.2,.05,.63,0,materials.white);});
-piece('plant','Happy monstera',2.12,-.05,g=>{cyl(g,.29,.21,.44,0,.22,0,mat('#81b7a4'));cyl(g,.3,.3,.06,0,.43,0,materials.white);for(let i=0;i<9;i++){const a=i*2.4,x=Math.cos(a)*.3,z=Math.sin(a)*.3;cyl(g,.015,.015,.7,x*.5,.7,z*.5,materials.wood);const leaf=ball(g,.27,x,.85+(i%3)*.14,z,i%2?materials.green:materials.sofa,[.8,1,.3]);leaf.rotation.y=-a;leaf.rotation.z=Math.cos(a)*.6;}});
-piece('nightstand','Bedside nook',-.95,-1.65,g=>{box(g,.9,.65,.8,0,.4,0,materials.white);box(g,1,.12,.9,0,.78,0,materials.wood);for(const y of [.22,.52]){box(g,.8,.23,.08,0,y,.42,materials.white);ball(g,.04,0,y,.48,gold);}cyl(g,.18,.2,.055,.1,.88,-.05,materials.wood);cyl(g,.025,.025,.36,.1,1.07,-.05,materials.wood);cyl(g,.12,.25,.3,.1,1.36,-.05,materials.white);});
-piece('dresser','Cream dresser',-2.3,.65,g=>{box(g,.85,.75,1.55,0,.48,0,materials.white);box(g,.95,.12,1.68,0,.92,0,materials.wood);for(const y of [.25,.5,.75])for(const z of [-.38,.38]){box(g,.07,.21,.68,.46,y,z,materials.white);ball(g,.04,.52,y,z,gold);}box(g,.38,.055,.3,.05,1.02,.2,coral);cyl(g,.08,.12,.25,0,1.09,-.4,materials.white);for(let i=0;i<5;i++)ball(g,.09,Math.sin(i*2)*.1,1.33+(i%2)*.06,-.4+Math.cos(i*2)*.1,pink);});
-piece('stool','Little cushion',-1.05,1.5,g=>{box(g,.62,.25,.6,0,.15,0,gold);box(g,.58,.08,.56,0,.3,0,materials.cushion);box(g,.12,.025,.12,0,.35,0,materials.wood)});
+buildFurniture({piece,box,ball,cyl,mat,materials,shell,gold,coral,pink});
 let selected=pieces[0],theme='matcha';const key='pocket-room-cozy-v2';
 function persist(){try{localStorage.setItem(key,JSON.stringify({theme,pieces:pieces.map(p=>({id:p.id,x:p.g.position.x,z:p.g.position.z,r:p.g.rotation.y,visible:p.g.visible}))}));document.querySelector('#status').textContent='Room saved on this device.'}catch{document.querySelector('#status').textContent='Storage unavailable; changes last this session.'}}
-const themes={matcha:['#b6c476','#f2c69c','#ffedce'],sky:['#8ca7f4','#d6dfc0','#e7e9e0'],rose:['#d9a5b7','#d7dcb8','#eee3df']};function palette(t){theme=t;[materials.sofa,materials.rug,materials.wall].forEach((m,i)=>m.color.set(themes[t][i]));document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===t))}
+const themes={matcha:['#b6c476','#f2c69c','#ffedce'],sky:['#8ca7f4','#d6dfc0','#e7e9e0'],rose:['#d9a5b7','#d7dcb8','#eee3df']};function palette(t){renderNeeded=true;theme=t;[materials.sofa,materials.rug,materials.wall].forEach((m,i)=>m.color.set(themes[t][i]));document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===t))}
 try{const data=JSON.parse(localStorage.getItem(key));if(data){if(themes[data.theme])palette(data.theme);for(const saved of data.pieces||[]){const p=pieces.find(p=>p.id===saved.id);if(p&&[saved.x,saved.z,saved.r].every(Number.isFinite)){p.g.position.x=THREE.MathUtils.clamp(saved.x,-2.3,2.3);p.g.position.z=THREE.MathUtils.clamp(saved.z,-1.9,1.9);p.g.rotation.y=saved.r;p.g.visible=saved.visible!==false}}}}catch{}
+const detailDescriptions={bed:'Draped quilt · stitched pillows · woven throw · turned oak legs',table:'Glazed cup with handle · coffee swirl · bound book · pastry plate',plant:'Split leaves and veins · curved stems · ribbed ceramic planter',nightstand:'Pleated linen shade · brass pull handles · turned lamp base',dresser:'Inset drawer panels · brass ring pulls · books and flower vase',stool:'Piped edges · button tufts · hand-tied tassels'};
+const atmosphereGroup=atmosphere(scene);
 const thumbnails=[
 '<path d="M6 27V9h29v18M6 12h29M9 24h24v-9H9z" fill="#d6ac72"/><path d="M10 16h22v8H10z" fill="#b6c476"/><rect x="11" y="13" width="9" height="5" rx="2" fill="#fff7df"/><rect x="22" y="13" width="9" height="5" rx="2" fill="#fff7df"/>',
 '<path d="M10 20v9m22-9v9"/><ellipse cx="21" cy="18" rx="17" ry="7" fill="#c58b60"/><rect x="19" y="13" width="9" height="5" rx="1" fill="#f5dda7"/>',
@@ -60,15 +67,19 @@ const thumbnails=[
 '<rect x="9" y="13" width="26" height="15" rx="5" fill="#ebc887"/><rect x="9" y="10" width="26" height="12" rx="5" fill="#f6dda6"/><path d="M20 14l4 4m-4 0l4-4"/>'
 ];
 const outline=new THREE.BoxHelper(selected.g,0xb18c61);outline.material.depthTest=false;outline.material.transparent=true;outline.material.opacity=.25;outline.renderOrder=2;scene.add(outline);
-function ui(){document.querySelector('#selection').textContent=selected.name;document.querySelector('#toggle').textContent=selected.g.visible?'Put away':'Place in room';document.querySelector('#collection').innerHTML=pieces.map((p,i)=>`<button data-piece="${p.id}" class="${p===selected?'active':''} ${p.g.visible?'':'stored'}" aria-pressed="${p===selected}"><svg width="42" height="32" viewBox="0 0 42 32" aria-hidden="true"><g stroke="#a57a55" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">${thumbnails[i]}</g></svg>${p.name}</button>`).join('');outline.visible=selected.g.visible;outline.setFromObject(selected.g)}ui();outline.visible=false;
+function ui(){renderNeeded=true;renderer.shadowMap.needsUpdate=true;document.querySelector('#selection').textContent=selected.name;document.querySelector('#piece-details').textContent=detailDescriptions[selected.id];document.querySelector('#toggle').textContent=selected.g.visible?'Put away':'Place in room';document.querySelector('#collection').innerHTML=pieces.map((p,i)=>`<button data-piece="${p.id}" class="${p===selected?'active':''} ${p.g.visible?'':'stored'}" aria-pressed="${p===selected}"><svg width="42" height="32" viewBox="0 0 42 32" aria-hidden="true"><g stroke="#a57a55" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">${thumbnails[i]}</g></svg>${p.name}</button>`).join('');outline.visible=selected.g.visible;outline.setFromObject(selected.g)}ui();outline.visible=false;
 document.querySelector('#collection').onclick=e=>{const b=e.target.closest('[data-piece]');if(b){selected=pieces.find(p=>p.id===b.dataset.piece);ui()}};
 document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{palette(b.dataset.theme);persist()});
 document.querySelector('#rotate').onclick=()=>{selected.g.rotation.y+=Math.PI/2;ui();persist()};document.querySelector('#toggle').onclick=()=>{selected.g.visible=!selected.g.visible;ui();persist()};
 document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>{const [x,z]=b.dataset.move.split(',').map(Number);selected.g.position.x=THREE.MathUtils.clamp(selected.g.position.x+x,-2.3,2.3);selected.g.position.z=THREE.MathUtils.clamp(selected.g.position.z+z,-1.9,1.9);ui();persist()});
-document.querySelector('#camera').onclick=view;document.querySelector('#reset').onclick=()=>{if(!confirm('Reset your room layout and palette?'))return;pieces.forEach(p=>{p.g.position.set(p.home[0],0,p.home[1]);p.g.rotation.y=0;p.g.visible=true});palette('matcha');view();ui();persist()};
+document.querySelector('#camera').onclick=view;
+document.querySelector('#inspect').onclick=()=>{const bounds=new THREE.Box3().setFromObject(selected.g),target=bounds.getCenter(new THREE.Vector3());const direction=camera.position.clone().sub(controls.target).normalize().multiplyScalar(13);controls.target.copy(target);camera.position.copy(target).add(direction);camera.zoom=2.5;camera.updateProjectionMatrix();controls.update();};
+let dream=true;
+document.querySelector('#lighting').onclick=()=>{dream=!dream;document.body.dataset.lighting=dream?'dream':'day';ambient.color.set(dream?0xd9f9ff:0xfff3dc);rim.intensity=dream?1.35:.4;atmosphereGroup.visible=dream;document.querySelector('#lighting').textContent=dream?'☀ Daylight':'✧ Dream light';renderer.shadowMap.needsUpdate=true;};document.querySelector('#reset').onclick=()=>{if(!confirm('Reset your room layout and palette?'))return;pieces.forEach(p=>{p.g.position.set(p.home[0],0,p.home[1]);p.g.rotation.y=0;p.g.visible=true});palette('matcha');view();ui();persist()};
 const ray=new THREE.Raycaster();let down;renderer.domElement.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;const r=renderer.domElement.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const hit=ray.intersectObjects(pieces.filter(p=>p.g.visible).map(p=>p.g),true)[0];if(hit){let g=hit.object;while(g&&!g.userData.id)g=g.parent;selected=pieces.find(p=>p.id===g?.userData.id)||selected;ui()}});
-new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}).observe(host);
-renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
+new ResizeObserver(()=>{renderNeeded=true;const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}).observe(host);
+controls.addEventListener('change',()=>{renderNeeded=true});
+renderer.setAnimationLoop(()=>{if(document.hidden)return;controls.update();if(!renderNeeded&&!renderer.shadowMap.needsUpdate)return;renderNeeded=false;renderer.render(scene,camera)});
 // Savings remains the main loop; room editing is an earned, permanent reward.
 const accountKey='pocket-room-v1';
 const seed={jars:[{name:'Summer Trip',icon:'✈',balance:340,goal:600},{name:'Emergency Fund',icon:'♡',balance:180,goal:1000},{name:'New Laptop',icon:'▣',balance:260,goal:1200}],week:45,earned:780,items:['plant','lamp','cat'],placed:['plant','lamp','cat'],theme:'',history:[]};
