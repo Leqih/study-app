@@ -24,10 +24,7 @@ jobs:
       - run: |
           python build.py
           mkdir -p _site
-          cp index.html room.html _site/
-          mkdir -p _site/src
-          cp -R src/room _site/src/
-          cp -R vendor design-system _site/
+          cp index.html _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
